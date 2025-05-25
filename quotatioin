@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Quotation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f6f5;
+            font-family: 'Open Sans', sans-serif;
+            display: flex;
+            position: relative;
+        }
+        .sidebar {
+            width: 300px;
+            padding: 20px;
+            background: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        }
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        .toggle-btn {
+            position: fixed;
+            left: 220px;
+            top: 10px;
+            padding: 8px 15px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: left 0.3s ease;
+            font-size: 14px;
+        }
+        .toggle-btn.hidden {
+            left: 10px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 0;
+            flex-grow: 1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .sidebar label {
+            font-weight: bold;
+            font-size: 13px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .sidebar input, .sidebar select, .sidebar textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+        .sidebar textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        .sidebar button {
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+        .sidebar button:hover {
+            background: #34495e;
+        }
+        .header-banner {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .quotation-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .quote-number {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .header-details {
+            padding: 20px;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        .company-details {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+        .client-info {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .client-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .items-section {
+            padding: 20px;
+        }
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .order-table th {
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 700;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+        .order-table td {
+            padding: 12px;
+            font-size: 13px;
+            color: #444;
+            border-bottom: 1px solid #eee;
+        }
+        .order-table tr:nth-child(even) {
+            background: #fafafa;
+        }
+        .total-row {
+            font-weight: bold;
+            background: #f8f9fa !important;
+        }
+        .bottom-sections {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
+        .terms-section, .signature-section {
+            width: 50%;
+            background: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .info-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 5px;
+        }
+        .info-content {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        .signature-block {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .signature-block img {
+            width: 100px;
+            margin: 10px auto;
+            display: block;
+        }
+        .signature-line {
+            border-top: 1px solid #2c3e50;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .footer {
+            background: #f8f9fa;
+            text-align: center;
+            font-size: 11px;
+            color: #777;
+            padding: 15px;
+            border-radius: 0 0 8px 8px;
+            border-top: 1px solid #eee;
+        }
+        @media only screen and (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            .toggle-btn {
+                left: 10px;
+            }
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 95%;
+                margin: 15px auto;
+            }
+            .bottom-sections {
+                flex-direction: column;
+            }
+            .terms-section, .signature-section {
+                width: 100%;
+            }
+            .order-table th, .order-table td {
+                font-size: 12px;
+                padding: 8px;
+            }
+        }
+        @media print {
+            body {
+                background: #ffffff;
+            }
+            .sidebar, .toggle-btn {
+                display: none !important;
+            }
+            .container {
+                margin: 20mm auto;
+                box-shadow: none;
+                width: 700px;
+            }
+            .bottom-sections {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" onclick="toggleSidebar()">Hide Sidebar</button>
+
+    <div class="sidebar">
+        <h3 style="color: #2c3e50; margin-top: 0;">Quotation Details</h3>
+        <label>Date:</label>
+        <input type="date" id="quote-date">
+        
+        <label>Client Name:</label>
+        <input type="text" id="client-name-input" placeholder="Enter client name">
+        
+        <label>Quotation Number:</label>
+        <input type="text" id="quote-number-input" placeholder="Enter quotation number">
+        
+        <h3 style="color: #2c3e50;">Items</h3>
+        <div id="items-container">
+            <div class="item-row">
+                <input type="text" class="item-name" placeholder="Item Name">
+                <input type="number" class="item-price" placeholder="Unit Price" min="0">
+                <input type="number" class="item-qty" placeholder="Qty" min="1">
+            </div>
+        </div>
+        <button onclick="addItem()">Add More Items</button>
+        
+        <label>Show Designer Signature:</label>
+        <input type="checkbox" id="show-signature" checked>
+        
+        <h3 style="color: #2c3e50;">Payment Terms</h3>
+        <select id="payment-terms-select" onchange="togglePaymentTerms()">
+            <option value="full">Full Payment</option>
+            <option value="split">50/50 Split</option>
+            <option value="custom">Custom</option>
+        </select>
+        <textarea id="custom-payment-terms" style="display: none;" placeholder="Enter custom payment terms"></textarea>
+        
+        <h3 style="color: #2c3e50;">Support Terms</h3>
+        <select id="support-terms-select" onchange="toggleSupportTerms()">
+            <option value="unlimited">Unlimited Changes</option>
+            <option value="limited">Limited Changes</option>
+            <option value="custom">Custom</option>
+        </select>
+        <textarea id="custom-support-terms" style="display: none;" placeholder="Enter custom support terms"></textarea>
+        
+        <button onclick="updateQuotation()">Update Quotation</button>
+        
+        <h3 style="color: #2c3e50;">Save/Load Data</h3>
+        <button onclick="downloadCSV()">Download as CSV</button>
+        <label>Upload CSV:</label>
+        <input type="file" id="csv-upload" accept=".csv">
+        <button onclick="uploadAndAutofill()">Autofill from CSV</button>
+    </div>
+
+    <div class="container">
+        <div class="header-banner">
+            <h1 class="quotation-title">Quotation</h1>
+            <div class="quote-number"><strong id="quote-number">No. #Q000000</strong></div>
+        </div>
+        
+        <div class="header-details">
+            <div class="company-details">
+                <img src="https://cdn.glitch.global/ba391faf-df59-446b-a220-6e7db8275fe9/w10logo-01.svg?v=1742469589534" alt="Company Logo" style="max-width: 40px; margin-bottom: 10px;">
+                <div><strong>Contact:</strong> William WL Ho</div>
+                <div><strong>Tel:</strong> +852 9298 1495</div>
+                <div><strong>Email:</strong> <a href="mailto:wailap_ho@outlook.com" style="color: #2c3e50;">wailap_ho@outlook.com</a></div>
+                <div><strong>Date:</strong> <span id="quote-date-display">20/03/2025</span></div>
+            </div>
+            <div class="client-info">
+                <strong>Prepared for:</strong> <span class="client-name" id="client-name">My Client Company Limited</span>
+            </div>
+        </div>
+
+        <div class="items-section">
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Item Description</th>
+                        <th>Unit Price</th>
+                        <th style="text-align:center;">Qty</th>
+                        <th style="text-align:right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="order-items">
+                    <tr>
+                        <td>Project Name</td>
+                        <td>HKD $4000</td>
+                        <td style="text-align:center;">1</td>
+                        <td style="text-align:right;">HKD $4000</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align:right;">Total:</td>
+                        <td style="text-align:right;" id="total-amount">HKD $4000</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="bottom-sections">
+            <div class="terms-section">
+                <div class="info-title">Payment Terms & Support</div>
+                <div class="info-content" id="terms-content">
+                    <strong>Payment Terms:</strong> Full payment upon completion<br>
+                    <strong>Support:</strong> Unlimited changes until satisfied<br>
+                    <strong>Support Hours:</strong> Mon to Sat 9:00 AM - 6:00 PM<br>
+                    <span style="font-size: 8px;">(Possible to edit on Sundays & public holidays for urgent requests)</span>
+                </div>
+            </div>
+
+            <div class="signature-section">
+                <div class="info-title">Signatures</div>
+                <div class="info-content">
+                    <div class="signature-block">
+                        <div>Customer's Responsible Person & Company Stamp</div>
+                        <img src="https://cdn.glitch.global/ba391faf-df59-446b-a220-6e7db8275fe9/w-sign-02.png?v=1742464027001" alt="Client Signature">
+                        <div class="signature-line"></div>
+                        <div id="client-signature-label">Name: My Client Company Limited</div>
+                        <div>Date: <span id="client-sign-date">20/03/2025</span></div>
+                    </div>
+                    <div class="signature-block">
+                        <div>Designer</div>
+                        <img src="https://cdn.glitch.global/ba391faf-df59-446b-a220-6e7db8275fe9/w-sign-01.png?v=1742464034831" alt="Designer Signature" id="designer-signature-img">
+                        <div class="signature-line"></div>
+                        <div>Name: William WL Ho</div>
+                        <div>Date: <span id="designer-sign-date">20/03/2025</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span id="quote-footer">No. #Q000000 | Date: 20/03/2025</span>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFile = null;
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const toggleBtn = document.querySelector('.toggle-btn');
+            sidebar.classList.toggle('hidden');
+            toggleBtn.classList.toggle('hidden');
+            toggleBtn.textContent = sidebar.classList.contains('hidden') ? 'Show Sidebar' : 'Hide Sidebar';
+        }
+
+        function updateFooter() {
+            document.getElementById("quote-footer").textContent = 
+                `${document.getElementById("quote-number").textContent} | Date: ${document.getElementById("quote-date-display").textContent}`;
+        }
+
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const row = document.createElement('div');
+            row.classList.add('item-row');
+            row.innerHTML = `
+                <input type="text" class="item-name" placeholder="Item Name">
+                <input type="number" class="item-price" placeholder="Unit Price" min="0">
+                <input type="number" class="item-qty" placeholder="Qty" min="1">
+            `;
+            container.appendChild(row);
+        }
+
+        function updateSignatureDisplay() {
+            const showSignature = document.getElementById('show-signature').checked;
+            const signatureImg = document.getElementById('designer-signature-img');
+            signatureImg.src = showSignature 
+                ? 'https://cdn.glitch.global/ba391faf-df59-446b-a220-6e7db8275fe9/w-sign-01.png?v=1742464034831'
+                : 'https://cdn.glitch.global/ba391faf-df59-446b-a220-6e7db8275fe9/w-sign-02.png?v=1742464027001';
+        }
+
+        function togglePaymentTerms() {
+            const select = document.getElementById('payment-terms-select').value;
+            const customInput = document.getElementById('custom-payment-terms');
+            customInput.style.display = select === 'custom' ? 'block' : 'none';
+            updateQuotation();
+        }
+
+        function toggleSupportTerms() {
+            const select = document.getElementById('support-terms-select').value;
+            const customInput = document.getElementById('custom-support-terms');
+            customInput.style.display = select === 'custom' ? 'block' : 'none';
+            updateQuotation();
+        }
+
+        function updateQuotation() {
+            const quoteDate = document.getElementById('quote-date').value || '2025-03-20';
+            const clientName = document.getElementById('client-name-input').value || 'My Client Company Limited';
+            const quoteNumber = document.getElementById('quote-number-input').value || 'No. #Q000000';
+            
+            const formattedDate = quoteDate.split('-').reverse().join('/');
+            document.getElementById('quote-date-display').textContent = formattedDate;
+            document.getElementById('client-name').textContent = clientName;
+            document.getElementById('quote-number').textContent = quoteNumber;
+            document.getElementById('client-signature-label').textContent = `Name: ${clientName}`;
+            document.getElementById('client-sign-date').textContent = formattedDate;
+            document.getElementById('designer-sign-date').textContent = formattedDate;
+
+            const itemsContainer = document.getElementById('order-items');
+            itemsContainer.innerHTML = '';
+            let totalAmount = 0;
+
+            document.querySelectorAll('.item-row').forEach(row => {
+                const name = row.querySelector('.item-name').value || 'Unnamed Item';
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const qty = parseInt(row.querySelector('.item-qty').value) || 1;
+                const amount = price * qty;
+                totalAmount += amount;
+
+                itemsContainer.innerHTML += `
+                    <tr>
+                        <td>${name}</td>
+                        <td>HKD $${price.toFixed(2)}</td>
+                        <td style="text-align:center;">${qty}</td>
+                        <td style="text-align:right;">HKD $${amount.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('total-amount').textContent = `HKD $${totalAmount.toFixed(2)}`;
+
+            // Update Payment Terms & Support
+            const termsContent = document.getElementById('terms-content');
+            const paymentSelect = document.getElementById('payment-terms-select').value;
+            const customPayment = document.getElementById('custom-payment-terms').value;
+            const supportSelect = document.getElementById('support-terms-select').value;
+            const customSupport = document.getElementById('custom-support-terms').value;
+
+            let paymentTerms = '';
+            switch(paymentSelect) {
+                case 'full':
+                    paymentTerms = 'Full payment upon completion';
+                    break;
+                case 'split':
+                    paymentTerms = '50% deposit upon acceptance, 50% upon completion';
+                    break;
+                case 'custom':
+                    paymentTerms = customPayment || 'Custom payment terms';
+                    break;
+            }
+
+            let supportTerms = '';
+            switch(supportSelect) {
+                case 'unlimited':
+                    supportTerms = 'Unlimited changes until satisfied';
+                    break;
+                case 'limited':
+                    supportTerms = 'Changes exceeding 5 revisions will be charged at HKD $500 per revision';
+                    break;
+                case 'custom':
+                    supportTerms = customSupport || 'Custom support terms';
+                    break;
+            }
+
+            termsContent.innerHTML = `
+                <strong>Payment Terms:</strong> ${paymentTerms}<br>
+                <strong>Support:</strong> ${supportTerms}<br>
+                <strong>Support Hours:</strong> Mon to Sat 9:00 AM - 6:00 PM<br>
+                <span style="font-size: 8px;">(Possible to edit on Sundays and public holidays for urgent requests)</span>
+            `;
+
+            updateSignatureDisplay();
+            updateFooter();
+        }
+
+        function downloadCSV() {
+            const data = {
+                quoteDate: document.getElementById('quote-date').value || '',
+                clientName: document.getElementById('client-name-input').value || '',
+                quoteNumber: document.getElementById('quote-number-input').value || '',
+                showSignature: document.getElementById('show-signature').checked,
+                paymentTerms: document.getElementById('payment-terms-select').value,
+                customPaymentTerms: document.getElementById('custom-payment-terms').value || '',
+                supportTerms: document.getElementById('support-terms-select').value,
+                customSupportTerms: document.getElementById('custom-support-terms').value || '',
+                items: []
+            };
+
+            document.querySelectorAll('.item-row').forEach(row => {
+                data.items.push({
+                    name: row.querySelector('.item-name').value || '',
+                    price: row.querySelector('.item-price').value || '',
+                    qty: row.querySelector('.item-qty').value || ''
+                });
+            });
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Date,Client Name,Quotation Number,Show Signature,Payment Terms,Custom Payment Terms,Support Terms,Custom Support Terms\n";
+            csvContent += `${data.quoteDate},${data.clientName},${data.quoteNumber},${data.showSignature},${data.paymentTerms},${data.customPaymentTerms},${data.supportTerms},${data.customSupportTerms}\n`;
+            csvContent += "Items\n";
+            csvContent += "Name,Price,Qty\n";
+            data.items.forEach(item => {
+                csvContent += `${item.name},${item.price},${item.qty}\n`;
+            });
+
+            const quoteNumber = data.quoteNumber || 'Quotation';
+            const safeFileName = `(Q)${quoteNumber.replace(/[^a-zA-Z0-9-_]/g, '_')}.csv`;
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", safeFileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById('csv-upload').addEventListener('change', function(event) {
+            uploadedFile = event.target.files[0];
+        });
+
+        function uploadAndAutofill() {
+            if (!uploadedFile) {
+                alert('Please upload a CSV file first.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const csvText = event.target.result;
+                parseAndAutofillCSV(csvText);
+            };
+            reader.onerror = function() {
+                alert('Error reading CSV file. Please try again.');
+            };
+            reader.readAsText(uploadedFile);
+        }
+
+        function parseAndAutofillCSV(csvText) {
+            const lines = csvText.split('\n').map(line => line.trim());
+            const data = {
+                quoteDate: '',
+                clientName: '',
+                quoteNumber: '',
+                showSignature: true,
+                paymentTerms: 'full',
+                customPaymentTerms: '',
+                supportTerms: 'unlimited',
+                customSupportTerms: '',
+                items: []
+            };
+
+            const headers = lines[0].split(',');
+            if (headers[0] !== "Date") {
+                alert('Invalid CSV format. Please use a CSV generated by this tool.');
+                return;
+            }
+
+            const details = lines[1].split(',');
+            data.quoteDate = details[0] || '';
+            data.clientName = details[1] || '';
+            data.quoteNumber = details[2] || '';
+            data.showSignature = details[3] === 'true';
+            data.paymentTerms = details[4] || 'full';
+            data.customPaymentTerms = details[5] || '';
+            data.supportTerms = details[6] || 'unlimited';
+            data.customSupportTerms = details[7] || '';
+
+            if (lines[2] !== "Items" || lines[3] !== "Name,Price,Qty") {
+                alert('Invalid CSV format for items section.');
+                return;
+            }
+
+            for (let i = 4; i < lines.length; i++) {
+                if (lines[i]) {
+                    const [name, price, qty] = lines[i].split(',');
+                    data.items.push({ name: name || '', price: price || '', qty: qty || '' });
+                }
+            }
+
+            autofillForm(data);
+            updateQuotation();
+        }
+
+        function autofillForm(data) {
+            document.getElementById('quote-date').value = data.quoteDate || '';
+            document.getElementById('client-name-input').value = data.clientName || '';
+            document.getElementById('quote-number-input').value = data.quoteNumber || '';
+            document.getElementById('show-signature').checked = data.showSignature;
+            document.getElementById('payment-terms-select').value = data.paymentTerms;
+            document.getElementById('custom-payment-terms').value = data.customPaymentTerms;
+            document.getElementById('support-terms-select').value = data.supportTerms;
+            document.getElementById('custom-support-terms').value = data.customSupportTerms;
+
+            togglePaymentTerms();
+            toggleSupportTerms();
+
+            const itemsContainer = document.getElementById('items-container');
+            itemsContainer.innerHTML = '';
+
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    const row = document.createElement('div');
+                    row.classList.add('item-row');
+                    row.innerHTML = `
+                        <input type="text" class="item-name" value="${item.name || ''}" placeholder="Item Name">
+                        <input type="number" class="item-price" value="${item.price || ''}" placeholder="Unit Price" min="0">
+                        <input type="number" class="item-qty" value="${item.qty || ''}" placeholder="Qty" min="1">
+                    `;
+                    itemsContainer.appendChild(row);
+                });
+            } else {
+                addItem();
+            }
+        }
+
+        document.getElementById('show-signature').addEventListener('change', updateQuotation);
+        document.getElementById('payment-terms-select').addEventListener('change', updateQuotation);
+        document.getElementById('support-terms-select').addEventListener('change', updateQuotation);
+        document.getElementById('custom-payment-terms').addEventListener('input', updateQuotation);
+        document.getElementById('custom-support-terms').addEventListener('input', updateQuotation);
+
+        window.onload = function() {
+            updateSignatureDisplay();
+            updateFooter();
+        };
+    </script>
+</body>
+</html>
