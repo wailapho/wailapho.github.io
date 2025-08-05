@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>William Ho - Creative Director</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+        
+        .cinematic-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .project-card {
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .project-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .skill-tag {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .skill-tag:hover {
+            transform: scale(1.05);
+            background: #ffffff;
+            color: #000;
+            border-color: transparent;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            position: relative;
+        }
+        
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        }
+        
+        .text-gradient {
+            color: #ffffff;
+        }
+        
+        .cinematic-glow {
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body class="bg-black text-white">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-black/90 backdrop-blur-md z-50 border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold text-white cinematic-font">Portfolio</div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-gray-300 hover:text-white transition-colors">Home</a>
+                    <a href="#about" class="text-gray-300 hover:text-white transition-colors">About</a>
+                    <a href="#portfolio" class="text-gray-300 hover:text-white transition-colors">Portfolio</a>
+                    <a href="#contact" class="text-gray-300 hover:text-white transition-colors">Contact</a>
+                </div>
+                <button class="md:hidden p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient min-h-screen flex items-center justify-center text-white relative z-10">
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-20">
+            <div class="fade-in stagger-1">
+                <h1 class="text-6xl md:text-8xl font-bold mb-6 cinematic-font">Content Design Manager</h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90">Video Production • Art Direction • Web Design • Everything About Design</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="document.getElementById('portfolio').scrollIntoView({behavior: 'smooth'})" 
+                            class="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 transition-all cinematic-glow">
+                        View My Work
+                    </button>
+                    <button onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})" 
+                            class="border-2 border-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-colors">
+                        Get In Touch
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-gray-900">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="fade-in stagger-2">
+                    <h2 class="text-5xl font-bold mb-6 text-gradient cinematic-font">About Me</h2>
+                    <p class="text-lg text-gray-300 mb-6">
+                        I'm a passionate Content Design Manager with extensive experience in video production, art direction, and comprehensive design solutions. I believe in creating cinematic experiences that captivate and inspire.
+                    </p>
+                    <p class="text-lg text-gray-300 mb-8">
+                        From concept to execution, I handle everything about design - whether it's crafting compelling video narratives, directing visual aesthetics, or building immersive web experiences.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Video Production</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Art Direction</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Content Strategy</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Web Design</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Motion Graphics</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Creative Direction</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Brand Development</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Cinematography</span>
+                    </div>
+                </div>
+                <div class="fade-in stagger-3">
+                    <div class="bg-white rounded-2xl p-8 text-black relative overflow-hidden">
+                        <div class="text-center relative z-10">
+                            <div class="w-32 h-32 bg-black/20 rounded-full mx-auto mb-6 flex items-center justify-center">
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-2 cinematic-font">100+ Productions</h3>
+                            <p class="opacity-90">Cinematic experiences delivered</p>
+                        </div>
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-black/10 rounded-full -translate-y-16 translate-x-16"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full translate-y-12 -translate-x-12"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-20 bg-black">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16 fade-in stagger-2">
+                <h2 class="text-5xl font-bold mb-4 text-gradient cinematic-font">Featured Work</h2>
+                <p class="text-xl text-gray-300">Cinematic productions and design experiences</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div class="project-card rounded-2xl overflow-hidden shadow-lg fade-in stagger-3">
+                    <div class="h-48 bg-white flex items-center justify-center relative overflow-hidden">
+                        <svg class="w-16 h-16 text-black z-10" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"/>
+                        </svg>
+                        <div class="absolute inset-0 bg-black/20"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white cinematic-font">Brand Documentary</h3>
+                        <p class="text-gray-300 mb-4">Cinematic brand story capturing the essence of luxury automotive heritage.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Video Production</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Cinematography</span>
+                        </div>
+                        <button class="text-gradient font-semibold hover:opacity-80 transition-opacity">View Project →</button>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="project-card rounded-2xl overflow-hidden shadow-lg fade-in stagger-4">
+                    <div class="h-48 bg-white flex items-center justify-center relative overflow-hidden">
+                        <svg class="w-16 h-16 text-black z-10" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                        </svg>
+                        <div class="absolute inset-0 bg-black/20"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white cinematic-font">Podcast Series</h3>
+                        <p class="text-gray-300 mb-4">Complete art direction and visual identity for tech industry podcast.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Art Direction</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Motion Graphics</span>
+                        </div>
+                        <button class="text-gradient font-semibold hover:opacity-80 transition-opacity">View Project →</button>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="project-card rounded-2xl overflow-hidden shadow-lg fade-in stagger-1">
+                    <div class="h-48 bg-white flex items-center justify-center relative overflow-hidden">
+                        <svg class="w-16 h-16 text-black z-10" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3,3H21V21H3V3M5,5V19H19V5H5Z"/>
+                        </svg>
+                        <div class="absolute inset-0 bg-black/20"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white cinematic-font">Interactive Web Experience</h3>
+                        <p class="text-gray-300 mb-4">Immersive digital platform combining storytelling with cutting-edge design.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Web Design</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">UX Direction</span>
+                        </div>
+                        <button class="text-gradient font-semibold hover:opacity-80 transition-opacity">View Project →</button>
+                    </div>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="project-card rounded-2xl overflow-hidden shadow-lg fade-in stagger-2">
+                    <div class="h-48 bg-white flex items-center justify-center relative overflow-hidden">
+                        <svg class="w-16 h-16 text-black z-10" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                        </svg>
+                        <div class="absolute inset-0 bg-black/20"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white cinematic-font">Fashion Campaign</h3>
+                        <p class="text-gray-300 mb-4">High-fashion editorial shoot with dramatic lighting and cinematic composition.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Creative Direction</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Photography</span>
+                        </div>
+                        <button class="text-gradient font-semibold hover:opacity-80 transition-opacity">View Project →</button>
+                    </div>
+                </div>
+
+                <!-- Project 5 -->
+                <div class="project-card rounded-2xl overflow-hidden shadow-lg fade-in stagger-3">
+                    <div class="h-48 bg-white flex items-center justify-center relative overflow-hidden">
+                        <svg class="w-16 h-16 text-black z-10" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7H14A7,7 0 0,1 21,14H22A1,1 0 0,1 23,15V18A1,1 0 0,1 22,19H21V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V19H2A1,1 0 0,1 1,18V15A1,1 0 0,1 2,14H3A7,7 0 0,1 10,7H11V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2Z"/>
+                        </svg>
+                        <div class="absolute inset-0 bg-black/20"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white cinematic-font">Music Video</h3>
+                        <p class="text-gray-300 mb-4">Conceptual music video blending surreal visuals with narrative storytelling.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Video Direction</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Post-Production</span>
+                        </div>
+                        <button class="text-gradient font-semibold hover:opacity-80 transition-opacity">View Project →</button>
+                    </div>
+                </div>
+
+                <!-- Project 6 -->
+                <div class="project-card rounded-2xl overflow-hidden shadow-lg fade-in stagger-4">
+                    <div class="h-48 bg-white flex items-center justify-center relative overflow-hidden">
+                        <svg class="w-16 h-16 text-black z-10" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12,2L2,7L12,12L22,7L12,2M2,17L12,22L22,17L12,12L2,17Z"/>
+                        </svg>
+                        <div class="absolute inset-0 bg-black/20"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white cinematic-font">Brand Identity System</h3>
+                        <p class="text-gray-300 mb-4">Complete visual identity overhaul for emerging tech startup with global ambitions.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Brand Strategy</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">Visual Identity</span>
+                        </div>
+                        <button class="text-gradient font-semibold hover:opacity-80 transition-opacity">View Project →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-gray-900">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="fade-in stagger-2">
+                <h2 class="text-5xl font-bold mb-6 text-gradient cinematic-font">Let's Create Together</h2>
+                <p class="text-xl text-gray-300 mb-12">Ready to bring your vision to life? Let's craft something extraordinary that captivates and inspires.</p>
+                
+                <div class="grid md:grid-cols-3 gap-8 mb-12">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/20">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20,4H4C2.9,4 2,4.9 2,6V18C2,19.1 2.9,20 4,20H20C21.1,20 22,19.1 22,18V6C22,4.9 21.1,4 20,4M20,8L12,13L4,8V6L12,11L20,6V8Z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold mb-2 text-white">Email</h3>
+                        <p class="text-gray-300">william@creativestudio.com</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/20">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold mb-2 text-white">Phone</h3>
+                        <p class="text-gray-300">+1 (555) 987-6543</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/20">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold mb-2 text-white">Location</h3>
+                        <p class="text-gray-300">Los Angeles, CA</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="window.open('mailto:william@creativestudio.com', '_blank')" 
+                            class="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 transition-all cinematic-glow">
+                        Send Email
+                    </button>
+                    <button onclick="window.open('https://linkedin.com/in/williamho', '_blank')" 
+                            class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-colors">
+                        LinkedIn Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-12 border-t border-white/10">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="text-2xl font-bold mb-2 text-white cinematic-font">Portfolio</div>
+                    <p class="text-gray-400">Content Design Manager & Creative Director</p>
+                </div>
+                <div class="flex space-x-6">
+                    <button onclick="window.open('https://vimeo.com/williamho', '_blank')" 
+                            class="text-gray-400 hover:text-gradient transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"/>
+                        </svg>
+                    </button>
+                    <button onclick="window.open('https://behance.net/williamho', '_blank')" 
+                            class="text-gray-400 hover:text-gradient transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6.5,12C6.5,10.61 7.61,9.5 9,9.5H12V14.5H9C7.61,14.5 6.5,13.39 6.5,12M9,7A5,5 0 0,0 4,12A5,5 0 0,0 9,17H12A5,5 0 0,0 17,12A5,5 0 0,0 12,7H9Z"/>
+                        </svg>
+                    </button>
+                    <button onclick="window.open('https://instagram.com/williamho_creative', '_blank')" 
+                            class="text-gray-400 hover:text-gradient transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 Alex Chen. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 100) {
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.remove('shadow-lg');
+            }
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.animationPlayState = 'paused';
+            observer.observe(el);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a5c098d690166a',t:'MTc1NDM5MTIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
