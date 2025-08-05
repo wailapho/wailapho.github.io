@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Documentary - Project Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+        
+        .cinematic-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body class="bg-black text-white">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-black/90 backdrop-blur-md z-50 border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="history.back()" class="text-2xl font-bold text-white cinematic-font hover:opacity-80 transition-opacity">
+                    ← Portfolio
+                </button>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#overview" class="text-gray-300 hover:text-white transition-colors">Overview</a>
+                    <a href="#process" class="text-gray-300 hover:text-white transition-colors">Process</a>
+                    <a href="#result" class="text-gray-300 hover:text-white transition-colors">Result</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-16 bg-black">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="fade-in stagger-1">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6 cinematic-font">Brand Documentary</h1>
+                <p class="text-xl text-gray-300 mb-8">Cinematic brand story capturing the essence of luxury automotive heritage</p>
+                <div class="flex flex-wrap justify-center gap-3 mb-12">
+                    <span class="bg-white/10 text-white px-4 py-2 rounded-full text-sm border border-white/20">Video Production</span>
+                    <span class="bg-white/10 text-white px-4 py-2 rounded-full text-sm border border-white/20">Cinematography</span>
+                    <span class="bg-white/10 text-white px-4 py-2 rounded-full text-sm border border-white/20">Art Direction</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="py-16 bg-gray-900">
+        <div class="max-w-4xl mx-auto px-6">
+            <!-- Project Image -->
+            <div class="fade-in stagger-2 mb-16">
+                <div class="aspect-video bg-white rounded-2xl flex items-center justify-center mb-8">
+                    <svg class="w-24 h-24 text-black" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Overview -->
+            <div id="overview" class="fade-in stagger-3 mb-16">
+                <h2 class="text-3xl font-bold mb-6 cinematic-font">Project Overview</h2>
+                <div class="grid md:grid-cols-2 gap-12">
+                    <div>
+                        <p class="text-lg text-gray-300 mb-6">
+                            This documentary project explores the rich heritage and craftsmanship behind a luxury automotive brand. Through cinematic storytelling, we captured the passion, precision, and artistry that goes into every vehicle.
+                        </p>
+                        <p class="text-lg text-gray-300">
+                            The film takes viewers on a journey from the design studio to the factory floor, showcasing the human stories behind the brand's legacy.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 text-white">Project Details</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Duration:</span>
+                                <span class="text-white">15 minutes</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Format:</span>
+                                <span class="text-white">4K Cinema</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Timeline:</span>
+                                <span class="text-white">8 weeks</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Role:</span>
+                                <span class="text-white">Director & Producer</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process -->
+            <div id="process" class="fade-in stagger-4 mb-16">
+                <h2 class="text-3xl font-bold mb-8 cinematic-font">Creative Process</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-black/50 p-6 rounded-xl border border-white/10">
+                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-white font-bold">1</span>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-3 text-white">Research & Planning</h3>
+                        <p class="text-gray-300 text-sm">Deep dive into brand history, interviewing key stakeholders and craftspeople to understand the authentic story.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-xl border border-white/10">
+                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-white font-bold">2</span>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-3 text-white">Production</h3>
+                        <p class="text-gray-300 text-sm">Cinematic filming across multiple locations using professional lighting and camera techniques to capture the essence.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-xl border border-white/10">
+                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-white font-bold">3</span>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-3 text-white">Post-Production</h3>
+                        <p class="text-gray-300 text-sm">Careful editing, color grading, and sound design to create an emotional and compelling narrative.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div id="result" class="fade-in stagger-1 mb-16">
+                <h2 class="text-3xl font-bold mb-6 cinematic-font">Results & Impact</h2>
+                <div class="bg-black/50 p-8 rounded-xl border border-white/10">
+                    <div class="grid md:grid-cols-3 gap-8 text-center">
+                        <div>
+                            <div class="text-3xl font-bold text-white mb-2">2.5M+</div>
+                            <div class="text-gray-300">Views</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold text-white mb-2">95%</div>
+                            <div class="text-gray-300">Positive Feedback</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold text-white mb-2">3</div>
+                            <div class="text-gray-300">Industry Awards</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex justify-between items-center pt-8 border-t border-white/10">
+                <button onclick="history.back()" class="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors">
+                    ← Back to Portfolio
+                </button>
+                <button class="border-2 border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-colors">
+                    Next Project →
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.animationPlayState = 'paused';
+            observer.observe(el);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6b74d723207a7',t:'MTc1NDQwMTMyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
