@@ -68,6 +68,87 @@
         .stagger-4 { animation-delay: 0.4s; }
         .stagger-5 { animation-delay: 0.5s; }
         .stagger-6 { animation-delay: 0.6s; }
+        
+        /* Modal animations */
+        .modal-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+        }
+        
+        .modal-content {
+            transform: scale(0.9) translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .modal-content.show {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Scroll reveal animations */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .scroll-reveal-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .scroll-reveal-left.revealed {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .scroll-reveal-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .scroll-reveal-right.revealed {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* Parallax effect */
+        .parallax-bg {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Floating animation for showcase items */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .showcase-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+            animation: float 3s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-black text-white">
@@ -89,9 +170,9 @@
     </nav>
 
     <!-- Header -->
-    <section class="pt-24 pb-12 bg-black">
+    <section class="pt-24 pb-12 bg-black parallax-bg" style="background-image: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);">
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <div class="fade-in stagger-1">
+            <div class="scroll-reveal">
                 <h1 class="text-5xl md:text-6xl font-bold mb-4 cinematic-font">Design Showcase</h1>
                 <p class="text-xl text-gray-300 mb-8">A collection of creative work spanning branding, digital, and print design</p>
             </div>
@@ -104,7 +185,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
                 <!-- Item 1 - Brand Identity -->
-                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-1 cursor-pointer" data-category="branding" onclick="showProjectDetails('luxury-brand')">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="branding" onclick="showProjectDetails('luxury-brand')" style="transition-delay: 0.1s;">
                     <div class="image-placeholder aspect-[4/3]">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
@@ -120,7 +201,7 @@
                 </div>
 
                 <!-- Item 2 - Web Design -->
-                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-2 cursor-pointer" data-category="web" onclick="showProjectDetails('ecommerce-platform')">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="web" onclick="showProjectDetails('ecommerce-platform')" style="transition-delay: 0.2s;">
                     <div class="image-placeholder aspect-[4/5]">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M3,3H21V21H3V3M5,5V19H19V5H5Z"/>
@@ -136,7 +217,7 @@
                 </div>
 
                 <!-- Item 3 - Print Design -->
-                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-3 cursor-pointer" data-category="print" onclick="showProjectDetails('magazine-layout')">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="print" onclick="showProjectDetails('magazine-layout')" style="transition-delay: 0.3s;">
                     <div class="image-placeholder aspect-square">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V5H19V19Z"/>
@@ -152,7 +233,7 @@
                 </div>
 
                 <!-- Item 4 - Photography -->
-                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-4 cursor-pointer" data-category="branding" onclick="showProjectDetails('product-photography')">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="branding" onclick="showProjectDetails('product-photography')" style="transition-delay: 0.4s;">
                     <div class="image-placeholder aspect-[3/4]">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"/>
@@ -168,7 +249,7 @@
                 </div>
 
                 <!-- Item 5 - Motion Graphics -->
-                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-5 cursor-pointer" data-category="branding" onclick="showProjectDetails('brand-animation')">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="branding" onclick="showProjectDetails('brand-animation')" style="transition-delay: 0.5s;">
                     <div class="image-placeholder aspect-video">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"/>
@@ -184,7 +265,7 @@
                 </div>
 
                 <!-- Item 6 - Packaging -->
-                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-6 cursor-pointer" data-category="branding" onclick="showProjectDetails('product-packaging')">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="branding" onclick="showProjectDetails('product-packaging')" style="transition-delay: 0.6s;">
                     <div class="image-placeholder aspect-[4/3]">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12,2L2,7L12,12L22,7L12,2M2,17L12,22L22,17L12,12L2,17Z"/>
@@ -200,7 +281,7 @@
                 </div>
 
                 <!-- Item 7 - App Design -->
-                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-1 cursor-pointer" data-category="web" onclick="showProjectDetails('mobile-app')">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="web" onclick="showProjectDetails('mobile-app')" style="transition-delay: 0.1s;">
                     <div class="image-placeholder aspect-[3/5]">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M17,19H7V5H17M17,1H7C5.89,1 5,1.89 5,3V21C5,22.1 5.9,23 7,23H17C18.1,23 19,22.1 19,21V3C19,1.89 18.1,1 17,1Z"/>
@@ -216,7 +297,7 @@
                 </div>
 
                 <!-- Item 8 - Poster Design -->
-                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-2 cursor-pointer" data-category="print" onclick="showProjectDetails('event-poster')">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="print" onclick="showProjectDetails('event-poster')" style="transition-delay: 0.2s;">
                     <div class="image-placeholder aspect-[2/3]">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M5,19V5H19V19H5Z"/>
@@ -232,7 +313,7 @@
                 </div>
 
                 <!-- Item 9 - Social Media -->
-                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-3 cursor-pointer" data-category="branding" onclick="showProjectDetails('social-media')">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="branding" onclick="showProjectDetails('social-media')" style="transition-delay: 0.3s;">
                     <div class="image-placeholder aspect-square">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"/>
@@ -253,15 +334,17 @@
 
     <!-- Load More -->
     <section class="py-12 bg-gray-900 text-center">
-        <button class="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors">
-            Load More Projects
-        </button>
+        <div class="scroll-reveal">
+            <button class="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors">
+                Load More Projects
+            </button>
+        </div>
     </section>
 
     <!-- Project Detail Modal -->
-    <div id="projectModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden">
+    <div id="projectModal" class="modal-overlay fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden">
         <div class="flex items-center justify-center min-h-screen p-6">
-            <div class="bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
+            <div class="modal-content bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
                 <div class="p-8">
                     <div class="flex justify-between items-start mb-6">
                         <div>
@@ -347,9 +430,11 @@
     <!-- Back to Portfolio -->
     <section class="py-12 bg-black">
         <div class="max-w-4xl mx-auto px-6 text-center">
-            <button onclick="history.back()" class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-colors">
-                ← Back to Portfolio
-            </button>
+            <div class="scroll-reveal">
+                <button onclick="history.back()" class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-colors">
+                    ← Back to Portfolio
+                </button>
+            </div>
         </div>
     </section>
 
@@ -491,15 +576,34 @@
                 toolsContainer.appendChild(toolElement);
             });
 
-            // Show modal
-            document.getElementById('projectModal').classList.remove('hidden');
+            // Show modal with animation
+            const modal = document.getElementById('projectModal');
+            const modalContent = modal.querySelector('.modal-content');
+            
+            modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            
+            // Trigger animations
+            setTimeout(() => {
+                modal.classList.add('show');
+                modalContent.classList.add('show');
+            }, 10);
         }
 
         // Close modal
         function closeModal() {
-            document.getElementById('projectModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            const modal = document.getElementById('projectModal');
+            const modalContent = modal.querySelector('.modal-content');
+            
+            // Remove animation classes
+            modal.classList.remove('show');
+            modalContent.classList.remove('show');
+            
+            // Hide modal after animation
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }, 300);
         }
 
         // Close modal when clicking outside
@@ -545,23 +649,34 @@
             });
         });
 
-        // Animate elements on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+        // Scroll reveal animation observer
+        const scrollRevealOptions = {
+            threshold: 0.15,
+            rootMargin: '0px 0px -100px 0px'
         };
 
-        const observer = new IntersectionObserver(function(entries) {
+        const scrollRevealObserver = new IntersectionObserver(function(entries) {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.style.animationPlayState = 'running';
+                    entry.target.classList.add('revealed');
                 }
             });
-        }, observerOptions);
+        }, scrollRevealOptions);
 
-        document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.animationPlayState = 'paused';
-            observer.observe(el);
+        // Observe all scroll reveal elements
+        document.querySelectorAll('.scroll-reveal, .scroll-reveal-left, .scroll-reveal-right').forEach(el => {
+            scrollRevealObserver.observe(el);
+        });
+
+        // Parallax scroll effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const parallaxElements = document.querySelectorAll('.parallax-bg');
+            
+            parallaxElements.forEach(element => {
+                const speed = 0.5;
+                element.style.transform = `translateY(${scrolled * speed}px)`;
+            });
         });
 
         // Load more functionality
@@ -580,5 +695,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6c0b9515607a7',t:'MTc1NDQwMTcxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6c8b1e3cd07a7',t:'MTc1NDQwMjA0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
