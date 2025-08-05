@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Showcase - Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+        
+        .cinematic-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .showcase-item {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .showcase-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .image-placeholder {
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .image-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(0,0,0,0.05) 50%, transparent 70%);
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        .stagger-5 { animation-delay: 0.5s; }
+        .stagger-6 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body class="bg-black text-white">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-black/90 backdrop-blur-md z-50 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="history.back()" class="text-2xl font-bold text-white cinematic-font hover:opacity-80 transition-opacity">
+                    ← Portfolio
+                </button>
+                <div class="hidden md:flex space-x-8">
+                    <button data-category="all" class="category-btn text-white border-b-2 border-white pb-1">All Work</button>
+                    <button data-category="branding" class="category-btn text-gray-400 hover:text-white transition-colors">Branding</button>
+                    <button data-category="web" class="category-btn text-gray-400 hover:text-white transition-colors">Web Design</button>
+                    <button data-category="print" class="category-btn text-gray-400 hover:text-white transition-colors">Print</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="pt-24 pb-12 bg-black">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="fade-in stagger-1">
+                <h1 class="text-5xl md:text-6xl font-bold mb-4 cinematic-font">Design Showcase</h1>
+                <p class="text-xl text-gray-300 mb-8">A collection of creative work spanning branding, digital, and print design</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Showcase Grid -->
+    <section class="py-12 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Item 1 - Brand Identity -->
+                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-1 cursor-pointer" data-category="branding" onclick="showProjectDetails('luxury-brand')">
+                    <div class="image-placeholder aspect-[4/3]">
+                        <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-2 text-white">Luxury Brand Identity</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Branding</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Logo Design</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 2 - Web Design -->
+                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-2 cursor-pointer" data-category="web" onclick="showProjectDetails('ecommerce-platform')">
+                    <div class="image-placeholder aspect-[4/5]">
+                        <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3,3H21V21H3V3M5,5V19H19V5H5Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-2 text-white">E-commerce Platform</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Web Design</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">UI/UX</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 3 - Print Design -->
+                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-3 cursor-pointer" data-category="print" onclick="showProjectDetails('magazine-layout')">
+                    <div class="image-placeholder aspect-square">
+                        <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V5H19V19Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-2 text-white">Magazine Layout</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Print</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Editorial</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 4 - Photography -->
+                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-4 cursor-pointer" data-category="branding" onclick="showProjectDetails('product-photography')">
+                    <div class="image-placeholder aspect-[3/4]">
+                        <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-2 text-white">Product Photography</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Photography</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Commercial</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 5 - Motion Graphics -->
+                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-5 cursor-pointer" data-category="branding" onclick="showProjectDetails('brand-animation')">
+                    <div class="image-placeholder aspect-video">
+                        <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-2 text-white">Brand Animation</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Motion</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Animation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 6 - Packaging -->
+                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-6 cursor-pointer" data-category="branding" onclick="showProjectDetails('product-packaging')">
+                    <div class="image-placeholder aspect-[4/3]">
+                        <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12,2L2,7L12,12L22,7L12,2M2,17L12,22L22,17L12,12L2,17Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-2 text-white">Product Packaging</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Packaging</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">3D Design</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 7 - App Design -->
+                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-1 cursor-pointer" data-category="web" onclick="showProjectDetails('mobile-app')">
+                    <div class="image-placeholder aspect-[3/5]">
+                        <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17,19H7V5H17M17,1H7C5.89,1 5,1.89 5,3V21C5,22.1 5.9,23 7,23H17C18.1,23 19,22.1 19,21V3C19,1.89 18.1,1 17,1Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-2 text-white">Mobile App Design</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Mobile</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">UI Design</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 8 - Poster Design -->
+                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-2 cursor-pointer" data-category="print" onclick="showProjectDetails('event-poster')">
+                    <div class="image-placeholder aspect-[2/3]">
+                        <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M5,19V5H19V19H5Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-2 text-white">Event Poster Series</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Print</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Typography</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 9 - Social Media -->
+                <div class="showcase-item rounded-2xl overflow-hidden fade-in stagger-3 cursor-pointer" data-category="branding" onclick="showProjectDetails('social-media')">
+                    <div class="image-placeholder aspect-square">
+                        <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-2 text-white">Social Media Campaign</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Digital</span>
+                            <span class="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">Social Media</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Load More -->
+    <section class="py-12 bg-gray-900 text-center">
+        <button class="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors">
+            Load More Projects
+        </button>
+    </section>
+
+    <!-- Project Detail Modal -->
+    <div id="projectModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-6">
+            <div class="bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
+                <div class="p-8">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 id="modalTitle" class="text-3xl font-bold text-white cinematic-font mb-2">Project Title</h2>
+                            <div id="modalTags" class="flex flex-wrap gap-2">
+                                <!-- Tags will be inserted here -->
+                            </div>
+                        </div>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Project Images -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="image-placeholder aspect-video rounded-xl">
+                            <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                                <path id="modalIcon" d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                            </svg>
+                        </div>
+                        <div class="image-placeholder aspect-video rounded-xl">
+                            <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Project Description -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-white mb-4">Project Overview</h3>
+                        <p id="modalDescription" class="text-gray-300 text-lg leading-relaxed">
+                            Project description will be loaded here...
+                        </p>
+                    </div>
+                    
+                    <!-- Project Details -->
+                    <div class="grid md:grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-4">Project Details</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Client:</span>
+                                    <span id="modalClient" class="text-white">Client Name</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Duration:</span>
+                                    <span id="modalDuration" class="text-white">Timeline</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Role:</span>
+                                    <span id="modalRole" class="text-white">My Role</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Year:</span>
+                                    <span id="modalYear" class="text-white">2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-4">Tools Used</h3>
+                            <div id="modalTools" class="flex flex-wrap gap-2">
+                                <!-- Tools will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button class="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors">
+                            View Live Project
+                        </button>
+                        <button onclick="closeModal()" class="border-2 border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Portfolio -->
+    <section class="py-12 bg-black">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <button onclick="history.back()" class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-colors">
+                ← Back to Portfolio
+            </button>
+        </div>
+    </section>
+
+    <script>
+        // Project data
+        const projectData = {
+            'luxury-brand': {
+                title: 'Luxury Brand Identity',
+                tags: ['Branding', 'Logo Design'],
+                description: 'A comprehensive brand identity system for a luxury automotive company. This project involved creating a sophisticated visual language that reflects the brand\'s heritage while appealing to modern consumers. The design emphasizes elegance, precision, and timeless appeal.',
+                client: 'Luxury Motors Inc.',
+                duration: '6 weeks',
+                role: 'Brand Designer',
+                year: '2024',
+                tools: ['Adobe Illustrator', 'Photoshop', 'Figma'],
+                icon: 'M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z'
+            },
+            'ecommerce-platform': {
+                title: 'E-commerce Platform',
+                tags: ['Web Design', 'UI/UX'],
+                description: 'A modern e-commerce platform designed for seamless user experience across all devices. The design focuses on clean layouts, intuitive navigation, and conversion optimization. Features include advanced filtering, wishlist functionality, and streamlined checkout process.',
+                client: 'TechShop Online',
+                duration: '8 weeks',
+                role: 'UI/UX Designer',
+                year: '2024',
+                tools: ['Figma', 'Sketch', 'Principle'],
+                icon: 'M3,3H21V21H3V3M5,5V19H19V5H5Z'
+            },
+            'magazine-layout': {
+                title: 'Magazine Layout',
+                tags: ['Print', 'Editorial'],
+                description: 'Editorial design for a contemporary lifestyle magazine. The layout balances typography, imagery, and white space to create engaging reading experiences. Each spread is carefully crafted to guide the reader through the content while maintaining visual interest.',
+                client: 'Modern Living Magazine',
+                duration: '4 weeks',
+                role: 'Art Director',
+                year: '2024',
+                tools: ['InDesign', 'Photoshop', 'Illustrator'],
+                icon: 'M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V5H19V19Z'
+            },
+            'product-photography': {
+                title: 'Product Photography',
+                tags: ['Photography', 'Commercial'],
+                description: 'High-end product photography for luxury consumer goods. Each shot is meticulously planned and executed to highlight the product\'s unique features and craftsmanship. The lighting and composition create dramatic, compelling images that drive sales.',
+                client: 'Premium Goods Co.',
+                duration: '3 weeks',
+                role: 'Photographer & Retoucher',
+                year: '2024',
+                tools: ['Canon 5D Mark IV', 'Profoto Lighting', 'Capture One'],
+                icon: 'M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z'
+            },
+            'brand-animation': {
+                title: 'Brand Animation',
+                tags: ['Motion', 'Animation'],
+                description: 'Dynamic brand animation and motion graphics for digital platforms. The animations bring the brand to life through fluid movements and engaging transitions. Perfect for social media, web headers, and digital advertising campaigns.',
+                client: 'Dynamic Brands',
+                duration: '5 weeks',
+                role: 'Motion Designer',
+                year: '2024',
+                tools: ['After Effects', 'Cinema 4D', 'Premiere Pro'],
+                icon: 'M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z'
+            },
+            'product-packaging': {
+                title: 'Product Packaging',
+                tags: ['Packaging', '3D Design'],
+                description: 'Innovative packaging design that combines functionality with visual appeal. The design considers sustainability, shelf presence, and user experience. Each package tells the brand story while protecting the product inside.',
+                client: 'EcoTech Products',
+                duration: '7 weeks',
+                role: 'Package Designer',
+                year: '2024',
+                tools: ['Illustrator', 'Dimension', 'KeyShot'],
+                icon: 'M12,2L2,7L12,12L22,7L12,2M2,17L12,22L22,17L12,12L2,17Z'
+            },
+            'mobile-app': {
+                title: 'Mobile App Design',
+                tags: ['Mobile', 'UI Design'],
+                description: 'User-centered mobile app design focusing on intuitive navigation and engaging user experience. The interface is optimized for touch interactions and follows platform-specific design guidelines while maintaining brand consistency.',
+                client: 'StartupTech',
+                duration: '10 weeks',
+                role: 'Mobile UI Designer',
+                year: '2024',
+                tools: ['Figma', 'Principle', 'Zeplin'],
+                icon: 'M17,19H7V5H17M17,1H7C5.89,1 5,1.89 5,3V21C5,22.1 5.9,23 7,23H17C18.1,23 19,22.1 19,21V3C19,1.89 18.1,1 17,1Z'
+            },
+            'event-poster': {
+                title: 'Event Poster Series',
+                tags: ['Print', 'Typography'],
+                description: 'A series of event posters that capture the energy and atmosphere of live music events. Bold typography and dynamic compositions create visual impact while communicating essential event information clearly and effectively.',
+                client: 'City Music Festival',
+                duration: '3 weeks',
+                role: 'Graphic Designer',
+                year: '2024',
+                tools: ['Illustrator', 'Photoshop', 'InDesign'],
+                icon: 'M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M5,19V5H19V19H5Z'
+            },
+            'social-media': {
+                title: 'Social Media Campaign',
+                tags: ['Digital', 'Social Media'],
+                description: 'Comprehensive social media campaign design including posts, stories, and video content. The visual system maintains brand consistency across platforms while optimizing for each platform\'s unique requirements and audience behaviors.',
+                client: 'Fashion Forward',
+                duration: '6 weeks',
+                role: 'Social Media Designer',
+                year: '2024',
+                tools: ['Photoshop', 'After Effects', 'Canva Pro'],
+                icon: 'M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z'
+            }
+        };
+
+        // Show project details modal
+        function showProjectDetails(projectId) {
+            const project = projectData[projectId];
+            if (!project) return;
+
+            // Update modal content
+            document.getElementById('modalTitle').textContent = project.title;
+            document.getElementById('modalDescription').textContent = project.description;
+            document.getElementById('modalClient').textContent = project.client;
+            document.getElementById('modalDuration').textContent = project.duration;
+            document.getElementById('modalRole').textContent = project.role;
+            document.getElementById('modalYear').textContent = project.year;
+            document.getElementById('modalIcon').setAttribute('d', project.icon);
+
+            // Update tags
+            const tagsContainer = document.getElementById('modalTags');
+            tagsContainer.innerHTML = '';
+            project.tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20';
+                tagElement.textContent = tag;
+                tagsContainer.appendChild(tagElement);
+            });
+
+            // Update tools
+            const toolsContainer = document.getElementById('modalTools');
+            toolsContainer.innerHTML = '';
+            project.tools.forEach(tool => {
+                const toolElement = document.createElement('span');
+                toolElement.className = 'bg-black/50 text-white px-3 py-1 rounded-full text-sm border border-white/20';
+                toolElement.textContent = tool;
+                toolsContainer.appendChild(toolElement);
+            });
+
+            // Show modal
+            document.getElementById('projectModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('projectModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('projectModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Category filtering
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const showcaseItems = document.querySelectorAll('.showcase-item');
+
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                
+                // Update active button
+                categoryButtons.forEach(btn => {
+                    btn.classList.remove('text-white', 'border-b-2', 'border-white', 'pb-1');
+                    btn.classList.add('text-gray-400');
+                });
+                this.classList.remove('text-gray-400');
+                this.classList.add('text-white', 'border-b-2', 'border-white', 'pb-1');
+                
+                // Filter items
+                showcaseItems.forEach(item => {
+                    const itemCategory = item.getAttribute('data-category');
+                    if (category === 'all' || itemCategory === category) {
+                        item.style.display = 'block';
+                        setTimeout(() => {
+                            item.style.opacity = '1';
+                            item.style.transform = 'translateY(0)';
+                        }, 100);
+                    } else {
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            item.style.display = 'none';
+                        }, 300);
+                    }
+                });
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.animationPlayState = 'paused';
+            observer.observe(el);
+        });
+
+        // Load more functionality
+        document.querySelector('section:nth-last-child(2) button').addEventListener('click', function() {
+            this.textContent = 'Loading...';
+            setTimeout(() => {
+                this.textContent = 'Load More Projects';
+                // Here you would typically load more content
+            }, 1000);
+        });
+
+        // Keyboard navigation for modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6c0b9515607a7',t:'MTc1NDQwMTcxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
