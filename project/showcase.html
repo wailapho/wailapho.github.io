@@ -149,6 +149,17 @@
             border-color: rgba(255, 255, 255, 0.2);
             animation: float 3s ease-in-out infinite;
         }
+        
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .hidden-mobile {
+                display: none;
+            }
+            
+            .hidden-mobile.show-mobile {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body class="bg-black text-white">
@@ -281,7 +292,7 @@
                 </div>
 
                 <!-- Item 7 - App Design -->
-                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="web" onclick="showProjectDetails('mobile-app')" style="transition-delay: 0.1s;">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer hidden-mobile" data-category="web" onclick="showProjectDetails('mobile-app')" style="transition-delay: 0.1s;">
                     <div class="image-placeholder aspect-[3/5]">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M17,19H7V5H17M17,1H7C5.89,1 5,1.89 5,3V21C5,22.1 5.9,23 7,23H17C18.1,23 19,22.1 19,21V3C19,1.89 18.1,1 17,1Z"/>
@@ -297,7 +308,7 @@
                 </div>
 
                 <!-- Item 8 - Poster Design -->
-                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="print" onclick="showProjectDetails('event-poster')" style="transition-delay: 0.2s;">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer hidden-mobile" data-category="print" onclick="showProjectDetails('event-poster')" style="transition-delay: 0.2s;">
                     <div class="image-placeholder aspect-[2/3]">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M5,19V5H19V19H5Z"/>
@@ -313,7 +324,7 @@
                 </div>
 
                 <!-- Item 9 - Social Media -->
-                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer" data-category="branding" onclick="showProjectDetails('social-media')" style="transition-delay: 0.3s;">
+                <div class="showcase-item rounded-2xl overflow-hidden scroll-reveal cursor-pointer hidden-mobile" data-category="branding" onclick="showProjectDetails('social-media')" style="transition-delay: 0.3s;">
                     <div class="image-placeholder aspect-square">
                         <svg class="w-16 h-16 text-black" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"/>
@@ -680,12 +691,49 @@
         });
 
         // Load more functionality
-        document.querySelector('section:nth-last-child(2) button').addEventListener('click', function() {
-            this.textContent = 'Loading...';
-            setTimeout(() => {
-                this.textContent = 'Load More Projects';
-                // Here you would typically load more content
-            }, 1000);
+        const loadMoreButton = document.querySelector('section:nth-last-child(2) button');
+        let isLoading = false;
+        
+        loadMoreButton.addEventListener('click', function() {
+            if (isLoading) return;
+            
+            const hiddenItems = document.querySelectorAll('.hidden-mobile:not(.show-mobile)');
+            
+            if (hiddenItems.length > 0) {
+                isLoading = true;
+                this.textContent = 'Loading...';
+                this.classList.add('opacity-75');
+                
+                setTimeout(() => {
+                    // Show hidden items with animation
+                    hiddenItems.forEach((item, index) => {
+                        setTimeout(() => {
+                            // First make the item visible but transparent
+                            item.classList.add('show-mobile');
+                            item.style.opacity = '0';
+                            item.style.transform = 'translateY(30px)';
+                            item.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                            
+                            // Then animate it in
+                            requestAnimationFrame(() => {
+                                item.style.opacity = '1';
+                                item.style.transform = 'translateY(0)';
+                            });
+                        }, index * 150);
+                    });
+                    
+                    // Update button state
+                    setTimeout(() => {
+                        this.textContent = 'All Projects Loaded';
+                        this.disabled = true;
+                        this.classList.remove('opacity-75');
+                        this.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+                        this.classList.remove('hover:bg-gray-200');
+                        isLoading = false;
+                    }, hiddenItems.length * 150 + 500);
+                    
+                }, 600);
+            }
         });
 
         // Keyboard navigation for modal
@@ -695,5 +743,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6c8b1e3cd07a7',t:'MTc1NDQwMjA0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a6f5d9a0d206fa',t:'MTc1NDQwMzg5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
