@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>William Ho</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+        
+        .cinematic-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .project-card {
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .project-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .skill-tag {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .skill-tag:hover {
+            transform: scale(1.05);
+            background: #ffffff;
+            color: #000;
+            border-color: transparent;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            position: relative;
+        }
+        
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        }
+        
+        .text-gradient {
+            color: #ffffff;
+        }
+        
+        .cinematic-glow {
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body class="bg-black text-white">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-black/90 backdrop-blur-md z-50 border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold text-white cinematic-font">Portfolio</div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-gray-300 hover:text-white transition-colors">Home</a>
+                    <a href="#about" class="text-gray-300 hover:text-white transition-colors">About</a>
+                    <a href="#portfolio" class="text-gray-300 hover:text-white transition-colors">Portfolio</a>
+                    <a href="#contact" class="text-gray-300 hover:text-white transition-colors">Contact</a>
+                </div>
+                <button class="md:hidden p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient min-h-screen flex items-center justify-center text-white relative z-10">
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-20">
+            <div class="fade-in stagger-1">
+                <h1 class="text-6xl md:text-8xl font-bold mb-6 cinematic-font">Made to Create</h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90">Video Production • Art Direction • Web Design • Everything About Design</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="document.getElementById('portfolio').scrollIntoView({behavior: 'smooth'})" 
+                            class="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 transition-all cinematic-glow">
+                        View My Work
+                    </button>
+                    <button onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})" 
+                            class="border-2 border-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-colors">
+                        Get In Touch
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-gray">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="fade-in stagger-2">
+                    <h2 class="text-5xl font-bold mb-6 text-gradient cinematic-font">About Me</h2>
+                    <p class="text-lg text-gray-300 mb-6">
+                        I bring a deep passion for design that bridges creativity and strategy. With years of experience leading visual projects, I specialise in transforming ideas into immersive, high-impact experiences that engage and inspire.
+                    </p>
+                    <p class="text-lg text-gray-300 mb-6">
+                        From art direction and motion storytelling to digital design, brand systems, and leading live streaming events, I thrive at the intersection of aesthetics and purpose – where every detail contributes to a greater vision.
+                        Whether collaborating with teams or shaping complete creative journeys, I’m driven by the challenge of crafting work that is not only visually striking but also meaningful and memorable.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Video Production</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Art Direction</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Content Strategy</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Web Design</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Motion Graphics</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Creative Direction</span>
+                        <span class="skill-tag text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer">Brand Development</span>
+                    </div>
+                </div>
+                <div class="fade-in stagger-3">
+                    <div class="bg-white rounded-2xl p-8 text-black relative overflow-hidden">
+                        <div class="text-center relative z-10">
+                            <div class="w-32 h-32 bg-black/20 rounded-full mx-auto mb-6 flex items-center justify-center">
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-2 cinematic-font">100+ Productions</h3>
+                            <p class="opacity-90">Cinematic experiences delivered</p>
+                        </div>
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-black/10 rounded-full -translate-y-16 translate-x-16"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full translate-y-12 -translate-x-12"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-20 bg-black">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16 fade-in stagger-2">
+                <h2 class="text-5xl font-bold mb-4 text-gradient cinematic-font">Featured Work</h2>
+                <p class="text-xl text-gray-300">Creative productions and design закончены</p>
+            </div>
+            
+            <div id="project-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Projects will be dynamically inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-gray">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="fade-in stagger-2">
+                <h2 class="text-5xl font-bold mb-6 text-gradient cinematic-font">Let's Create Together</h2>
+                <p class="text-xl text-gray-300 mb-12">Ready to bring your vision to life? Let's craft something extraordinary that captivates and inspires.</p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="window.open('mailto:wailap_ho@outlook.com', '_blank')" 
+                            class="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 transition-all cinematic-glow">
+                        Send Email
+                    </button>
+                    <button onclick="window.open('https://www.linkedin.com/in/william-ho-2337a99b/', '_blank')" 
+                            class="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-black transition-colors">
+                        LinkedIn Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-12 border-t border-white/10">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="text-2xl font-bold mb-2 text-white cinematic-font">Portfolio</div>
+                    <p class="text-gray-400">Video Production • Art Direction • Web Design • Everything About Design</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 William Ho. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // CSV URL from Google Sheets
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR8sv-8aOCPH1MZP583HflkZzJT8A4l_7o9Ukdd_xW3LZ5CLvmJrcMoZL0OWge3c2p_xKaWD0hmwHYY/pub?gid=0&single=true&output=csv';
+
+        // Fetch and parse CSV
+        async function fetchProjects() {
+            try {
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                const projects = parseCSV(csvText);
+                displayProjects(projects);
+            } catch (error) {
+                console.error('Error fetching projects:', error);
+                document.getElementById('project-grid').innerHTML = '<p class="text-center text-gray-300">Failed to load projects. Please try again later.</p>';
+            }
+        }
+
+        // Parse CSV into array of objects
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            const headers = lines[0].split(',').map(header => header.trim());
+            const projects = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const data = lines[i].split(',').map(item => item.trim());
+                if (data.length >= 6) {
+                    projects.push({
+                        title: data[0],
+                        description: data[1],
+                        tags: data[2],
+                        mediaUrl: data[3],
+                        mediaType: data[4].toLowerCase(),
+                        projectLink: data[5]
+                    });
+                }
+            }
+            return projects;
+        }
+
+        // Display projects in the portfolio section
+        function displayProjects(projects) {
+            const projectGrid = document.getElementById('project-grid');
+            projectGrid.innerHTML = ''; // Clear existing content
+
+            projects.forEach((project, index) => {
+                const tagsArray = project.tags ? project.tags.split(',').map(tag => tag.trim()) : [];
+                const staggerClass = `stagger-${(index % 4) + 1}`;
+
+                // Create project card
+                const projectCard = document.createElement('div');
+                projectCard.className = `project-card rounded-2xl overflow-hidden shadow-lg fade-in ${staggerClass}`;
+
+                // Media content
+                let mediaContent = '';
+                if (project.mediaType === 'video') {
+                    mediaContent = `
+                        <video class="w-full h-48 object-cover" controls>
+                            <source src="${project.mediaUrl}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    `;
+                } else {
+                    mediaContent = `
+                        <img src="${project.mediaUrl}" alt="${project.title}" class="w-full h-48 object-cover">
+                    `;
+                }
+
+                // Tags content
+                const tagsContent = tagsArray
+                    .map(
+                        tag => `<span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">${tag}</span>`
+                    )
+                    .join('');
+
+                // Project link button
+                const buttonLink = project.projectLink ? `window.open('${project.projectLink}', '_blank')` : 'return false;';
+
+                projectCard.innerHTML = `
+                    <div class="h-48 relative overflow-hidden">
+                        ${mediaContent}
+                        <div class="absolute inset-0 bg-black/20"></div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white cinematic-font">${project.title}</h3>
+                        <p class="text-gray-300 mb-4">${project.description}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            ${tagsContent}
+                        </div>
+                        <button onclick="${buttonLink}" class="text-gradient font-semibold hover:opacity-80 transition-opacity">View Project →</button>
+                    </div>
+                `;
+
+                projectGrid.appendChild(projectCard);
+            });
+
+            // Re-observe new elements for animations
+            document.querySelectorAll('.fade-in').forEach(el => {
+                el.style.animationPlayState = 'paused';
+                observer.observe(el);
+            });
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 100) {
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.remove('shadow-lg');
+            }
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, observerOptions);
+
+        // Initial observation for existing elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.animationPlayState = 'paused';
+            observer.observe(el);
+        });
+
+        // Fetch projects on page load
+        window.addEventListener('load', fetchProjects);
+    </script>
+</body>
+</html>
