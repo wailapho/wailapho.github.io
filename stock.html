@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>william %r — Preview</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0a0e17 0%, #1a2335 100%);
+      color: #e0e7ff;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 800px;
+      padding: 3rem 2rem;
+      background: rgba(20, 25, 40, 0.6);
+      border-radius: 16px;
+      border: 1px solid rgba(100, 150, 255, 0.15);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      font-size: 7.2rem;
+      font-weight: 800;
+      margin: 0 0 0.8rem;
+      letter-spacing: -0.04em;
+      background: linear-gradient(90deg, #a5b4fc, #c7d2fe, #e0e7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .percent-r {
+      color: #818cf8;
+      font-weight: 900;
+    }
+
+    .subtitle {
+      font-size: 1.5rem;
+      font-weight: 400;
+      opacity: 0.85;
+      margin: 1rem 0 2rem;
+      letter-spacing: 0.02em;
+    }
+
+    .description {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      max-width: 620px;
+      margin: 0 auto;
+      color: #c7d2fe;
+      opacity: 0.9;
+    }
+
+    .description strong {
+      color: #a5b4fc;
+    }
+
+    footer {
+      margin-top: 4rem;
+      font-size: 0.95rem;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 5.5rem; }
+      .subtitle { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>william <span class="percent-r">%r</span></h1>
+    <div class="subtitle">Williams Percent Range — Momentum Oscillator</div>
+
+    <p class="description">
+      The <strong>Williams %R</strong> (often written as %R) is a momentum indicator developed by Larry Williams. It measures the current closing price relative to the high-low range over a specified look-back period (commonly 14 periods), oscillating between 0 and -100.
+    </p>
+
+    <p class="description">
+      • Readings from 0 to -20 typically indicate <strong>overbought</strong> conditions.<br>
+      • Readings from -80 to -100 typically indicate <strong>oversold</strong> conditions.
+    </p>
+  </div>
+
+  <footer>Preview page • January 2026</footer>
+
+</body>
+</html>
