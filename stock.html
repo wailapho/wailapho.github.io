@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Williams %R Calculator — Online Tool</title>
+  <title>Williams %R Calculator with Live Stock Data</title>
   <style>
     body {
       margin: 0;
@@ -37,11 +37,12 @@
 
     label {
       display: block;
-      margin: 1rem 0 0.4rem;
+      margin: 1.2rem 0 0.4rem;
       font-weight: 500;
       color: #94a3b8;
     }
 
+    input[type="text"],
     input[type="number"] {
       width: 100%;
       padding: 0.75rem;
@@ -52,14 +53,14 @@
       font-size: 1rem;
     }
 
-    input[type="number"]:focus {
+    input:focus {
       outline: none;
       border-color: #818cf8;
       box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
     }
 
     button {
-      margin-top: 1.5rem;
+      margin-top: 1.8rem;
       width: 100%;
       padding: 0.9rem;
       background: linear-gradient(90deg, #6366f1, #8b5cf6);
@@ -72,9 +73,8 @@
       transition: opacity 0.2s;
     }
 
-    button:hover {
-      opacity: 0.92;
-    }
+    button:hover { opacity: 0.92; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     #result {
       margin-top: 2rem;
@@ -83,17 +83,18 @@
       border-radius: 8px;
       border: 1px solid rgba(129, 140, 248, 0.2);
       text-align: center;
+      display: none;
     }
 
     .value {
-      font-size: 2.8rem;
+      font-size: 3rem;
       font-weight: 700;
-      margin: 0.5rem 0;
+      margin: 0.4rem 0;
       color: #c7d2fe;
     }
 
     .interpretation {
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       margin-top: 1rem;
     }
 
@@ -101,13 +102,15 @@
     .oversold   { color: #4ade80; }
     .neutral    { color: #94a3b8; }
 
-    .info {
-      margin-top: 2rem;
+    .info, .status {
+      margin-top: 1.5rem;
       font-size: 0.95rem;
       color: #94a3b8;
       line-height: 1.5;
       text-align: center;
     }
+
+    .error { color: #f87171; font-weight: 500; }
 
     @media (max-width: 500px) {
       .container { padding: 1.5rem; }
@@ -118,68 +121,117 @@
 <body>
 
   <div class="container">
-    <h1>Williams %R Calculator</h1>
+    <h1>Williams %R Calculator (Live Data)</h1>
+
+    <label for="ticker">Stock Ticker (e.g., AAPL, 0700.HK, TSLA)</label>
+    <input type="text" id="ticker" placeholder="AAPL" value="AAPL">
 
     <label for="period">Look-back Period (default: 14)</label>
     <input type="number" id="period" value="14" min="2" step="1">
 
-    <label for="close">Most Recent Close Price</label>
-    <input type="number" id="close" step="0.01" placeholder="e.g. 145.67" required>
+    <label for="close">Close Price (auto-filled from live data)</label>
+    <input type="number" id="close" step="0.01" placeholder="Fetching..." readonly>
 
-    <label for="highest">Highest High over the Period</label>
-    <input type="number" id="highest" step="0.01" placeholder="e.g. 152.30" required>
+    <label for="highest">Highest High over Period</label>
+    <input type="number" id="highest" step="0.01" placeholder="Enter manually or use today's high">
 
-    <label for="lowest">Lowest Low over the Period</label>
-    <input type="number" id="lowest" step="0.01" placeholder="e.g. 138.45" required>
+    <label for="lowest">Lowest Low over Period</label>
+    <input type="number" id="lowest" step="0.01" placeholder="Enter manually or use today's low">
 
-    <button onclick="calculateWilliamsR()">Calculate Williams %R</button>
+    <button id="fetchBtn" onclick="fetchAndCalculate()">Fetch Live Data & Calculate</button>
 
-    <div id="result" style="display: none;">
-      <div class="value" id="percentR"></div>
+    <div id="result">
+      <div class="value" id="percentR">--.--</div>
       <div class="interpretation" id="status"></div>
     </div>
 
     <div class="info">
-      Formula: %R = (Highest High − Close) / (Highest High − Lowest Low) × -100<br>
-      Traditional levels: 0 to -20 = overbought | -80 to -100 = oversold
+      Uses Yahoo Finance public quote endpoint (near real-time during market hours).<br>
+      Full %R needs multi-period high/low — enter manually for accuracy beyond 1 day.
     </div>
+
+    <div class="status" id="fetchStatus"></div>
   </div>
 
   <script>
-    function calculateWilliamsR() {
+    async function fetchAndCalculate() {
+      const ticker = document.getElementById('ticker').value.trim().toUpperCase();
       const period = parseInt(document.getElementById('period').value) || 14;
-      const close   = parseFloat(document.getElementById('close').value);
-      const high    = parseFloat(document.getElementById('highest').value);
-      const low     = parseFloat(document.getElementById('lowest').value);
+      const statusEl = document.getElementById('fetchStatus');
+      const btn = document.getElementById('fetchBtn');
 
-      if (isNaN(close) || isNaN(high) || isNaN(low) || high <= low) {
-        alert("Please enter valid numeric values. Highest must be greater than Lowest.");
+      if (!ticker) {
+        statusEl.textContent = "Please enter a valid ticker symbol.";
+        statusEl.className = "status error";
         return;
       }
 
-      const range = high - low;
-      const numerator = high - close;
-      const percentR = (numerator / range) * -100;
+      statusEl.textContent = "Fetching live data...";
+      statusEl.className = "status";
+      btn.disabled = true;
 
-      const rounded = percentR.toFixed(2);
+      try {
+        // Yahoo Finance quote endpoint (v7 – still active in 2026 for many users)
+        const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${ticker}`;
+        const response = await fetch(url, {
+          headers: { 'User-Agent': 'Mozilla/5.0' }  // Helps avoid some blocks
+        });
 
-      let statusText = "";
-      let statusClass = "neutral";
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-      if (percentR > -20) {
-        statusText = "Overbought (potential downward pressure)";
-        statusClass = "overbought";
-      } else if (percentR < -80) {
-        statusText = "Oversold (potential upward pressure)";
-        statusClass = "oversold";
-      } else {
-        statusText = "Neutral zone";
+        const data = await response.json();
+        const quote = data.quoteResponse.result[0];
+
+        if (!quote || !quote.regularMarketPrice) {
+          throw new Error("No valid quote data returned.");
+        }
+
+        const close   = quote.regularMarketPrice;
+        const dayHigh = quote.regularMarketDayHigh || close;
+        const dayLow  = quote.regularMarketDayLow  || close;
+
+        document.getElementById('close').value   = close.toFixed(2);
+        // Suggest today's range for single-day approximation
+        document.getElementById('highest').placeholder = `Today's high: ${dayHigh.toFixed(2)}`;
+        document.getElementById('lowest').placeholder  = `Today's low: ${dayLow.toFixed(2)}`;
+
+        // Use user-entered high/low if provided, else fall back to today's range
+        let high = parseFloat(document.getElementById('highest').value) || dayHigh;
+        let low  = parseFloat(document.getElementById('lowest').value)  || dayLow;
+
+        if (high <= low) {
+          throw new Error("Highest must be greater than Lowest.");
+        }
+
+        const percentR = ((high - close) / (high - low)) * -100;
+        const rounded  = percentR.toFixed(2);
+
+        let statusText = "Neutral zone";
+        let statusClass = "neutral";
+
+        if (percentR > -20) {
+          statusText = "Overbought (potential reversal down)";
+          statusClass = "overbought";
+        } else if (percentR < -80) {
+          statusText = "Oversold (potential reversal up)";
+          statusClass = "oversold";
+        }
+
+        document.getElementById('percentR').textContent = rounded;
+        document.getElementById('status').textContent = statusText;
+        document.getElementById('status').className = "interpretation " + statusClass;
+        document.getElementById('result').style.display = "block";
+
+        statusEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+        statusEl.className = "status";
+
+      } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
+        statusEl.className = "status error";
+        document.getElementById('result').style.display = "none";
+      } finally {
+        btn.disabled = false;
       }
-
-      document.getElementById('percentR').textContent = rounded;
-      document.getElementById('status').textContent = statusText;
-      document.getElementById('status').className = "interpretation " + statusClass;
-      document.getElementById('result').style.display = "block";
     }
   </script>
 
