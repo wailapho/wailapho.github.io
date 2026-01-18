@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Williams %R Calculator — Live Quote (Finnhub)</title>
+  <title>Williams %R Calculator with Live Quote & Chart (US Default)</title>
   <style>
     body {
       margin: 0;
@@ -12,9 +12,6 @@
       background: linear-gradient(135deg, #0f172a, #1e293b);
       color: #e2e8f0;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
     }
 
     .container {
@@ -23,14 +20,14 @@
       border-radius: 12px;
       border: 1px solid rgba(148, 163, 184, 0.2);
       padding: 2rem;
-      max-width: 640px;
-      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
 
     h1 {
-      font-size: 2.1rem;
-      margin: 0 0 1.5rem;
+      font-size: 2.2rem;
+      margin: 0 0 1.8rem;
       text-align: center;
       color: #c7d2fe;
     }
@@ -62,7 +59,7 @@
     button {
       margin-top: 1.8rem;
       width: 100%;
-      padding: 0.9rem;
+      padding: 0.95rem;
       background: linear-gradient(90deg, #6366f1, #8b5cf6);
       color: white;
       border: none;
@@ -77,54 +74,70 @@
     button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     #result {
-      margin-top: 2rem;
-      padding: 1.5rem;
+      margin: 2.5rem 0;
+      padding: 1.8rem;
       background: rgba(15, 23, 42, 0.6);
-      border-radius: 8px;
-      border: 1px solid rgba(129, 140, 248, 0.2);
+      border-radius: 10px;
+      border: 1px solid rgba(129, 140, 248, 0.25);
       text-align: center;
-      display: none;
     }
 
     .value {
-      font-size: 3rem;
+      font-size: 3.5rem;
       font-weight: 700;
-      margin: 0.4rem 0;
+      margin: 0.5rem 0;
       color: #c7d2fe;
     }
 
     .interpretation {
-      font-size: 1.2rem;
-      margin-top: 1rem;
+      font-size: 1.35rem;
+      margin: 1.2rem 0;
+      font-weight: 500;
     }
 
-    .overbought { color: #f87171; }
-    .oversold   { color: #4ade80; }
-    .neutral    { color: #94a3b8; }
+    .buy-suggestion {
+      font-size: 1.25rem;
+      margin-top: 1rem;
+      padding: 0.8rem;
+      border-radius: 8px;
+    }
+
+    .buy { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+    .sell { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+    .neutral { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+
+    .chart-container {
+      margin-top: 3rem;
+      height: 500px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(129, 140, 248, 0.2);
+    }
 
     .info, .status {
-      margin-top: 1.5rem;
+      margin-top: 2rem;
       font-size: 0.95rem;
       color: #94a3b8;
-      line-height: 1.5;
+      line-height: 1.6;
       text-align: center;
     }
 
     .error { color: #f87171; font-weight: 500; }
 
-    @media (max-width: 500px) {
+    @media (max-width: 768px) {
       .container { padding: 1.5rem; }
-      h1 { font-size: 1.8rem; }
+      h1 { font-size: 1.9rem; }
+      .chart-container { height: 400px; }
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>Williams %R Calculator (Live Quote via Finnhub)</h1>
+    <h1>Williams %R Calculator with Chart (US Stocks Default)</h1>
 
-    <label for="ticker">Ticker Symbol (e.g., 0700.HK, AAPL, 9988.HK)</label>
-    <input type="text" id="ticker" placeholder="0700.HK" value="0700.HK">
+    <label for="ticker">Ticker Symbol (US default: AAPL, TSLA, MSFT, etc.)</label>
+    <input type="text" id="ticker" placeholder="AAPL" value="AAPL">
 
     <label for="period">Look-back Period (default: 14)</label>
     <input type="number" id="period" value="14" min="2" step="1">
@@ -133,31 +146,58 @@
     <input type="number" id="close" step="0.01" placeholder="Awaiting fetch..." readonly>
 
     <label for="highest">Highest High over period</label>
-    <input type="number" id="highest" step="0.01" placeholder="Enter manually (required for multi-day accuracy)">
+    <input type="number" id="highest" step="0.01" placeholder="Enter manually (required for multi-period accuracy)">
 
     <label for="lowest">Lowest Low over period</label>
-    <input type="number" id="lowest" step="0.01" placeholder="Enter manually (required for multi-day accuracy)">
+    <input type="number" id="lowest" step="0.01" placeholder="Enter manually (required for multi-period accuracy)">
 
-    <button id="fetchBtn" onclick="fetchAndCalculate()">Fetch Live Quote & Calculate %R</button>
+    <button id="fetchBtn" onclick="fetchAndCalculate()">Fetch Quote & Calculate %R</button>
 
-    <div id="result">
+    <div id="result" style="display: none;">
       <div class="value" id="percentR">--.--</div>
       <div class="interpretation" id="status"></div>
+      <div class="buy-suggestion" id="suggestion"></div>
     </div>
 
+    <div class="chart-container" id="tradingview_chart"></div>
+
     <div class="info">
-      Powered by Finnhub API (using provided key).<br>
-      Note: On weekends/non-trading days (e.g., Sunday), the "live" price reflects the last available close.<br>
-      For precise Williams %R over multiple periods, input the actual highest high and lowest low from your charting platform.
+      Powered by Finnhub API (supports US and global exchanges, including HKEX with .HK suffix).<br>
+      Default set to US stocks. On non-trading days, data reflects the last available close.<br>
+      Chart displays the ticker with Williams %R (14) indicator for visual confirmation.
     </div>
 
     <div class="status" id="fetchStatus"></div>
   </div>
 
   <script>
+    let tvWidget = null;
+
+    function initTradingViewChart(ticker) {
+      if (tvWidget) {
+        tvWidget.remove();
+      }
+
+      tvWidget = new TradingView.widget({
+        "width": "100%",
+        "height": "100%",
+        "symbol": ticker,
+        "interval": "D",
+        "timezone": "America/New_York",  // US market default
+        "theme": "dark",
+        "style": "1",
+        "locale": "en",
+        "toolbar_bg": "#f1f3f6",
+        "enable_publishing": false,
+        "allow_symbol_change": true,
+        "container_id": "tradingview_chart",
+        "studies": ["WilliamsR@tv-basicstudies"]
+      });
+    }
+
     async function fetchAndCalculate() {
       const ticker = document.getElementById('ticker').value.trim().toUpperCase();
-      const apiKey = "d5m6nmpr01qidp4k9pqgd5m6nmpr01qidp4k9pr0";  // Your provided key is embedded here
+      const apiKey = "d5m6nmpr01qidp4k9pqgd5m6nmpr01qidp4k9pr0";
       const statusEl = document.getElementById('fetchStatus');
       const btn = document.getElementById('fetchBtn');
 
@@ -175,55 +215,66 @@
         const url = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${apiKey}`;
         const response = await fetch(url);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status} — verify ticker or API key status`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
 
         if (data.c === 0 || !data.c) {
-          throw new Error("No valid quote returned (symbol may be invalid or market data unavailable)");
+          throw new Error("No valid quote data (invalid symbol or market unavailable)");
         }
 
-        const close   = data.c;               // Current / last close price
-        const dayHigh = data.h || close;      // Day's high
-        const dayLow  = data.l  || close;     // Day's low
+        const close   = data.c;
+        const dayHigh = data.h || close;
+        const dayLow  = data.l  || close;
 
         document.getElementById('close').value = close.toFixed(2);
 
-        // Provide hints based on today's range
         document.getElementById('highest').placeholder = `Today's high: ${dayHigh.toFixed(2)}`;
         document.getElementById('lowest').placeholder  = `Today's low: ${dayLow.toFixed(2)}`;
 
-        // Prefer user-entered values; fall back to today's range for quick single-day test
         let high = parseFloat(document.getElementById('highest').value) || dayHigh;
         let low  = parseFloat(document.getElementById('lowest').value)  || dayLow;
 
-        if (high <= low) {
-          throw new Error("Highest High must be greater than Lowest Low");
-        }
+        if (high <= low) throw new Error("Highest High must exceed Lowest Low");
 
         const percentR = ((high - close) / (high - low)) * -100;
         const rounded  = percentR.toFixed(2);
 
         let statusText = "Neutral zone";
         let statusClass = "neutral";
+        let suggestionText = "No strong signal — consider additional analysis before deciding to buy.";
+        let suggestionClass = "neutral";
 
         if (percentR > -20) {
-          statusText = "Overbought (potential downward reversal)";
+          statusText = "Overbought";
           statusClass = "overbought";
+          suggestionText = "Generally not suitable for buying at present (elevated risk of pullback or reversal downward). Consider waiting for better entry or selling if holding.";
+          suggestionClass = "sell";
         } else if (percentR < -80) {
-          statusText = "Oversold (potential upward reversal)";
+          statusText = "Oversold";
           statusClass = "oversold";
+          suggestionText = "Potentially suitable for buying (indicates possible upward reversal). Confirm with supporting factors such as volume, price action, or other indicators.";
+          suggestionClass = "buy";
+        } else {
+          statusText = "Neutral";
+          statusClass = "neutral";
         }
 
         document.getElementById('percentR').textContent = rounded;
         document.getElementById('status').textContent = statusText;
         document.getElementById('status').className = "interpretation " + statusClass;
+
+        const sugEl = document.getElementById('suggestion');
+        sugEl.textContent = suggestionText;
+        sugEl.className = "buy-suggestion " + suggestionClass;
+
         document.getElementById('result').style.display = "block";
 
-        statusEl.textContent = `Data fetched: ${new Date().toLocaleTimeString('en-US', {timeZone: 'Asia/Hong_Kong'})} HKT`;
+        statusEl.textContent = `Updated: ${new Date().toLocaleTimeString('en-US', {timeZone: 'America/New_York'})} ET`;
         statusEl.className = "status";
+
+        // Load TradingView chart
+        initTradingViewChart(ticker);
 
       } catch (err) {
         statusEl.textContent = `Error: ${err.message}`;
@@ -234,6 +285,8 @@
       }
     }
   </script>
+
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
 </body>
 </html>
