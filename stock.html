@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Williams %R Calculator with Live Quote & Chart (US Default)</title>
+  <title>Williams %R Calculator — Multi-Day Lookback with Chart</title>
   <style>
     body {
       margin: 0;
@@ -114,8 +114,8 @@
       border: 1px solid rgba(129, 140, 248, 0.2);
     }
 
-    .info, .status {
-      margin-top: 2rem;
+    .info, .status, #dataInfo {
+      margin-top: 1.5rem;
       font-size: 0.95rem;
       color: #94a3b8;
       line-height: 1.6;
@@ -134,37 +134,31 @@
 <body>
 
   <div class="container">
-    <h1>Williams %R Calculator with Chart (US Stocks Default)</h1>
+    <h1>Williams %R Calculator — Multi-Day Lookback (US Stocks Default)</h1>
 
-    <label for="ticker">Ticker Symbol (US default: AAPL, TSLA, MSFT, etc.)</label>
+    <label for="ticker">Ticker Symbol (e.g., AAPL, TSLA, MSFT)</label>
     <input type="text" id="ticker" placeholder="AAPL" value="AAPL">
 
-    <label for="period">Look-back Period (default: 14)</label>
-    <input type="number" id="period" value="14" min="2" step="1">
+    <label for="lookbackDays">Look-back Days (e.g., 14, 30, 90, 200)</label>
+    <input type="number" id="lookbackDays" value="30" min="5" step="1">
 
-    <label for="close">Close Price (fetched live)</label>
+    <label for="close">Latest Close Price</label>
     <input type="number" id="close" step="0.01" placeholder="Awaiting fetch..." readonly>
 
-    <label for="highest">Highest High over period</label>
-    <input type="number" id="highest" step="0.01" placeholder="Enter manually (required for multi-period accuracy)">
-
-    <label for="lowest">Lowest Low over period</label>
-    <input type="number" id="lowest" step="0.01" placeholder="Enter manually (required for multi-period accuracy)">
-
-    <button id="fetchBtn" onclick="fetchAndCalculate()">Fetch Quote & Calculate %R</button>
+    <button id="fetchBtn" onclick="fetchAndCalculate()">Fetch Data & Calculate %R</button>
 
     <div id="result" style="display: none;">
       <div class="value" id="percentR">--.--</div>
       <div class="interpretation" id="status"></div>
       <div class="buy-suggestion" id="suggestion"></div>
+      <div id="dataInfo"></div>
     </div>
 
     <div class="chart-container" id="tradingview_chart"></div>
 
     <div class="info">
-      Powered by Finnhub API (supports US and global exchanges, including HKEX with .HK suffix).<br>
-      Default set to US stocks. On non-trading days, data reflects the last available close.<br>
-      Chart displays the ticker with Williams %R (14) indicator for visual confirmation.
+      Powered by Finnhub API (fetches daily historical data for accurate multi-day %R).<br>
+      Free tier typically provides up to ~1 year of history. Chart shows standard 14-period Williams %R for reference.
     </div>
 
     <div class="status" id="fetchStatus"></div>
@@ -174,16 +168,14 @@
     let tvWidget = null;
 
     function initTradingViewChart(ticker) {
-      if (tvWidget) {
-        tvWidget.remove();
-      }
+      if (tvWidget) tvWidget.remove();
 
       tvWidget = new TradingView.widget({
         "width": "100%",
         "height": "100%",
         "symbol": ticker,
         "interval": "D",
-        "timezone": "America/New_York",  // US market default
+        "timezone": "America/New_York",
         "theme": "dark",
         "style": "1",
         "locale": "en",
@@ -197,83 +189,85 @@
 
     async function fetchAndCalculate() {
       const ticker = document.getElementById('ticker').value.trim().toUpperCase();
+      const lookbackDays = parseInt(document.getElementById('lookbackDays').value) || 30;
       const apiKey = "d5m6nmpr01qidp4k9pqgd5m6nmpr01qidp4k9pr0";
       const statusEl = document.getElementById('fetchStatus');
       const btn = document.getElementById('fetchBtn');
 
-      if (!ticker) {
-        statusEl.textContent = "Please enter a valid ticker symbol.";
+      if (!ticker || lookbackDays < 5) {
+        statusEl.textContent = "Please enter a valid ticker and look-back days (minimum 5).";
         statusEl.className = "status error";
         return;
       }
 
-      statusEl.textContent = "Fetching quote...";
+      statusEl.textContent = "Fetching historical data...";
       statusEl.className = "status";
       btn.disabled = true;
 
       try {
-        const url = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${apiKey}`;
+        const to = Math.floor(Date.now() / 1000);
+        const from = to - (lookbackDays * 86400 * 1.3); // Buffer for non-trading days
+
+        const url = `https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=D&from=${from}&to=${to}&token=${apiKey}`;
         const response = await fetch(url);
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
 
-        if (data.c === 0 || !data.c) {
-          throw new Error("No valid quote data (invalid symbol or market unavailable)");
+        if (data.s !== "ok" || !data.c || data.c.length < 2) {
+          throw new Error("Insufficient or no historical data returned");
         }
 
-        const close   = data.c;
-        const dayHigh = data.h || close;
-        const dayLow  = data.l  || close;
+        const closes = data.c;
+        const highs  = data.h;
+        const lows   = data.l;
 
-        document.getElementById('close').value = close.toFixed(2);
+        const latestClose = closes[closes.length - 1];
+        const periodHigh  = Math.max(...highs);
+        const periodLow   = Math.min(...lows);
+        const barCount    = closes.length;
 
-        document.getElementById('highest').placeholder = `Today's high: ${dayHigh.toFixed(2)}`;
-        document.getElementById('lowest').placeholder  = `Today's low: ${dayLow.toFixed(2)}`;
+        document.getElementById('close').value = latestClose.toFixed(2);
 
-        let high = parseFloat(document.getElementById('highest').value) || dayHigh;
-        let low  = parseFloat(document.getElementById('lowest').value)  || dayLow;
+        if (periodHigh <= periodLow) throw new Error("Invalid price range in data");
 
-        if (high <= low) throw new Error("Highest High must exceed Lowest Low");
-
-        const percentR = ((high - close) / (high - low)) * -100;
+        const percentR = ((periodHigh - latestClose) / (periodHigh - periodLow)) * -100;
         const rounded  = percentR.toFixed(2);
 
         let statusText = "Neutral zone";
         let statusClass = "neutral";
-        let suggestionText = "No strong signal — consider additional analysis before deciding to buy.";
+        let suggestionText = "No strong signal — consider additional analysis.";
         let suggestionClass = "neutral";
 
         if (percentR > -20) {
           statusText = "Overbought";
           statusClass = "overbought";
-          suggestionText = "Generally not suitable for buying at present (elevated risk of pullback or reversal downward). Consider waiting for better entry or selling if holding.";
+          suggestionText = "Generally not suitable for buying (risk of pullback). Consider waiting or selling.";
           suggestionClass = "sell";
         } else if (percentR < -80) {
           statusText = "Oversold";
           statusClass = "oversold";
-          suggestionText = "Potentially suitable for buying (indicates possible upward reversal). Confirm with supporting factors such as volume, price action, or other indicators.";
+          suggestionText = "Potentially suitable for buying (possible upward reversal). Confirm with other factors.";
           suggestionClass = "buy";
-        } else {
-          statusText = "Neutral";
-          statusClass = "neutral";
         }
 
         document.getElementById('percentR').textContent = rounded;
         document.getElementById('status').textContent = statusText;
         document.getElementById('status').className = "interpretation " + statusClass;
 
-        const sugEl = document.getElementById('suggestion');
-        sugEl.textContent = suggestionText;
-        sugEl.className = "buy-suggestion " + suggestionClass;
+        document.getElementById('suggestion').textContent = suggestionText;
+        document.getElementById('suggestion').className = "buy-suggestion " + suggestionClass;
+
+        document.getElementById('dataInfo').textContent = 
+          `Based on ${barCount} trading days (requested: ${lookbackDays}). ` +
+          (barCount < lookbackDays ? "Limited by available history." : "Full period used.");
 
         document.getElementById('result').style.display = "block";
 
         statusEl.textContent = `Updated: ${new Date().toLocaleTimeString('en-US', {timeZone: 'America/New_York'})} ET`;
         statusEl.className = "status";
 
-        // Load TradingView chart
         initTradingViewChart(ticker);
 
       } catch (err) {
