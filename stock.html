@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Williams %R Calculator with Live Stock Data</title>
+  <title>Williams %R Calculator — Live Data</title>
   <style>
     body {
       margin: 0;
@@ -121,24 +121,24 @@
 <body>
 
   <div class="container">
-    <h1>Williams %R Calculator (Live Data)</h1>
+    <h1>Williams %R Calculator (Live Quote)</h1>
 
-    <label for="ticker">Stock Ticker (e.g., AAPL, 0700.HK, TSLA)</label>
-    <input type="text" id="ticker" placeholder="AAPL" value="AAPL">
+    <label for="ticker">Ticker Symbol</label>
+    <input type="text" id="ticker" placeholder="0700.HK or AAPL" value="0700.HK">
 
-    <label for="period">Look-back Period (default: 14)</label>
+    <label for="period">Look-back Period</label>
     <input type="number" id="period" value="14" min="2" step="1">
 
-    <label for="close">Close Price (auto-filled from live data)</label>
+    <label for="close">Close Price (live)</label>
     <input type="number" id="close" step="0.01" placeholder="Fetching..." readonly>
 
-    <label for="highest">Highest High over Period</label>
-    <input type="number" id="highest" step="0.01" placeholder="Enter manually or use today's high">
+    <label for="highest">Highest High over period</label>
+    <input type="number" id="highest" step="0.01" placeholder="Enter manually">
 
-    <label for="lowest">Lowest Low over Period</label>
-    <input type="number" id="lowest" step="0.01" placeholder="Enter manually or use today's low">
+    <label for="lowest">Lowest Low over period</label>
+    <input type="number" id="lowest" step="0.01" placeholder="Enter manually">
 
-    <button id="fetchBtn" onclick="fetchAndCalculate()">Fetch Live Data & Calculate</button>
+    <button id="fetchBtn" onclick="fetchAndCalculate()">Fetch Quote & Calculate</button>
 
     <div id="result">
       <div class="value" id="percentR">--.--</div>
@@ -146,8 +146,8 @@
     </div>
 
     <div class="info">
-      Uses Yahoo Finance public quote endpoint (near real-time during market hours).<br>
-      Full %R needs multi-period high/low — enter manually for accuracy beyond 1 day.
+      Fetches current price via Yahoo Finance (via public CORS proxy).<br>
+      For accurate multi-period %R, manually enter the true highest high and lowest low over the selected period.
     </div>
 
     <div class="status" id="fetchStatus"></div>
@@ -161,46 +161,54 @@
       const btn = document.getElementById('fetchBtn');
 
       if (!ticker) {
-        statusEl.textContent = "Please enter a valid ticker symbol.";
+        statusEl.textContent = "Please enter a ticker symbol.";
         statusEl.className = "status error";
         return;
       }
 
-      statusEl.textContent = "Fetching live data...";
+      statusEl.textContent = "Fetching quote...";
       statusEl.className = "status";
       btn.disabled = true;
 
       try {
-        // Yahoo Finance quote endpoint (v7 – still active in 2026 for many users)
-        const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${ticker}`;
+        // Using a public CORS proxy — change provider if this one becomes slow/unreliable
+        const proxy = 'https://corsproxy.io/?';
+        const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${ticker}`;
+        const url = proxy + encodeURIComponent(yahooUrl);
+
         const response = await fetch(url, {
-          headers: { 'User-Agent': 'Mozilla/5.0' }  // Helps avoid some blocks
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
         });
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} — proxy or Yahoo may be temporarily unavailable`);
+        }
 
         const data = await response.json();
-        const quote = data.quoteResponse.result[0];
+        const quote = data.quoteResponse?.result?.[0];
 
-        if (!quote || !quote.regularMarketPrice) {
-          throw new Error("No valid quote data returned.");
+        if (!quote || typeof quote.regularMarketPrice !== 'number') {
+          throw new Error("No valid quote data received");
         }
 
         const close   = quote.regularMarketPrice;
         const dayHigh = quote.regularMarketDayHigh || close;
         const dayLow  = quote.regularMarketDayLow  || close;
 
-        document.getElementById('close').value   = close.toFixed(2);
-        // Suggest today's range for single-day approximation
+        document.getElementById('close').value = close.toFixed(2);
+
+        // Show today's range as hint
         document.getElementById('highest').placeholder = `Today's high: ${dayHigh.toFixed(2)}`;
         document.getElementById('lowest').placeholder  = `Today's low: ${dayLow.toFixed(2)}`;
 
-        // Use user-entered high/low if provided, else fall back to today's range
+        // Use user values if provided, otherwise fall back to today's range (single-day approximation only)
         let high = parseFloat(document.getElementById('highest').value) || dayHigh;
         let low  = parseFloat(document.getElementById('lowest').value)  || dayLow;
 
         if (high <= low) {
-          throw new Error("Highest must be greater than Lowest.");
+          throw new Error("Highest High must be greater than Lowest Low");
         }
 
         const percentR = ((high - close) / (high - low)) * -100;
@@ -210,10 +218,10 @@
         let statusClass = "neutral";
 
         if (percentR > -20) {
-          statusText = "Overbought (potential reversal down)";
+          statusText = "Overbought";
           statusClass = "overbought";
         } else if (percentR < -80) {
-          statusText = "Oversold (potential reversal up)";
+          statusText = "Oversold";
           statusClass = "oversold";
         }
 
@@ -222,7 +230,7 @@
         document.getElementById('status').className = "interpretation " + statusClass;
         document.getElementById('result').style.display = "block";
 
-        statusEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+        statusEl.textContent = `Updated: ${new Date().toLocaleTimeString('en-US', {timeZone: 'Asia/Hong_Kong'})} HKT`;
         statusEl.className = "status";
 
       } catch (err) {
