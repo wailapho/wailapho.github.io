@@ -3,99 +3,185 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>william %r — Preview</title>
+  <title>Williams %R Calculator — Online Tool</title>
   <style>
     body {
       margin: 0;
-      padding: 0;
-      height: 100vh;
-      background: linear-gradient(135deg, #0a0e17 0%, #1a2335 100%);
-      color: #e0e7ff;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
       justify-content: center;
-      align-items: center;
-      overflow: hidden;
+      align-items: flex-start;
     }
 
     .container {
-      text-align: center;
-      max-width: 800px;
-      padding: 3rem 2rem;
-      background: rgba(20, 25, 40, 0.6);
-      border-radius: 16px;
-      border: 1px solid rgba(100, 150, 255, 0.15);
+      background: rgba(30, 41, 59, 0.8);
       backdrop-filter: blur(10px);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 2rem;
+      max-width: 640px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
 
     h1 {
-      font-size: 7.2rem;
-      font-weight: 800;
-      margin: 0 0 0.8rem;
-      letter-spacing: -0.04em;
-      background: linear-gradient(90deg, #a5b4fc, #c7d2fe, #e0e7ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .percent-r {
-      color: #818cf8;
-      font-weight: 900;
-    }
-
-    .subtitle {
-      font-size: 1.5rem;
-      font-weight: 400;
-      opacity: 0.85;
-      margin: 1rem 0 2rem;
-      letter-spacing: 0.02em;
-    }
-
-    .description {
-      font-size: 1.15rem;
-      line-height: 1.6;
-      max-width: 620px;
-      margin: 0 auto;
+      font-size: 2.1rem;
+      margin: 0 0 1.5rem;
+      text-align: center;
       color: #c7d2fe;
-      opacity: 0.9;
     }
 
-    .description strong {
-      color: #a5b4fc;
+    label {
+      display: block;
+      margin: 1rem 0 0.4rem;
+      font-weight: 500;
+      color: #94a3b8;
     }
 
-    footer {
-      margin-top: 4rem;
+    input[type="number"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 1rem;
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #818cf8;
+      box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    #result {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+      border: 1px solid rgba(129, 140, 248, 0.2);
+      text-align: center;
+    }
+
+    .value {
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+      color: #c7d2fe;
+    }
+
+    .interpretation {
+      font-size: 1.15rem;
+      margin-top: 1rem;
+    }
+
+    .overbought { color: #f87171; }
+    .oversold   { color: #4ade80; }
+    .neutral    { color: #94a3b8; }
+
+    .info {
+      margin-top: 2rem;
       font-size: 0.95rem;
-      opacity: 0.7;
+      color: #94a3b8;
+      line-height: 1.5;
+      text-align: center;
     }
 
-    @media (max-width: 640px) {
-      h1 { font-size: 5.5rem; }
-      .subtitle { font-size: 1.3rem; }
+    @media (max-width: 500px) {
+      .container { padding: 1.5rem; }
+      h1 { font-size: 1.8rem; }
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>william <span class="percent-r">%r</span></h1>
-    <div class="subtitle">Williams Percent Range — Momentum Oscillator</div>
+    <h1>Williams %R Calculator</h1>
 
-    <p class="description">
-      The <strong>Williams %R</strong> (often written as %R) is a momentum indicator developed by Larry Williams. It measures the current closing price relative to the high-low range over a specified look-back period (commonly 14 periods), oscillating between 0 and -100.
-    </p>
+    <label for="period">Look-back Period (default: 14)</label>
+    <input type="number" id="period" value="14" min="2" step="1">
 
-    <p class="description">
-      • Readings from 0 to -20 typically indicate <strong>overbought</strong> conditions.<br>
-      • Readings from -80 to -100 typically indicate <strong>oversold</strong> conditions.
-    </p>
+    <label for="close">Most Recent Close Price</label>
+    <input type="number" id="close" step="0.01" placeholder="e.g. 145.67" required>
+
+    <label for="highest">Highest High over the Period</label>
+    <input type="number" id="highest" step="0.01" placeholder="e.g. 152.30" required>
+
+    <label for="lowest">Lowest Low over the Period</label>
+    <input type="number" id="lowest" step="0.01" placeholder="e.g. 138.45" required>
+
+    <button onclick="calculateWilliamsR()">Calculate Williams %R</button>
+
+    <div id="result" style="display: none;">
+      <div class="value" id="percentR"></div>
+      <div class="interpretation" id="status"></div>
+    </div>
+
+    <div class="info">
+      Formula: %R = (Highest High − Close) / (Highest High − Lowest Low) × -100<br>
+      Traditional levels: 0 to -20 = overbought | -80 to -100 = oversold
+    </div>
   </div>
 
-  <footer>Preview page • January 2026</footer>
+  <script>
+    function calculateWilliamsR() {
+      const period = parseInt(document.getElementById('period').value) || 14;
+      const close   = parseFloat(document.getElementById('close').value);
+      const high    = parseFloat(document.getElementById('highest').value);
+      const low     = parseFloat(document.getElementById('lowest').value);
+
+      if (isNaN(close) || isNaN(high) || isNaN(low) || high <= low) {
+        alert("Please enter valid numeric values. Highest must be greater than Lowest.");
+        return;
+      }
+
+      const range = high - low;
+      const numerator = high - close;
+      const percentR = (numerator / range) * -100;
+
+      const rounded = percentR.toFixed(2);
+
+      let statusText = "";
+      let statusClass = "neutral";
+
+      if (percentR > -20) {
+        statusText = "Overbought (potential downward pressure)";
+        statusClass = "overbought";
+      } else if (percentR < -80) {
+        statusText = "Oversold (potential upward pressure)";
+        statusClass = "oversold";
+      } else {
+        statusText = "Neutral zone";
+      }
+
+      document.getElementById('percentR').textContent = rounded;
+      document.getElementById('status').textContent = statusText;
+      document.getElementById('status').className = "interpretation " + statusClass;
+      document.getElementById('result').style.display = "block";
+    }
+  </script>
 
 </body>
 </html>
