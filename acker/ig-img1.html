@@ -7,14 +7,67 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.13/html-to-image.min.js"></script>
   <style>
-    body { margin: 0; padding: 0; background: #f1f5f9; font-family: system-ui, sans-serif; }
-    .preview-wrapper { width: 1080px; height: 1350px; margin: 40px auto; background: #e5e7eb; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.12); }
-    #capture-area { width: 1080px; height: 1350px; position: relative; background: white; overflow: hidden; }
-    .photo-mask { position: absolute; inset: 0; z-index: 1; }
-    .photo-inner { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-    .photo-gradient { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 30%); pointer-events: none; z-index: 2; }
-    .upload-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.25); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3; pointer-events: none; }
-    .text-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 800px; z-index: 7; text-align: left; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f1f5f9;
+      font-family: system-ui, sans-serif;
+    }
+    .preview-wrapper {
+      width: 1080px;
+      height: 1350px;
+      margin: 40px auto;
+      background: #e5e7eb;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    }
+    #capture-area {
+      width: 1080px;
+      height: 1350px;
+      position: relative;
+      background: white;
+      overflow: hidden;
+    }
+    .photo-mask {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+    .photo-inner {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    .photo-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 30%);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .upload-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .text-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 800px;
+      z-index: 7;
+      text-align: left;
+    }
     .glass-box {
       padding: 40px;
       border-radius: 16px;
@@ -24,85 +77,224 @@
       position: relative;
       overflow: hidden;
       background-color: rgba(0,0,0,0.2);
+      background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="2" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100" height="100" filter="url(%23noise)" opacity="0.05"/%3E%3C/svg%3E');
     }
-    .glow-top { position: absolute; top: 0; left: 0; right: 0; height: 20px; background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent); pointer-events: none; }
-    .section { margin-bottom: 20px; }
-    .label, .description {
+    .glow-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent);
+      pointer-events: none;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .label {
       font-family: Verdana, sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.1;
+      display: block;
       color: #ffffff;
     }
-    .label { font-size: 36px; font-weight: 700; line-height: 1.1; display: block; }
-    .description { font-size: 32px; font-weight: 400; line-height: 1.2; margin-top: 8px; white-space: pre-wrap; word-wrap: break-word; }
-    .control-panel { max-width: 1140px; margin: 0 auto 32px; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
-    .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .btn-primary { background: #3b82f6; color: white; }
-    .btn-primary:hover { background: #2563eb; }
+    .description {
+      font-family: Verdana, sans-serif;
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-top: 8px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #ffffff;
+    }
+    .control-panel {
+      max-width: 1140px;
+      margin: 0 auto 32px;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #2563eb;
+    }
   </style>
 </head>
 <body>
-  <!-- Control panel + preview area same as before -->
   <div class="control-panel">
-    <h1 class="text-2xl font-bold mb-4">Liquid Glass Text Editor</h1>
+    <h1 class="text-2xl font-bold mb-4 text-center md:text-left">Liquid Glass Text Editor</h1>
     <div class="flex flex-wrap gap-4 mb-6 justify-center md:justify-start">
       <button id="upload-bg" class="btn btn-primary">Upload Background Image</button>
       <button id="download" class="btn bg-green-600 hover:bg-green-700 text-white">Download JPG</button>
     </div>
     <input type="file" id="file-bg" accept="image/*" class="hidden">
   </div>
-
   <div class="preview-wrapper">
     <div id="capture-area">
+      <!-- Background Photo -->
       <div class="photo-mask" id="mask-bg">
         <img class="photo-inner" id="inner-bg" crossorigin="anonymous">
         <div class="photo-gradient"></div>
         <div class="upload-overlay">
-          <svg class="w-16 h-16 mb-3" fill="none" stroke="white" viewBox="0 0 24 24">...</svg>
+          <svg class="w-16 h-16 mb-3" fill="none" stroke="white" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
           <p class="text-lg font-semibold">Background Image<br>Drag & wheel to adjust</p>
         </div>
       </div>
       <div class="text-container">
         <div class="glass-box" id="glass-box">
           <div class="glow-top"></div>
-          <div class="section"><span class="label">Nose:</span><div contenteditable="true" class="description">Enter description here...</div></div>
-          <div class="section"><span class="label">Palate:</span><div contenteditable="true" class="description">Enter description here...</div></div>
-          <div class="section"><span class="label">Overall:</span><div contenteditable="true" class="description">Enter description here...</div></div>
+          <div class="section">
+            <span class="label">Nose:</span>
+            <div contenteditable="true" class="description" id="nose-desc">Enter description here...</div>
+          </div>
+          <div class="section">
+            <span class="label">Palate:</span>
+            <div contenteditable="true" class="description" id="palate-desc">Enter description here...</div>
+          </div>
+          <div class="section">
+            <span class="label">Overall:</span>
+            <div contenteditable="true" class="description" id="overall-desc">Enter description here...</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Toast same as before -->
-
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-8 right-8 bg-green-600 text-white px-8 py-4 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-50">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+    <span id="toast-text">Done!</span>
+  </div>
   <script>
-    // ... (all previous upload, drag, zoom, clear placeholder code remains the same)
+    // ───────────────────────────────────────────────
+    // Elements
+    // ───────────────────────────────────────────────
+    const captureArea = document.getElementById('capture-area');
+    const glassBox = document.getElementById('glass-box');
+    const textContainer = document.querySelector('.text-container');
+    const toast = document.getElementById('toast');
+    const bgMask = document.getElementById('mask-bg');
+    const bgInner = document.getElementById('inner-bg');
+    const bgUpload = bgMask.querySelector('.upload-overlay');
 
+    // Clear placeholders on focus
+    const descriptions = document.querySelectorAll('.description');
+    descriptions.forEach(desc => {
+      desc.addEventListener('focus', () => {
+        if (desc.innerHTML === 'Enter description here...') desc.innerHTML = '';
+      });
+    });
+    // ───────────────────────────────────────────────
+    // File Upload
+    // ───────────────────────────────────────────────
+    document.getElementById('upload-bg').onclick = () => document.getElementById('file-bg').click();
+    document.getElementById('file-bg').onchange = e => loadImage(e, bgInner, bgUpload);
+    function loadImage(e, targetInner, overlay) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        targetInner.src = ev.target.result;
+        overlay.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+    // ───────────────────────────────────────────────
+    // Drag & Zoom
+    // ───────────────────────────────────────────────
+    function makeDraggableAndZoomable(mask, inner) {
+      let scale = 1;
+      let posX = 0;
+      let posY = 0;
+      let isDragging = false;
+      let startX, startY;
+      const update = () => {
+        inner.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+      };
+      update(); // Initial update
+      mask.addEventListener('mousedown', e => {
+        isDragging = true;
+        startX = e.clientX - posX;
+        startY = e.clientY - posY;
+        mask.style.cursor = 'grabbing';
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        posX = e.clientX - startX;
+        posY = e.clientY - startY;
+        update();
+      });
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        mask.style.cursor = 'grab';
+      });
+      mask.addEventListener('wheel', e => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+        scale = Math.max(0.5, Math.min(3.5, scale + delta));
+        update();
+      });
+      let startDist = 0;
+      mask.addEventListener('touchstart', e => {
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          const t1 = e.touches[0], t2 = e.touches[1];
+          startDist = Math.hypot(t1.clientX-t2.clientX, t1.clientY-t2.clientY);
+        }
+      }, {passive:false});
+      mask.addEventListener('touchmove', e => {
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          const t1 = e.touches[0], t2 = e.touches[1];
+          const dist = Math.hypot(t1.clientX-t2.clientX, t1.clientY-t2.clientY);
+          scale = Math.max(0.5, Math.min(3.5, scale * (dist / startDist)));
+          startDist = dist;
+          update();
+        }
+      }, {passive:false});
+    }
+    makeDraggableAndZoomable(bgMask, bgInner);
+    // ───────────────────────────────────────────────
+    // Download
+    // ───────────────────────────────────────────────
     document.getElementById('download').onclick = async () => {
       try {
         showToast('Creating...');
-
         const pixelRatio = 2;
         const options = {
           quality: 0.92,
-          pixelRatio,
+          pixelRatio: pixelRatio,
           canvasWidth: 1080 * pixelRatio,
           canvasHeight: 1350 * pixelRatio,
           backgroundColor: '#ffffff',
           cacheBust: true
         };
 
-        const textContainer = document.querySelector('.text-container');
-        const glassBox = document.getElementById('glass-box');
-
-        // 1. Capture background only
+        // Capture background without text
         textContainer.style.display = 'none';
         const bgDataUrl = await htmlToImage.toPng(captureArea, options);
         textContainer.style.display = '';
 
         const bgImg = new Image();
         bgImg.src = bgDataUrl;
-        await new Promise(r => bgImg.onload = r);
+        await new Promise(resolve => bgImg.onload = resolve);
 
-        // 2. Get glass box position/size
+        // Get glass box rect relative to capture area
         const captureRect = captureArea.getBoundingClientRect();
         const rect = glassBox.getBoundingClientRect();
         const x = rect.left - captureRect.left;
@@ -110,25 +302,26 @@
         const w = rect.width;
         const h = rect.height;
 
-        // 3. Create blurred + tinted + grained background
+        // Create blur canvas
         const blurCanvas = document.createElement('canvas');
         blurCanvas.width = w * pixelRatio;
         blurCanvas.height = h * pixelRatio;
         const bctx = blurCanvas.getContext('2d');
 
-        // Blur the background section
-        bctx.filter = `blur(${20}px)`;   // 10px × pixelRatio
+        // Blur the cropped background
+        bctx.filter = 'blur(20px)'; // 10px * pixelRatio
         bctx.drawImage(bgImg, x * pixelRatio, y * pixelRatio, w * pixelRatio, h * pixelRatio, 0, 0, w * pixelRatio, h * pixelRatio);
         bctx.filter = 'none';
 
-        // Tint
+        // Add tint
         bctx.fillStyle = 'rgba(0,0,0,0.2)';
-        bctx.fillRect(0, 0, blurCanvas.width, blurCanvas.height);
+        bctx.fillRect(0, 0, w * pixelRatio, h * pixelRatio);
 
-        // Grain (canvas-generated, reliable)
+        // Add grain
         const noiseSize = 64;
         const noiseCanvas = document.createElement('canvas');
-        noiseCanvas.width = noiseSize; noiseCanvas.height = noiseSize;
+        noiseCanvas.width = noiseSize;
+        noiseCanvas.height = noiseSize;
         const nctx = noiseCanvas.getContext('2d');
         const id = nctx.createImageData(noiseSize, noiseSize);
         for (let i = 0; i < id.data.length; i += 4) {
@@ -143,23 +336,22 @@
         bctx.fillRect(0, 0, blurCanvas.width, blurCanvas.height);
         bctx.globalAlpha = 1;
 
-        // 4. Temporarily apply baked background to glass box
+        // Temporarily set blurred background to glass box
         const originalStyle = {
           backdropFilter: glassBox.style.backdropFilter,
           backgroundImage: glassBox.style.backgroundImage,
           backgroundColor: glassBox.style.backgroundColor,
           backgroundSize: glassBox.style.backgroundSize
         };
-
         glassBox.style.backdropFilter = 'none';
-        glassBox.style.backgroundImage = `url(${blurCanvas.toDataURL('image/png')})`;
+        glassBox.style.backgroundImage = `url(${blurCanvas.toDataURL()})`;
         glassBox.style.backgroundColor = 'transparent';
         glassBox.style.backgroundSize = '100% 100%';
 
-        // 5. Capture final image
+        // Capture final image
         const dataUrl = await htmlToImage.toJpeg(captureArea, options);
 
-        // 6. Restore
+        // Restore original style
         glassBox.style.backdropFilter = originalStyle.backdropFilter;
         glassBox.style.backgroundImage = originalStyle.backgroundImage;
         glassBox.style.backgroundColor = originalStyle.backgroundColor;
@@ -175,8 +367,12 @@
         showToast('Export failed');
       }
     };
-
-    // showToast function (same as before)
+    function showToast(text) {
+      document.getElementById('toast-text').textContent = text;
+      toast.classList.remove('translate-y-20','opacity-0');
+      toast.classList.add('translate-y-0','opacity-100');
+      setTimeout(() => toast.classList.add('translate-y-20','opacity-0'), 2200);
+    }
   </script>
 </body>
 </html>
