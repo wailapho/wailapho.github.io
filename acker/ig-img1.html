@@ -185,6 +185,7 @@
     // ───────────────────────────────────────────────
     const captureArea = document.getElementById('capture-area');
     const glassBox = document.getElementById('glass-box');
+    const textContainer = document.querySelector('.text-container');
     const toast = document.getElementById('toast');
     const bgMask = document.getElementById('mask-bg');
     const bgInner = document.getElementById('inner-bg');
@@ -214,6 +215,7 @@
     // ───────────────────────────────────────────────
     // Drag & Zoom
     // ───────────────────────────────────────────────
+    let bgState = { scale: 1, posX: 0, posY: 0 };
     function makeDraggableAndZoomable(mask, inner) {
       let scale = 1;
       let posX = 0;
@@ -222,6 +224,7 @@
       let startX, startY;
       const update = () => {
         inner.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        bgState = { scale, posX, posY };
       };
       update(); // Initial update
       mask.addEventListener('mousedown', e => {
@@ -273,14 +276,80 @@
     document.getElementById('download').onclick = async () => {
       try {
         showToast('Creating...');
-        const dataUrl = await htmlToImage.toJpeg(captureArea, {
+        const pixelRatio = 2;
+        const options = {
           quality: 0.92,
-          pixelRatio: 2,
-          canvasWidth: 1080,
-          canvasHeight: 1350,
+          pixelRatio: pixelRatio,
+          canvasWidth: 1080 * pixelRatio,
+          canvasHeight: 1350 * pixelRatio,
           backgroundColor: '#ffffff',
           cacheBust: true
-        });
+        };
+
+        // Capture background without text
+        textContainer.style.display = 'none';
+        const bgDataUrl = await htmlToImage.toPng(captureArea, options);
+        textContainer.style.display = '';
+
+        const bgImg = new Image();
+        bgImg.src = bgDataUrl;
+        await new Promise(resolve => bgImg.onload = resolve);
+
+        // Get glass box rect relative to capture area
+        const captureRect = captureArea.getBoundingClientRect();
+        const rect = glassBox.getBoundingClientRect();
+        const x = rect.left - captureRect.left;
+        const y = rect.top - captureRect.top;
+        const w = rect.width;
+        const h = rect.height;
+
+        // Create blur canvas
+        const blurCanvas = document.createElement('canvas');
+        blurCanvas.width = w * pixelRatio;
+        blurCanvas.height = h * pixelRatio;
+        const bctx = blurCanvas.getContext('2d');
+
+        // Blur the cropped background
+        bctx.filter = 'blur(20px)'; // 10px * pixelRatio
+        bctx.drawImage(bgImg, x * pixelRatio, y * pixelRatio, w * pixelRatio, h * pixelRatio, 0, 0, w * pixelRatio, h * pixelRatio);
+        bctx.filter = 'none';
+
+        // Add tint
+        bctx.fillStyle = 'rgba(0,0,0,0.2)';
+        bctx.fillRect(0, 0, w * pixelRatio, h * pixelRatio);
+
+        // Add grain
+        const noiseUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="2" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100" height="100" filter="url(%23noise)" opacity="0.05"/%3E%3C/svg%3E';
+        const noiseImg = new Image();
+        noiseImg.src = noiseUrl;
+        await new Promise(resolve => noiseImg.onload = resolve);
+        const pattern = bctx.createPattern(noiseImg, 'repeat');
+        bctx.fillStyle = pattern;
+        bctx.globalAlpha = 0.05;
+        bctx.fillRect(0, 0, w * pixelRatio, h * pixelRatio);
+        bctx.globalAlpha = 1;
+
+        // Temporarily set blurred background to glass box
+        const originalStyle = {
+          backdropFilter: glassBox.style.backdropFilter,
+          backgroundImage: glassBox.style.backgroundImage,
+          backgroundColor: glassBox.style.backgroundColor,
+          backgroundSize: glassBox.style.backgroundSize
+        };
+        glassBox.style.backdropFilter = 'none';
+        glassBox.style.backgroundImage = `url(${blurCanvas.toDataURL()})`;
+        glassBox.style.backgroundColor = 'transparent';
+        glassBox.style.backgroundSize = 'cover';
+
+        // Capture final image
+        const dataUrl = await htmlToImage.toJpeg(captureArea, options);
+
+        // Restore original style
+        glassBox.style.backdropFilter = originalStyle.backdropFilter;
+        glassBox.style.backgroundImage = originalStyle.backgroundImage;
+        glassBox.style.backgroundColor = originalStyle.backgroundColor;
+        glassBox.style.backgroundSize = originalStyle.backgroundSize;
+
         const a = document.createElement('a');
         a.href = dataUrl;
         a.download = `glass-photo-${Date.now()}.jpg`;
