@@ -19,29 +19,25 @@
             letter-spacing: -0.025em;
         }
 
-        /* Improved bottle - balanced size */
         .bottle-container {
             aspect-ratio: 3 / 5.2;
-            max-width: 380px;
+            max-width: 280px;
             margin: 0 auto;
             background: white;
             border-radius: 2rem;
-            box-shadow: 0 25px 50px -12px rgb(128 23 71 / 0.15);
+            box-shadow: 0 25px 50px -12px rgb(128 23 71 / 0.2);
             overflow: hidden;
             border: 1px solid #f3e8e8;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        .bottle-container:hover {
-            transform: scale(1.03);
-            box-shadow: 0 35px 60px -15px rgb(128 23 71 / 0.25);
+        @media (min-width: 768px) {
+            .bottle-container { max-width: 380px; }
         }
 
         .bottle-img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 20px;
+            padding: 25px;
         }
 
         .tab-active {
@@ -58,105 +54,116 @@
 </head>
 <body class="tail-container bg-white text-[#0a0001]">
 
-    <!-- EXACT ACKER HEADER (unchanged) -->
-    <header class="bg-[#212121] text-white sticky top-0 z-50">
-        <div class="max-w-[1300px] mx-auto">
-            <div class="hidden md:grid grid-cols-4 items-center px-6 py-5 border-b border-white/10">
-                <div class="flex items-center">
-                    <a href="https://hk.ackerwines.com">
-                        <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" 
-                             alt="Acker Wines" class="h-11 w-auto">
-                    </a>
-                </div>
-                <div class="text-center text-sm tracking-widest text-white/90">Top 10 of the World's Most Iconic Wine Shops</div>
-                <div class="relative">
-                    <form class="relative">
-                        <input type="text" class="w-full pl-5 pr-12 py-3 rounded-full text-sm bg-white text-black placeholder:text-gray-500" placeholder="SEARCH">
-                        <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#801747]">
-                            🔍
-                        </button>
-                    </form>
-                </div>
-                <div class="flex items-center justify-end gap-x-8 text-sm">
-                    <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">🌏 ASIA</div>
-                    <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">Eng</div>
-                    <a href="#" class="hover:text-[#801747]">Login</a>
-                    <a href="#" class="relative flex items-center gap-x-2 hover:text-[#801747]">
-                        🛒 <span class="text-xs absolute -top-1 -right-1 bg-[#801747] px-1.5 rounded-full">0</span>
-                    </a>
-                </div>
+    <!-- EXACT ACKER HEADER -->
+    <header class="bg-[#212121] text-white sticky top-0 z-50 border-b border-white/10">
+        <div class="max-w-[1300px] mx-auto px-6 py-5 hidden md:grid grid-cols-4 items-center">
+            <div class="flex items-center">
+                <a href="https://hk.ackerwines.com">
+                    <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" 
+                         alt="Acker Wines Logo. Since 1820" class="h-11 w-auto">
+                </a>
             </div>
-            <!-- Mobile header -->
-            <div class="md:hidden flex items-center justify-between px-6 py-4">
-                <a href="https://hk.ackerwines.com"><img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" class="h-9"></a>
-                <div class="flex items-center gap-x-6 text-2xl">
-                    <button>🔍</button>
-                    <button>♡</button>
-                    <a href="#" class="relative">🛒<span class="absolute -top-1 -right-1 bg-[#801747] text-white text-[10px] px-1 rounded-full">0</span></a>
-                    <button>☰</button>
+            <div class="text-center">
+                <div class="text-sm tracking-widest text-white/90">Top 10 of the World's Most Iconic Wine Shops</div>
+            </div>
+            <div class="relative">
+                <form class="relative">
+                    <input type="text" class="w-full pl-5 pr-12 py-3 rounded-full text-sm bg-white text-black placeholder:text-gray-500 focus:outline-none focus:border-[#801747]" placeholder="SEARCH">
+                    <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#801747]">🔍</button>
+                </form>
+            </div>
+            <div class="flex items-center justify-end gap-x-8 text-sm">
+                <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">
+                    <img src="https://hk.ackerwines.com/wp-content/uploads/2020/11/globe.svg" class="h-4 w-4">
+                    <span class="font-medium">ASIA</span>
                 </div>
+                <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">
+                    <img src="https://hk.ackerwines.com/wp-content/uploads/2020/11/globe.svg" class="h-4 w-4">
+                    <span class="font-medium">Eng</span>
+                </div>
+                <a href="#" class="hover:text-[#801747]">Login</a>
+                <a href="#" class="relative flex items-center gap-x-2 hover:text-[#801747]">
+                    🛒
+                    <span class="absolute -top-1 -right-1 bg-[#801747] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Mobile Header -->
+        <div class="md:hidden flex items-center justify-between px-5 py-4 border-b border-white/10">
+            <a href="https://hk.ackerwines.com">
+                <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" class="h-9">
+            </a>
+            <div class="flex items-center gap-x-6 text-2xl">
+                <button>🔍</button>
+                <button>♡</button>
+                <a href="#" class="relative">🛒 <span class="absolute -top-1 -right-1 bg-[#801747] text-white text-[10px] px-1 rounded-full">0</span></a>
+                <button>☰</button>
             </div>
         </div>
     </header>
 
-    <!-- HERO - Improved balance (smaller image + cleaner text) -->
-    <div class="max-w-7xl mx-auto px-6 pt-10 pb-16">
-        <div class="grid md:grid-cols-12 gap-12 items-start">
+    <!-- HERO - MOBILE NAME FIRST -->
+    <div class="max-w-7xl mx-auto px-5 pt-6 pb-8 md:pt-10 md:pb-16">
+        <div class="md:grid md:grid-cols-12 gap-12 items-start">
             
-            <!-- Bottle - smaller & centered on all sizes -->
-            <div class="md:col-span-5 flex justify-center md:justify-end">
-                <div class="w-full max-w-[340px]">
+            <!-- MOBILE: Name first -->
+            <div class="md:hidden mb-8">
+                <div class="uppercase tracking-[3px] text-xs font-medium text-[#801747]">SAUTERNES • BORDEAUX • FRANCE</div>
+                <h1 class="heading-font text-3xl md:text-4xl lg:text-5xl leading-none mt-3">
+                    1975 Château d’Yquem
+                </h1>
+                <p class="text-xl text-gray-600 mt-1">Sauternes 750ml</p>
+            </div>
+
+            <!-- Bottle -->
+            <div class="md:col-span-5 flex justify-center">
+                <div class="w-full max-w-[280px] md:max-w-[380px]">
                     <div onclick="openLightbox()" class="bottle-container cursor-zoom-in">
                         <img src="https://hk.ackerwines.com/wp-content/uploads/2020/01/1880301.png" 
                              alt="1975 Château d’Yquem" class="bottle-img">
                     </div>
-                    <div class="flex gap-4 mt-6 justify-center">
-                        <button onclick="changeImage(this)" class="w-16 h-16 bg-white rounded-2xl overflow-hidden border-2 border-[#801747] shadow">
-                            <img src="https://hk.ackerwines.com/wp-content/uploads/2020/01/1880301.png" class="w-full h-full object-cover">
-                        </button>
-                    </div>
                 </div>
             </div>
 
-            <!-- Product Info - better typography & hierarchy -->
-            <div class="md:col-span-7 space-y-7 pt-4">
-                <div>
+            <!-- Info -->
+            <div class="md:col-span-7 mt-8 md:mt-0 space-y-7">
+                <div class="hidden md:block">
                     <div class="uppercase tracking-[3px] text-xs font-medium text-[#801747]">SAUTERNES • BORDEAUX • FRANCE</div>
-                    <h1 class="heading-font text-4xl md:text-5xl lg:text-6xl leading-none mt-3">
+                    <h1 class="heading-font text-4xl lg:text-5xl leading-none mt-3">
                         1975 Château d’Yquem
                     </h1>
-                    <p class="text-xl md:text-2xl text-gray-600 mt-1">Sauternes 750ml</p>
+                    <p class="text-2xl text-gray-600 mt-1">Sauternes 750ml</p>
                 </div>
 
                 <div class="flex items-baseline gap-4">
                     <div class="text-5xl font-semibold tracking-tighter">HKD 12,800</div>
-                    <div class="flex items-center gap-2 text-emerald-600 text-sm font-medium">
-                        <span class="w-2 h-2 bg-emerald-600 rounded-full animate-pulse"></span>
-                        IN STOCK • Ships from Hong Kong
+                    <div class="text-emerald-600 flex items-center gap-2 text-sm">
+                        <span class="w-2.5 h-2.5 bg-emerald-600 rounded-full animate-pulse"></span>
+                        IN STOCK
                     </div>
                 </div>
 
                 <div class="flex flex-wrap gap-3">
-                    <div class="bg-white border border-gray-200 px-5 py-2.5 rounded-3xl text-sm">750 ml</div>
-                    <div class="bg-white border border-gray-200 px-5 py-2.5 rounded-3xl text-sm">13.5% ABV</div>
-                    <div class="bg-white border border-gray-200 px-5 py-2.5 rounded-3xl text-sm">80% Sémillon • 20% Sauvignon Blanc</div>
+                    <div class="bg-white border border-gray-200 px-5 py-3 rounded-3xl text-sm">750 ml</div>
+                    <div class="bg-white border border-gray-200 px-5 py-3 rounded-3xl text-sm">13.5% ABV</div>
+                    <div class="bg-white border border-gray-200 px-5 py-3 rounded-3xl text-sm">80% Sémillon • 20% Sauvignon Blanc</div>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex items-center border border-gray-300 rounded-3xl overflow-hidden">
-                        <button onclick="changeQty(-1)" class="w-12 h-12 text-2xl hover:bg-gray-100">-</button>
-                        <input id="qty" type="text" value="1" class="w-14 text-center text-xl font-medium bg-transparent">
-                        <button onclick="changeQty(1)" class="w-12 h-12 text-2xl hover:bg-gray-100">+</button>
+                        <button onclick="changeQty(-1)" class="w-11 h-11 text-3xl leading-none hover:bg-gray-100">-</button>
+                        <input id="qty" type="text" value="1" class="w-12 text-center text-xl font-medium bg-transparent">
+                        <button onclick="changeQty(1)" class="w-11 h-11 text-3xl leading-none hover:bg-gray-100">+</button>
                     </div>
-                    <button onclick="addToCart()" 
-                            class="acker-button flex-1 text-white font-semibold text-lg py-6 rounded-3xl">
+                    <button onclick="addToCart()" class="acker-button flex-1 text-white font-semibold text-lg py-4 rounded-3xl">
                         ADD TO CART — HKD 12,800
                     </button>
                 </div>
 
                 <div class="flex gap-8 text-sm">
-                    <button class="flex items-center gap-2 hover:text-[#801747]">♡ Save to Wishlist</button>
-                    <button class="flex items-center gap-2 hover:text-[#801747]">↗ Share</button>
+                    <button onclick="alert('Added to Wishlist!')" class="flex items-center gap-x-2 hover:text-[#801747]">♡ Save to Wishlist</button>
+                    <button onclick="alert('Shared!')" class="flex items-center gap-x-2 hover:text-[#801747]">↗ Share</button>
                 </div>
 
                 <div class="grid grid-cols-3 gap-4 text-xs">
@@ -169,44 +176,46 @@
     </div>
 
     <!-- TABS -->
-    <div class="max-w-7xl mx-auto px-6 border-b border-gray-200">
-        <div class="flex overflow-x-auto">
-            <button onclick="switchTab(0)" class="tab px-8 py-5 text-sm font-semibold tab-active" id="tab0">OVERVIEW</button>
-            <button onclick="switchTab(1)" class="tab px-8 py-5 text-sm font-semibold" id="tab1">TASTING NOTES</button>
-            <button onclick="switchTab(2)" class="tab px-8 py-5 text-sm font-semibold" id="tab2">DETAILS</button>
+    <div class="max-w-7xl mx-auto px-5 border-b border-gray-200 sticky top-[57px] z-40 bg-white md:top-0">
+        <div class="flex overflow-x-auto hide-scrollbar">
+            <button onclick="switchTab(0)" class="tab whitespace-nowrap px-8 py-5 text-sm font-semibold tab-active" id="tab0">OVERVIEW</button>
+            <button onclick="switchTab(1)" class="tab whitespace-nowrap px-8 py-5 text-sm font-semibold" id="tab1">TASTING NOTES</button>
+            <button onclick="switchTab(2)" class="tab whitespace-nowrap px-8 py-5 text-sm font-semibold" id="tab2">DETAILS</button>
         </div>
     </div>
 
-    <!-- TAB CONTENTS - Rich & Complete -->
-    <div class="max-w-7xl mx-auto px-6 py-16">
+    <!-- TAB CONTENTS - FULL INFORMATION RESTORED -->
+    <div class="max-w-7xl mx-auto px-5 py-10">
         
         <!-- OVERVIEW -->
         <div id="content0" class="tab-content">
-            <div class="max-w-3xl">
-                <p class="text-lg leading-relaxed">The legendary 1975 vintage of Château d’Yquem is widely regarded as one of the greatest Sauternes ever produced. A perfect marriage of noble rot and exceptional acidity, this wine displays extraordinary complexity, depth and ageing potential.</p>
-                <p class="mt-6 text-lg leading-relaxed">Robert Parker awarded it 99 points, calling it “one of the greatest Yquems of the 20th century”. Now at 50+ years old, it is entering its absolute prime drinking window.</p>
+            <div class="prose max-w-3xl mx-auto text-[17px] leading-relaxed">
+                <p>The legendary 1975 vintage of Château d’Yquem is widely regarded as one of the greatest Sauternes ever produced. A perfect marriage of noble rot and exceptional acidity, this wine displays extraordinary complexity, depth and ageing potential that few wines can match.</p>
+                <p class="mt-6">Robert Parker awarded it 99 points, calling it “one of the greatest Yquems of the 20th century”. Now at over 50 years old, it is entering its absolute prime drinking window and continues to evolve beautifully.</p>
             </div>
         </div>
 
         <!-- TASTING NOTES -->
         <div id="content1" class="tab-content hidden">
-            <div class="grid md:grid-cols-2 gap-12">
-                <div class="space-y-8">
-                    <div>
-                        <div class="uppercase text-[#801747] text-xs tracking-widest mb-2">Nose</div>
-                        <p class="text-lg">Intense dried apricot, saffron, orange marmalade, toasted hazelnut, subtle caramel and musk perfume.</p>
-                    </div>
-                    <div>
-                        <div class="uppercase text-[#801747] text-xs tracking-widest mb-2">Palate</div>
-                        <p class="text-lg">Unctuous yet perfectly balanced with vibrant acidity. Layers of quince, ginger, crème brûlée and botrytis complexity.</p>
-                    </div>
-                </div>
-                <div class="bg-[#f8f8f8] p-10 rounded-3xl">
-                    <div class="flex items-baseline gap-4">
-                        <span class="text-7xl font-light text-[#801747]">99</span>
+            <div class="max-w-3xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-12">
+                    <div class="space-y-8">
                         <div>
-                            <div class="text-sm uppercase tracking-widest">Robert Parker</div>
-                            <div class="text-sm">"One of the greatest Yquems of the 20th century"</div>
+                            <div class="uppercase text-[#801747] text-xs tracking-widest mb-2">Nose</div>
+                            <p class="text-[17px]">Intense dried apricot, saffron, orange marmalade, toasted hazelnut, subtle caramel and musk perfume.</p>
+                        </div>
+                        <div>
+                            <div class="uppercase text-[#801747] text-xs tracking-widest mb-2">Palate</div>
+                            <p class="text-[17px]">Unctuous yet perfectly balanced with vibrant acidity. Layers of quince, ginger, crème brûlée and beautiful botrytis complexity that lingers for minutes.</p>
+                        </div>
+                    </div>
+                    <div class="bg-[#f8f8f8] p-10 rounded-3xl">
+                        <div class="flex items-baseline gap-4">
+                            <span class="text-7xl font-light text-[#801747]">99</span>
+                            <div>
+                                <div class="text-sm uppercase tracking-widest">Robert Parker</div>
+                                <div class="text-sm">"One of the greatest Yquems of the 20th century"</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -215,28 +224,28 @@
 
         <!-- DETAILS -->
         <div id="content2" class="tab-content hidden">
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white border border-gray-100 p-8 rounded-3xl">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                <div class="bg-white border border-gray-100 p-6 rounded-3xl">
                     <div class="text-xs text-gray-500">VINTAGE</div>
                     <div class="text-2xl font-semibold mt-1">1975</div>
                 </div>
-                <div class="bg-white border border-gray-100 p-8 rounded-3xl">
+                <div class="bg-white border border-gray-100 p-6 rounded-3xl">
                     <div class="text-xs text-gray-500">PRODUCER</div>
                     <div class="text-2xl font-semibold mt-1">Château d’Yquem</div>
                 </div>
-                <div class="bg-white border border-gray-100 p-8 rounded-3xl">
-                    <div class="text-xs text-gray-500">APPELLATION</div>
+                <div class="bg-white border border-gray-100 p-6 rounded-3xl">
+                    <div class="text-xs text-gray-500">REGION</div>
                     <div class="text-2xl font-semibold mt-1">Sauternes, Bordeaux</div>
                 </div>
-                <div class="bg-white border border-gray-100 p-8 rounded-3xl">
+                <div class="bg-white border border-gray-100 p-6 rounded-3xl">
                     <div class="text-xs text-gray-500">GRAPE VARIETIES</div>
                     <div class="text-2xl font-semibold mt-1">80% Sémillon • 20% Sauvignon Blanc</div>
                 </div>
-                <div class="bg-white border border-gray-100 p-8 rounded-3xl">
+                <div class="bg-white border border-gray-100 p-6 rounded-3xl">
                     <div class="text-xs text-gray-500">ALCOHOL</div>
                     <div class="text-2xl font-semibold mt-1">13.5%</div>
                 </div>
-                <div class="bg-white border border-gray-100 p-8 rounded-3xl">
+                <div class="bg-white border border-gray-100 p-6 rounded-3xl">
                     <div class="text-xs text-gray-500">BOTTLE SIZE</div>
                     <div class="text-2xl font-semibold mt-1">750ml</div>
                 </div>
@@ -245,22 +254,21 @@
     </div>
 
     <!-- MOBILE STICKY CART -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden z-50 p-4">
-        <button onclick="addToCart()" class="acker-button w-full text-white py-6 rounded-3xl font-semibold text-lg">
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t z-50 px-5 py-4 md:hidden">
+        <button onclick="addToCart()" class="acker-button w-full text-white font-semibold text-lg py-4 rounded-3xl">
             ADD TO CART — HKD 12,800
         </button>
     </div>
 
     <!-- LIGHTBOX -->
-    <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-[999] flex items-center justify-center p-6">
+    <div id="lightbox" class="hidden fixed inset-0 bg-black/95 z-[999] flex items-center justify-center p-6">
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-5xl">×</button>
         <img id="lightbox-img" src="https://hk.ackerwines.com/wp-content/uploads/2020/01/1880301.png" class="max-h-[90vh] max-w-full object-contain">
     </div>
 
-    <!-- FOOTER (same as before) -->
+    <!-- FULL FOOTER -->
     <footer class="bg-[#212121] text-[#f2f2f2] pt-16 pb-8">
         <div class="max-w-7xl mx-auto px-6">
-            <!-- ... (same footer as previous version) ... -->
             <div class="grid md:grid-cols-12 gap-y-12">
                 <div class="md:col-span-3">
                     <div class="text-white font-semibold text-lg mb-6">COMPANY</div>
@@ -295,14 +303,16 @@
                     </div>
                 </div>
             </div>
+
             <div class="mt-16 pt-8 border-t border-white/20 text-xs leading-relaxed">
                 根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。<br>
                 Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.
             </div>
+
             <div class="mt-12 flex flex-col md:flex-row justify-between text-xs">
                 <div class="flex items-center gap-4">
                     <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" class="h-6 opacity-75">
-                    <span>© 1820–2026 Acker Wines (Hong Kong) Ltd.</span>
+                    <span>© 1820–2026 Acker Wines (Hong Kong) Ltd. All rights reserved.</span>
                 </div>
                 <div class="mt-4 md:mt-0">Top 10 of the World's Most Iconic Wine Shops</div>
             </div>
@@ -328,11 +338,6 @@
             btn.textContent = '✓ ADDED!';
             btn.style.backgroundColor = '#166534';
             setTimeout(() => { btn.textContent = orig; btn.style.backgroundColor = ''; }, 1800);
-        }
-
-        function changeImage(el) {
-            document.querySelectorAll('.flex.gap-4 button').forEach(b => b.classList.remove('border-[#801747]'));
-            el.classList.add('border-[#801747]');
         }
 
         function openLightbox() {
