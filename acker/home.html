@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acker Wines | Fine Wine Since 1820</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root { --acker-red: #801747; }
+        
+        .tail-container { font-family: 'Inter', system-ui, sans-serif; }
+
+        .hero-bg {
+            background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), 
+                              url('https://www.ackerwines.com/wp-content/uploads/2022/12/LaPaulee-AmexPromotionalBanner.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .wine-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .wine-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+
+        .best-sellers-carousel {
+            scrollbar-width: none;
+        }
+        .best-sellers-carousel::-webkit-scrollbar { display: none; }
+
+        .add-cart-btn {
+            background-color: #801747;
+            color: white;
+        }
+        .add-cart-btn:hover {
+            background-color: #5c0f32;
+        }
+
+        /* Improved mobile hero */
+        @media (max-width: 767px) {
+            .hero-bg {
+                min-height: 85vh;
+            }
+            .hero-text {
+                font-size: 2.25rem;
+                line-height: 1.1;
+            }
+        }
+
+        /* Better mobile delivery calculator */
+        .calculator-mobile {
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body class="tail-container bg-white text-[#0a0001]">
+
+    <!-- ==================== EXACT HEADER ==================== -->
+    <header class="bg-[#212121] text-white sticky top-0 z-50 shadow">
+        <div class="max-w-[1300px] mx-auto">
+            <!-- Desktop -->
+            <div class="hidden md:flex items-center px-6 py-5 border-b border-white/10 gap-x-8">
+                <div class="flex items-center gap-x-6">
+                    <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" class="h-11">
+                    <div class="text-sm tracking-widest text-white/90 whitespace-nowrap">Top 10 of the World's Most Iconic Wine Shops</div>
+                </div>
+                <div class="flex-1 max-w-md">
+                    <input type="text" class="w-full bg-white text-black pl-5 pr-12 py-3 rounded-full text-sm placeholder:text-gray-500 focus:outline-none" placeholder="Search wines, vintages...">
+                </div>
+                <div class="flex items-center gap-x-8 text-sm">
+                    <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">
+                        <img src="https://hk.ackerwines.com/wp-content/uploads/2020/11/globe.svg" class="h-5 w-5">
+                        <span class="font-medium">ASIA</span>
+                    </div>
+                    <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">
+                        <img src="https://hk.ackerwines.com/content/images/flags/32/en.png" class="h-5 w-5">
+                        <span class="font-medium">ENG</span>
+                    </div>
+                    <a href="#" class="hover:text-[#801747]">LOGIN</a>
+                    <a href="#" class="relative flex items-center gap-x-1 hover:text-[#801747]">
+                        🛒 <span class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Top Bar -->
+            <div class="md:hidden flex items-center justify-between px-5 py-4 border-b border-white/10">
+                <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" class="h-9">
+                <div class="flex items-center gap-x-6 text-2xl">
+                    <button>🔍</button>
+                    <a href="#" class="relative">🛒 <span class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1 rounded-full">0</span></a>
+                    <button>☰</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Navigation - Hidden on Mobile -->
+        <nav class="hidden md:block bg-white text-[#212121] border-b">
+            <div class="max-w-[1300px] mx-auto">
+                <ul class="flex items-center justify-center gap-x-10 text-sm font-medium py-5">
+                    <li><a href="#" class="nav-link hover:text-[#801747]">AUCTIONS</a></li>
+                    <li><a href="#" class="nav-link hover:text-[#801747]">SHOP WINE</a></li>
+                    <li><a href="#" class="nav-link hover:text-[#801747]">SELL WINE</a></li>
+                    <li><a href="#" class="nav-link hover:text-[#801747]">CALENDAR</a></li>
+                    <li><a href="#" class="nav-link hover:text-[#801747]">CORPORATE SERVICES</a></li>
+                    <li><a href="#" class="nav-link hover:text-[#801747]">EXPLORE</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- HERO - Better Mobile UX -->
+    <div class="hero-bg h-screen flex items-center text-white">
+        <div class="max-w-4xl mx-auto px-5 text-center">
+            <h1 class="hero-text text-4xl md:text-6xl font-semibold leading-none tracking-tight mb-4">
+                Impeccable Provenance.<br>Delivered Globally.
+            </h1>
+            <p class="text-lg md:text-2xl max-w-2xl mx-auto text-white/90 leading-relaxed">
+                Two centuries of trust. The world’s finest wines, sourced with care and delivered with excellence across Asia.
+            </p>
+            <div class="mt-10">
+                <a href="#shop-section" 
+                   class="inline-block bg-white text-[#801747] font-semibold px-12 py-5 rounded-3xl text-base md:text-lg hover:bg-[#BEAD85] transition-all duration-300">
+                    SHOP THE COLLECTION
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- BEST SELLERS - Carousel on Mobile -->
+    <div id="shop-section" class="max-w-7xl mx-auto px-5 pt-20 pb-12">
+        <div class="flex justify-between items-end mb-8">
+            <h2 class="text-3xl font-semibold">Best Sellers</h2>
+            <a href="#" onclick="alert('Showing all best sellers...')" class="text-[#801747] font-medium hover:underline">View More →</a>
+        </div>
+        
+        <div class="best-sellers-carousel flex md:grid md:grid-cols-3 lg:grid-cols-5 gap-6 overflow-x-auto pb-8 snap-x snap-mandatory md:overflow-visible">
+            <!-- Cards (same as before) -->
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+                <img src="https://hk.ackerwines.com/wp-content/uploads/2020/01/1880301.png" class="w-full h-64 object-contain bg-white p-6">
+                <div class="p-5 flex-1 flex flex-col">
+                    <div class="font-medium">1975 Château d’Yquem</div>
+                    <div class="text-xs text-gray-500 mt-1">Sauternes • 750ml</div>
+                    <div class="mt-auto pt-4">
+                        <div class="font-semibold text-xl">HK$12,800</div>
+                        <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+                <img src="https://hk.ackerwines.com/wp-content/uploads/2022/06/176145-HK-Scrubbed.jpg" class="w-full h-64 object-contain bg-white p-6">
+                <div class="p-5 flex-1 flex flex-col">
+                    <div class="font-medium">Château Margaux 2015</div>
+                    <div class="text-xs text-gray-500 mt-1">Margaux • 750ml</div>
+                    <div class="mt-auto pt-4">
+                        <div class="font-semibold text-xl">HK$4,280</div>
+                        <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+                <img src="https://hk.ackerwines.com/wp-content/uploads/2022/04/140067-Scrubbed-341x1024.jpg" class="w-full h-64 object-contain bg-white p-6">
+                <div class="p-5 flex-1 flex flex-col">
+                    <div class="font-medium">Château Lafite Rothschild 2010</div>
+                    <div class="text-xs text-gray-500 mt-1">Pauillac • 750ml</div>
+                    <div class="mt-auto pt-4">
+                        <div class="font-semibold text-xl">HK$6,850</div>
+                        <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+                <img src="https://hk.ackerwines.com/wp-content/uploads/2023/07/Raveneau-Chablis-Vaillons-341x1024.jpg" class="w-full h-64 object-contain bg-white p-6">
+                <div class="p-5 flex-1 flex flex-col">
+                    <div class="font-medium">Raveneau Chablis Vaillons 2020</div>
+                    <div class="text-xs text-gray-500 mt-1">Chablis • 750ml</div>
+                    <div class="mt-auto pt-4">
+                        <div class="font-semibold text-xl">HK$1,980</div>
+                        <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+                <img src="https://hk.ackerwines.com/wp-content/uploads/2020/01/1880301.png" class="w-full h-64 object-contain bg-white p-6">
+                <div class="p-5 flex-1 flex flex-col">
+                    <div class="font-medium">1975 Château d’Yquem</div>
+                    <div class="text-xs text-gray-500 mt-1">Sauternes • 750ml</div>
+                    <div class="mt-auto pt-4">
+                        <div class="font-semibold text-xl">HK$12,800</div>
+                        <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELIVERY CALCULATOR - Redesigned for Mobile -->
+    <div class="bg-[#f9f5f0] py-16">
+        <div class="max-w-4xl mx-auto px-5">
+            <h2 class="text-3xl font-semibold text-center mb-3">Delivery Charges</h2>
+            <p class="text-center text-gray-600 mb-10">London to Hong Kong • Temperature-controlled air freight</p>
+            
+            <!-- Mobile-friendly calculator -->
+            <div class="bg-white rounded-3xl p-8 shadow">
+                <div class="mb-8">
+                    <label class="block text-sm text-gray-500 mb-3">Number of 750ml bottles</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" id="bottleSlider" min="1" max="120" value="12" 
+                               class="flex-1 accent-[#801747]" oninput="calculateDelivery()">
+                        <div id="bottleCount" class="text-4xl font-semibold text-[#801747] w-12 text-right">12</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-xs text-gray-500">TOTAL</div>
+                        <div id="totalCost" class="text-3xl font-semibold mt-1">HKD 1,196</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500">PER BOTTLE</div>
+                        <div id="perBottle" class="text-3xl font-semibold mt-1">HKD 99.67</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500">TIER</div>
+                        <div id="tier" class="text-3xl font-semibold mt-1 text-emerald-600">1–12</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Static list -->
+            <div class="mt-10 bg-white rounded-3xl p-8 text-sm">
+                <ul class="space-y-4">
+                    <li class="flex justify-between border-b pb-3">
+                        <span>12 bottles</span>
+                        <span class="font-medium">HKD 1,196</span>
+                    </li>
+                    <li class="flex justify-between border-b pb-3">
+                        <span>24–48 bottles</span>
+                        <span class="font-medium">HKD 988 per 12 bottles</span>
+                    </li>
+                    <li class="flex justify-between">
+                        <span>60 bottles+</span>
+                        <span class="font-medium">HKD 884 per 12 bottles</span>
+                    </li>
+                </ul>
+                <div class="mt-8 text-xs text-gray-600">
+                    Minimum charge HKD 1,196 (regardless of quantity)<br>
+                    One bottle = 750ml
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HONG KONG & LONDON STOCK - Better spacing -->
+    <div class="max-w-7xl mx-auto px-5 py-20">
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="stock-box bg-white rounded-3xl p-10 border border-gray-100 flex flex-col">
+                <h3 class="text-2xl font-semibold mb-3">HONG KONG STOCK</h3>
+                <p class="text-gray-600 flex-1">Ready to ship from our Kennedy Town warehouse</p>
+                <div class="button-area mt-10">
+                    <a href="#" class="block w-full text-center bg-[#801747] text-white font-semibold py-4 rounded-2xl hover:bg-black transition">Shop Now</a>
+                </div>
+                <div class="flex gap-4 mt-6">
+                    <a href="#" class="flex-1 text-center border border-gray-300 py-3 rounded-2xl text-sm font-medium">Download Excel</a>
+                    <a href="#" class="flex-1 text-center border border-gray-300 py-3 rounded-2xl text-sm font-medium">Download PDF</a>
+                </div>
+            </div>
+
+            <div class="stock-box bg-white rounded-3xl p-10 border border-gray-100 flex flex-col">
+                <h3 class="text-2xl font-semibold mb-3">LONDON STOCK</h3>
+                <p class="text-gray-600 flex-1">UK Bonded – Perfect provenance</p>
+                <div class="button-area mt-10">
+                    <a href="#" class="block w-full text-center bg-[#801747] text-white font-semibold py-4 rounded-2xl hover:bg-black transition">Shop Now</a>
+                </div>
+                <div class="flex gap-4 mt-6">
+                    <a href="#" class="flex-1 text-center border border-gray-300 py-3 rounded-2xl text-sm font-medium">Download Excel</a>
+                    <a href="#" class="flex-1 text-center border border-gray-300 py-3 rounded-2xl text-sm font-medium">Download PDF</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#212121] text-[#f2f2f2] pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-12 gap-y-12">
+                <div class="md:col-span-3">
+                    <div class="text-white font-semibold text-lg mb-6">COMPANY</div>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-[#f0cb70]">Our Story</a></li>
+                        <li><a href="#" class="hover:text-[#f0cb70]">Meet The Team</a></li>
+                        <li><a href="#" class="hover:text-[#f0cb70]">Press</a></li>
+                        <li><a href="#" class="hover:text-[#f0cb70]">Careers</a></li>
+                        <li><a href="#" class="hover:text-[#f0cb70]">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-[#f0cb70]">Terms &amp; Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="md:col-span-3">
+                    <div class="text-white font-semibold text-lg mb-6">HELP</div>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-[#f0cb70]">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-[#f0cb70]">FAQs</a></li>
+                        <li><a href="#" class="hover:text-[#f0cb70]">About Auctions</a></li>
+                        <li><a href="#" class="hover:text-[#f0cb70]">Auction Archives</a></li>
+                    </ul>
+                </div>
+                <div class="md:col-span-3">
+                    <div class="text-white font-semibold text-lg mb-6">Join Our Mailing List</div>
+                    <p class="text-sm leading-relaxed mb-6">Receive regional updates for auctions and events.</p>
+                    <a href="#" class="inline-block bg-[#801747] text-white font-medium px-8 py-4 rounded-3xl">Join Now</a>
+                </div>
+                <div class="md:col-span-3">
+                    <div class="text-white font-semibold text-lg mb-6">DOWNLOAD THE ACKER APP</div>
+                    <div class="flex gap-4">
+                        <a href="#"><img src="https://hk.ackerwines.com/wp-content/uploads/2021/05/GooglePlay.jpg" class="h-10"></a>
+                        <a href="#"><img src="https://hk.ackerwines.com/wp-content/uploads/2021/05/Apple.jpg" class="h-10"></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 pt-8 border-t border-white/20 text-xs leading-relaxed">
+                根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。<br>
+                Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.
+            </div>
+
+            <div class="mt-12 flex flex-col md:flex-row justify-between text-xs">
+                <div class="flex items-center gap-4">
+                    <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" class="h-6 opacity-75">
+                    <span>© 1820–2026 Acker Wines (Hong Kong) Ltd. All rights reserved.</span>
+                </div>
+                <div class="mt-4 md:mt-0">Top 10 of the World's Most Iconic Wine Shops</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function calculateDelivery() {
+            let bottles = parseInt(document.getElementById('bottleSlider').value);
+            document.getElementById('bottleCount').textContent = bottles;
+
+            let cost = 1196;
+            let tier = "1–12";
+
+            if (bottles > 12) {
+                let groups = Math.ceil(bottles / 12);
+                if (bottles <= 48) {
+                    cost = groups * 988;
+                    tier = "13–48";
+                } else {
+                    cost = groups * 884;
+                    tier = "60+";
+                }
+            }
+
+            document.getElementById('totalCost').textContent = `HKD ${cost.toLocaleString()}`;
+            document.getElementById('perBottle').textContent = `HKD ${(cost / bottles).toFixed(2)}`;
+            document.getElementById('tier').textContent = tier;
+        }
+
+        function addToCart(btn) {
+            const original = btn.textContent;
+            btn.textContent = "✓ ADDED";
+            btn.style.backgroundColor = "#166534";
+            setTimeout(() => {
+                btn.textContent = original;
+                btn.style.backgroundColor = "#801747";
+            }, 2000);
+        }
+
+        window.onload = () => {
+            calculateDelivery();
+            document.getElementById('bottleSlider').addEventListener('input', calculateDelivery);
+        };
+    </script>
+</body>
+</html>
