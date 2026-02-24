@@ -8,18 +8,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
+       
         :root { --acker-red: #801747; }
-        
+       
         .tail-container { font-family: 'Inter', system-ui, sans-serif; }
-
         .hero-bg {
-            background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), 
+            background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
                               url('https://www.ackerwines.com/wp-content/uploads/2022/12/LaPaulee-AmexPromotionalBanner.jpg');
             background-size: cover;
             background-position: center;
         }
-
         .wine-card {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -27,12 +25,10 @@
             transform: translateY(-12px);
             box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
         }
-
         .best-sellers-carousel {
             scrollbar-width: none;
         }
         .best-sellers-carousel::-webkit-scrollbar { display: none; }
-
         .add-cart-btn {
             background-color: #801747;
             color: white;
@@ -40,8 +36,6 @@
         .add-cart-btn:hover {
             background-color: #5c0f32;
         }
-
-        /* Improved mobile hero */
         @media (max-width: 767px) {
             .hero-bg {
                 min-height: 85vh;
@@ -51,16 +45,16 @@
                 line-height: 1.1;
             }
         }
-
-        /* Better mobile delivery calculator */
-        .calculator-mobile {
-            font-size: 15px;
+        .stock-tab {
+            transition: all 0.2s ease;
+        }
+        .route-btn {
+            transition: all 0.2s ease;
         }
     </style>
 </head>
 <body class="tail-container bg-white text-[#0a0001]">
-
-    <!-- ==================== EXACT HEADER ==================== -->
+    <!-- ==================== HEADER ==================== -->
     <header class="bg-[#212121] text-white sticky top-0 z-50 shadow">
         <div class="max-w-[1300px] mx-auto">
             <!-- Desktop -->
@@ -73,10 +67,23 @@
                     <input type="text" class="w-full bg-white text-black pl-5 pr-12 py-3 rounded-full text-sm placeholder:text-gray-500 focus:outline-none" placeholder="Search wines, vintages...">
                 </div>
                 <div class="flex items-center gap-x-8 text-sm">
-                    <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">
-                        <img src="https://hk.ackerwines.com/wp-content/uploads/2020/11/globe.svg" class="h-5 w-5">
-                        <span class="font-medium">ASIA</span>
+                    <!-- Mode Switch: Auction / Merchant -->
+                    <div class="flex bg-[#2a2a2a] rounded-3xl p-1 text-xs font-medium">
+                        <button id="merchant-btn" onclick="switchMode('merchant')" 
+                                class="px-6 py-2 rounded-3xl transition-colors bg-[#801747] text-white">MERCHANT</button>
+                        <button id="auction-btn" onclick="switchMode('auction')" 
+                                class="px-6 py-2 rounded-3xl transition-colors text-white/70">AUCTION</button>
                     </div>
+                    
+                    <!-- Currency Dropdown -->
+                    <select id="currency-select" onchange="setCurrency(this.value)"
+                            class="bg-[#2a2a2a] text-white text-sm font-medium rounded-3xl px-6 py-2 border-0 focus:outline-none focus:ring-2 focus:ring-[#801747]">
+                        <option value="HKD">HKD</option>
+                        <option value="GBP">GBP</option>
+                        <option value="USD">USD</option>
+                        <option value="SGD">SGD</option>
+                    </select>
+
                     <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">
                         <img src="https://hk.ackerwines.com/content/images/flags/32/en.png" class="h-5 w-5">
                         <span class="font-medium">ENG</span>
@@ -87,7 +94,6 @@
                     </a>
                 </div>
             </div>
-
             <!-- Mobile Top Bar -->
             <div class="md:hidden flex items-center justify-between px-5 py-4 border-b border-white/10">
                 <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" class="h-9">
@@ -98,8 +104,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- Main Navigation - Hidden on Mobile -->
+        <!-- Main Navigation -->
         <nav class="hidden md:block bg-white text-[#212121] border-b">
             <div class="max-w-[1300px] mx-auto">
                 <ul class="flex items-center justify-center gap-x-10 text-sm font-medium py-5">
@@ -113,7 +118,7 @@
         </nav>
     </header>
 
-    <!-- HERO - Better Mobile UX -->
+    <!-- HERO -->
     <div class="hero-bg h-screen flex items-center text-white">
         <div class="max-w-4xl mx-auto px-5 text-center">
             <h1 class="hero-text text-4xl md:text-6xl font-semibold leading-none tracking-tight mb-4">
@@ -123,7 +128,7 @@
                 Two centuries of trust. The world’s finest wines, sourced with care and delivered with excellence across Asia.
             </p>
             <div class="mt-10">
-                <a href="#shop-section" 
+                <a href="#shop-section"
                    class="inline-block bg-white text-[#801747] font-semibold px-12 py-5 rounded-3xl text-base md:text-lg hover:bg-[#BEAD85] transition-all duration-300">
                     SHOP THE COLLECTION
                 </a>
@@ -131,66 +136,106 @@
         </div>
     </div>
 
-    <!-- BEST SELLERS - Carousel on Mobile -->
+    <!-- BEST SELLERS -->
     <div id="shop-section" class="max-w-7xl mx-auto px-5 pt-20 pb-12">
-        <div class="flex justify-between items-end mb-8">
+        <div class="flex justify-between items-end mb-6">
             <h2 class="text-3xl font-semibold">Best Sellers</h2>
             <a href="#" onclick="alert('Showing all best sellers...')" class="text-[#801747] font-medium hover:underline">View More →</a>
         </div>
-        
+
+        <!-- Stock Selection Tabs (no emojis) -->
+        <div class="flex border-b mb-8 overflow-x-auto hide-scrollbar">
+            <button onclick="switchStock('HK')" data-stock-key="HK" 
+                    class="stock-tab px-8 py-4 border-b-2 border-[#801747] text-[#801747] font-medium whitespace-nowrap">Hong Kong</button>
+            <button onclick="switchStock('London')" data-stock-key="London" 
+                    class="stock-tab px-8 py-4 border-b-2 border-transparent hover:border-gray-300 text-gray-500 hover:text-[#801747] font-medium whitespace-nowrap">London</button>
+            <button onclick="switchStock('US')" data-stock-key="US" 
+                    class="stock-tab px-8 py-4 border-b-2 border-transparent hover:border-gray-300 text-gray-500 hover:text-[#801747] font-medium whitespace-nowrap">United States</button>
+            <button onclick="switchStock('Singapore')" data-stock-key="Singapore" 
+                    class="stock-tab px-8 py-4 border-b-2 border-transparent hover:border-gray-300 text-gray-500 hover:text-[#801747] font-medium whitespace-nowrap">Singapore</button>
+        </div>
+       
         <div class="best-sellers-carousel flex md:grid md:grid-cols-3 lg:grid-cols-5 gap-6 overflow-x-auto pb-8 snap-x snap-mandatory md:overflow-visible">
-            <!-- Cards (same as before) -->
-            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+            <!-- Card 1 -->
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto" data-hkd-price="12800">
                 <img src="https://hk.ackerwines.com/wp-content/uploads/2020/01/1880301.png" class="w-full h-64 object-contain bg-white p-6">
                 <div class="p-5 flex-1 flex flex-col">
                     <div class="font-medium">1975 Château d’Yquem</div>
                     <div class="text-xs text-gray-500 mt-1">Sauternes • 750ml</div>
+                    <div class="stock-info mt-3 text-xs">
+                        <div class="stock-name font-medium text-gray-600">Hong Kong Stock</div>
+                    </div>
                     <div class="mt-auto pt-4">
-                        <div class="font-semibold text-xl">HK$12,800</div>
+                        <div class="price font-semibold text-xl">HK$12,800</div>
+                        <div class="local-price text-xs text-gray-500 font-medium hidden"></div>
                         <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
                     </div>
                 </div>
             </div>
-            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+
+            <!-- Card 2 -->
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto" data-hkd-price="4280">
                 <img src="https://hk.ackerwines.com/wp-content/uploads/2022/06/176145-HK-Scrubbed.jpg" class="w-full h-64 object-contain bg-white p-6">
                 <div class="p-5 flex-1 flex flex-col">
                     <div class="font-medium">Château Margaux 2015</div>
                     <div class="text-xs text-gray-500 mt-1">Margaux • 750ml</div>
+                    <div class="stock-info mt-3 text-xs">
+                        <div class="stock-name font-medium text-gray-600">Hong Kong Stock</div>
+                    </div>
                     <div class="mt-auto pt-4">
-                        <div class="font-semibold text-xl">HK$4,280</div>
+                        <div class="price font-semibold text-xl">HK$4,280</div>
+                        <div class="local-price text-xs text-gray-500 font-medium hidden"></div>
                         <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
                     </div>
                 </div>
             </div>
-            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+
+            <!-- Card 3 -->
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto" data-hkd-price="6850">
                 <img src="https://hk.ackerwines.com/wp-content/uploads/2022/04/140067-Scrubbed-341x1024.jpg" class="w-full h-64 object-contain bg-white p-6">
                 <div class="p-5 flex-1 flex flex-col">
                     <div class="font-medium">Château Lafite Rothschild 2010</div>
                     <div class="text-xs text-gray-500 mt-1">Pauillac • 750ml</div>
+                    <div class="stock-info mt-3 text-xs">
+                        <div class="stock-name font-medium text-gray-600">Hong Kong Stock</div>
+                    </div>
                     <div class="mt-auto pt-4">
-                        <div class="font-semibold text-xl">HK$6,850</div>
+                        <div class="price font-semibold text-xl">HK$6,850</div>
+                        <div class="local-price text-xs text-gray-500 font-medium hidden"></div>
                         <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
                     </div>
                 </div>
             </div>
-            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+
+            <!-- Card 4 -->
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto" data-hkd-price="1980">
                 <img src="https://hk.ackerwines.com/wp-content/uploads/2023/07/Raveneau-Chablis-Vaillons-341x1024.jpg" class="w-full h-64 object-contain bg-white p-6">
                 <div class="p-5 flex-1 flex flex-col">
                     <div class="font-medium">Raveneau Chablis Vaillons 2020</div>
                     <div class="text-xs text-gray-500 mt-1">Chablis • 750ml</div>
+                    <div class="stock-info mt-3 text-xs">
+                        <div class="stock-name font-medium text-gray-600">Hong Kong Stock</div>
+                    </div>
                     <div class="mt-auto pt-4">
-                        <div class="font-semibold text-xl">HK$1,980</div>
+                        <div class="price font-semibold text-xl">HK$1,980</div>
+                        <div class="local-price text-xs text-gray-500 font-medium hidden"></div>
                         <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
                     </div>
                 </div>
             </div>
-            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto">
+
+            <!-- Card 5 -->
+            <div class="wine-card flex-shrink-0 snap-center flex flex-col rounded-3xl overflow-hidden border border-gray-100 w-[85%] md:w-auto" data-hkd-price="12800">
                 <img src="https://hk.ackerwines.com/wp-content/uploads/2020/01/1880301.png" class="w-full h-64 object-contain bg-white p-6">
                 <div class="p-5 flex-1 flex flex-col">
                     <div class="font-medium">1975 Château d’Yquem</div>
                     <div class="text-xs text-gray-500 mt-1">Sauternes • 750ml</div>
+                    <div class="stock-info mt-3 text-xs">
+                        <div class="stock-name font-medium text-gray-600">Hong Kong Stock</div>
+                    </div>
                     <div class="mt-auto pt-4">
-                        <div class="font-semibold text-xl">HK$12,800</div>
+                        <div class="price font-semibold text-xl">HK$12,800</div>
+                        <div class="local-price text-xs text-gray-500 font-medium hidden"></div>
                         <button onclick="addToCart(this)" class="add-cart-btn mt-4 w-full py-3 rounded-2xl text-sm font-medium">Add to Cart</button>
                     </div>
                 </div>
@@ -198,23 +243,30 @@
         </div>
     </div>
 
-    <!-- DELIVERY CALCULATOR - Redesigned for Mobile -->
+    <!-- DELIVERY CALCULATOR -->
     <div class="bg-[#f9f5f0] py-16">
         <div class="max-w-4xl mx-auto px-5">
             <h2 class="text-3xl font-semibold text-center mb-3">Delivery Charges</h2>
-            <p class="text-center text-gray-600 mb-10">London to Hong Kong • Temperature-controlled air freight</p>
             
-            <!-- Mobile-friendly calculator -->
+            <!-- Route Selector (no emojis) -->
+            <div class="flex justify-center gap-4 mb-10 flex-wrap">
+                <button data-route="LDN-HKG" onclick="setRoute('LDN-HKG')" 
+                        class="route-btn px-8 py-3.5 bg-white border-2 border-[#801747] rounded-3xl text-sm font-medium shadow-sm">London → Hong Kong</button>
+                <button data-route="US-HKG" onclick="setRoute('US-HKG')" 
+                        class="route-btn px-8 py-3.5 bg-white border border-gray-200 hover:border-gray-300 rounded-3xl text-sm font-medium">US → Hong Kong</button>
+                <button data-route="HKG-SG" onclick="setRoute('HKG-SG')" 
+                        class="route-btn px-8 py-3.5 bg-white border border-gray-200 hover:border-gray-300 rounded-3xl text-sm font-medium">Hong Kong → Singapore</button>
+            </div>
+
             <div class="bg-white rounded-3xl p-8 shadow">
                 <div class="mb-8">
                     <label class="block text-sm text-gray-500 mb-3">Number of 750ml bottles</label>
                     <div class="flex items-center gap-4">
-                        <input type="range" id="bottleSlider" min="1" max="120" value="12" 
+                        <input type="range" id="bottleSlider" min="1" max="120" value="12"
                                class="flex-1 accent-[#801747]" oninput="calculateDelivery()">
                         <div id="bottleCount" class="text-4xl font-semibold text-[#801747] w-12 text-right">12</div>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-3 gap-4 text-center">
                     <div>
                         <div class="text-xs text-gray-500">TOTAL</div>
@@ -231,33 +283,33 @@
                 </div>
             </div>
 
-            <!-- Static list -->
             <div class="mt-10 bg-white rounded-3xl p-8 text-sm">
                 <ul class="space-y-4">
                     <li class="flex justify-between border-b pb-3">
                         <span>12 bottles</span>
-                        <span class="font-medium">HKD 1,196</span>
+                        <span id="static-tier12" class="font-medium">HKD 1,196</span>
                     </li>
                     <li class="flex justify-between border-b pb-3">
                         <span>24–48 bottles</span>
-                        <span class="font-medium">HKD 988 per 12 bottles</span>
+                        <span id="static-tier24" class="font-medium">HKD 988 per 12 bottles</span>
                     </li>
                     <li class="flex justify-between">
                         <span>60 bottles+</span>
-                        <span class="font-medium">HKD 884 per 12 bottles</span>
+                        <span id="static-tier60" class="font-medium">HKD 884 per 12 bottles</span>
                     </li>
                 </ul>
                 <div class="mt-8 text-xs text-gray-600">
-                    Minimum charge HKD 1,196 (regardless of quantity)<br>
-                    One bottle = 750ml
+                    Minimum charge shown above (regardless of quantity)<br>
+                    One bottle = 750ml • Temperature-controlled shipping
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- HONG KONG & LONDON STOCK - Better spacing -->
+    <!-- STOCK SECTION - 2 columns (2x2 layout) -->
     <div class="max-w-7xl mx-auto px-5 py-20">
         <div class="grid md:grid-cols-2 gap-8">
+            <!-- HK -->
             <div class="stock-box bg-white rounded-3xl p-10 border border-gray-100 flex flex-col">
                 <h3 class="text-2xl font-semibold mb-3">HONG KONG STOCK</h3>
                 <p class="text-gray-600 flex-1">Ready to ship from our Kennedy Town warehouse</p>
@@ -269,10 +321,34 @@
                     <a href="#" class="flex-1 text-center border border-gray-300 py-3 rounded-2xl text-sm font-medium">Download PDF</a>
                 </div>
             </div>
-
+            <!-- London -->
             <div class="stock-box bg-white rounded-3xl p-10 border border-gray-100 flex flex-col">
                 <h3 class="text-2xl font-semibold mb-3">LONDON STOCK</h3>
                 <p class="text-gray-600 flex-1">UK Bonded – Perfect provenance</p>
+                <div class="button-area mt-10">
+                    <a href="#" class="block w-full text-center bg-[#801747] text-white font-semibold py-4 rounded-2xl hover:bg-black transition">Shop Now</a>
+                </div>
+                <div class="flex gap-4 mt-6">
+                    <a href="#" class="flex-1 text-center border border-gray-300 py-3 rounded-2xl text-sm font-medium">Download Excel</a>
+                    <a href="#" class="flex-1 text-center border border-gray-300 py-3 rounded-2xl text-sm font-medium">Download PDF</a>
+                </div>
+            </div>
+            <!-- US -->
+            <div class="stock-box bg-white rounded-3xl p-10 border border-gray-100 flex flex-col">
+                <h3 class="text-2xl font-semibold mb-3">US STOCK</h3>
+                <p class="text-gray-600 flex-1">Ready to ship from our California warehouses</p>
+                <div class="button-area mt-10">
+                    <a href="#" class="block w-full text-center bg-[#801747] text-white font-semibold py-4 rounded-2xl hover:bg-black transition">Shop Now</a>
+                </div>
+                <div class="flex gap-4 mt-6">
+                    <a href="#" class="flex-1 text-center border border-gray-300 py-3 rounded-2xl text-sm font-medium">Download Excel</a>
+                    <a href="#" class="flex-1 text-center border border-gray-300 py-3 rounded-2xl text-sm font-medium">Download PDF</a>
+                </div>
+            </div>
+            <!-- Singapore -->
+            <div class="stock-box bg-white rounded-3xl p-10 border border-gray-100 flex flex-col">
+                <h3 class="text-2xl font-semibold mb-3">SINGAPORE STOCK</h3>
+                <p class="text-gray-600 flex-1">Ready to ship from our Singapore warehouse</p>
                 <div class="button-area mt-10">
                     <a href="#" class="block w-full text-center bg-[#801747] text-white font-semibold py-4 rounded-2xl hover:bg-black transition">Shop Now</a>
                 </div>
@@ -321,12 +397,10 @@
                     </div>
                 </div>
             </div>
-
             <div class="mt-16 pt-8 border-t border-white/20 text-xs leading-relaxed">
                 根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。<br>
                 Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.
             </div>
-
             <div class="mt-12 flex flex-col md:flex-row justify-between text-xs">
                 <div class="flex items-center gap-4">
                     <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" class="h-6 opacity-75">
@@ -338,20 +412,88 @@
     </footer>
 
     <script>
+        const stocks = {
+            'HK': { name: 'Hong Kong', symbol: 'HK$', rate: 1 },
+            'London': { name: 'London', symbol: '£', rate: 0.0995 },
+            'US': { name: 'United States', symbol: '$', rate: 0.128 },
+            'Singapore': { name: 'Singapore', symbol: 'S$', rate: 0.171 }
+        };
+        let currentStock = 'HK';
+
+        const deliveryRoutes = {
+            'LDN-HKG': { minCharge: 1196, tier2Rate: 988, tier3Rate: 884 },
+            'US-HKG': { minCharge: 1480, tier2Rate: 1220, tier3Rate: 1050 },
+            'HKG-SG': { minCharge: 680, tier2Rate: 520, tier3Rate: 450 }
+        };
+        let currentRouteKey = 'LDN-HKG';
+
+        function switchStock(key) {
+            currentStock = key;
+            document.querySelectorAll('.stock-tab').forEach(tab => {
+                tab.classList.remove('border-[#801747]', 'text-[#801747]');
+                if (tab.getAttribute('data-stock-key') === key) {
+                    tab.classList.add('border-[#801747]', 'text-[#801747]');
+                }
+            });
+            updateStockDisplay();
+        }
+
+        function updateStockDisplay() {
+            const stockInfo = stocks[currentStock];
+            document.querySelectorAll('.wine-card').forEach(card => {
+                const hkdPrice = parseInt(card.dataset.hkdPrice);
+                const localPriceNum = Math.round(hkdPrice * stockInfo.rate);
+
+                const nameEl = card.querySelector('.stock-name');
+                if (nameEl) nameEl.textContent = `${stockInfo.name} Stock`;
+
+                const priceEl = card.querySelector('.price');
+                const localEl = card.querySelector('.local-price');
+                if (priceEl) {
+                    if (currentStock === 'HK') {
+                        priceEl.textContent = `HK$${hkdPrice.toLocaleString()}`;
+                        if (localEl) localEl.classList.add('hidden');
+                    } else {
+                        priceEl.textContent = `${stockInfo.symbol}${localPriceNum.toLocaleString()}`;
+                        if (localEl) {
+                            localEl.textContent = `HK$${hkdPrice.toLocaleString()}`;
+                            localEl.classList.remove('hidden');
+                        }
+                    }
+                }
+            });
+        }
+
+        function setRoute(routeKey) {
+            currentRouteKey = routeKey;
+            document.querySelectorAll('.route-btn').forEach(btn => {
+                btn.classList.remove('border-[#801747]', 'bg-[#801747]/5');
+                if (btn.getAttribute('data-route') === routeKey) {
+                    btn.classList.add('border-[#801747]', 'bg-[#801747]/5');
+                }
+            });
+            const data = deliveryRoutes[routeKey];
+            document.getElementById('static-tier12').textContent = `HKD ${data.minCharge}`;
+            document.getElementById('static-tier24').textContent = `HKD ${data.tier2Rate} per 12 bottles`;
+            document.getElementById('static-tier60').textContent = `HKD ${data.tier3Rate} per 12 bottles`;
+            calculateDelivery();
+        }
+
         function calculateDelivery() {
             let bottles = parseInt(document.getElementById('bottleSlider').value);
             document.getElementById('bottleCount').textContent = bottles;
 
-            let cost = 1196;
+            const routeData = deliveryRoutes[currentRouteKey];
+            let cost = routeData.minCharge;
             let tier = "1–12";
 
             if (bottles > 12) {
                 let groups = Math.ceil(bottles / 12);
                 if (bottles <= 48) {
-                    cost = groups * 988;
+                    cost = groups * routeData.tier2Rate;
                     tier = "13–48";
                 } else {
-                    cost = groups * 884;
+                    cost = groups * routeData.tier3Rate;
                     tier = "60+";
                 }
             }
@@ -359,6 +501,23 @@
             document.getElementById('totalCost').textContent = `HKD ${cost.toLocaleString()}`;
             document.getElementById('perBottle').textContent = `HKD ${(cost / bottles).toFixed(2)}`;
             document.getElementById('tier').textContent = tier;
+        }
+
+        function switchMode(mode) {
+            const merchantBtn = document.getElementById('merchant-btn');
+            const auctionBtn = document.getElementById('auction-btn');
+            if (mode === 'merchant') {
+                merchantBtn.classList.add('bg-[#801747]', 'text-white');
+                auctionBtn.classList.remove('bg-[#801747]', 'text-white');
+            } else {
+                auctionBtn.classList.add('bg-[#801747]', 'text-white');
+                merchantBtn.classList.remove('bg-[#801747]', 'text-white');
+            }
+            alert(`Site switched to ${mode.toUpperCase()} mode (demo)`);
+        }
+
+        function setCurrency(curr) {
+            alert(`Currency changed to ${curr} (full site pricing update available in production)`);
         }
 
         function addToCart(btn) {
@@ -372,8 +531,12 @@
         }
 
         window.onload = () => {
+            switchStock('HK');
+            setRoute('LDN-HKG');
             calculateDelivery();
             document.getElementById('bottleSlider').addEventListener('input', calculateDelivery);
+            // Default currency
+            document.getElementById('currency-select').value = 'HKD';
         };
     </script>
 </body>
