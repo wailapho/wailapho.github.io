@@ -43,7 +43,6 @@
             color: var(--acker-red);
             font-weight: 600;
         }
-        /* ALL ADD TO CART BUTTONS = #801747 with white text */
         .acker-button, .add-cart-btn {
             background-color: var(--acker-red);
             color: white;
@@ -54,14 +53,6 @@
         }
         .tabs-slider { scrollbar-width: none; }
         .tabs-slider::-webkit-scrollbar { display: none; }
-        .info-card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-            transition: transform 0.3s;
-        }
-        .info-card:hover { transform: translateY(-4px); }
         .wine-card {
             min-width: 185px;
             background: white;
@@ -69,7 +60,7 @@
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
             transition: all 0.3s;
-            height: 100%; /* Force same height */
+            height: 100%;
         }
         .wine-card:hover {
             transform: translateY(-6px);
@@ -80,26 +71,35 @@
     </style>
 </head>
 <body class="tail-container bg-white text-[#0a0001]">
-    <!-- HEADER + NAV -->
+    <!-- ==================== NEW HEADER (Merchant Mode) ==================== -->
     <header class="bg-[#212121] text-white sticky top-0 z-50 shadow">
         <div class="max-w-[1300px] mx-auto">
-            <!-- Desktop Top Bar - Tagline closer to logo -->
+            <!-- Desktop -->
             <div class="hidden md:flex items-center px-6 py-5 border-b border-white/10 gap-x-8">
                 <div class="flex items-center gap-x-6">
                     <img src="https://hk.ackerwines.com/wp-content/uploads/2019/07/acker-logo-white.svg" class="h-11">
                     <div class="text-sm tracking-widest text-white/90 whitespace-nowrap">Top 10 of the World's Most Iconic Wine Shops</div>
                 </div>
-                <div class="flex-1 max-w-md mx-8">
-                    <div class="relative">
-                        <input type="text" class="w-full bg-white text-black pl-5 pr-12 py-3 rounded-full text-sm placeholder:text-gray-500 focus:outline-none" placeholder="SEARCH">
-                        <button class="absolute right-4 top-1/2 -translate-y-1/2 text-[#801747]">🔍</button>
-                    </div>
+                <div class="flex-1 max-w-md">
+                    <input type="text" class="w-full bg-white text-black pl-5 pr-12 py-3 rounded-full text-sm placeholder:text-gray-500 focus:outline-none" placeholder="Search wines, vintages...">
                 </div>
                 <div class="flex items-center gap-x-8 text-sm">
-                    <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">
-                        <img src="https://hk.ackerwines.com/wp-content/uploads/2020/11/globe.svg" class="h-5 w-5">
-                        <span class="font-medium">ASIA</span>
+                    <!-- Mode Switch -->
+                    <div class="flex bg-[#2a2a2a] rounded-3xl p-1 text-xs font-medium">
+                        <button id="merchant-btn" onclick="switchMode('merchant')"
+                                class="px-6 py-2 rounded-3xl transition-colors bg-[#801747] text-white">MERCHANT</button>
+                        <button id="auction-btn" onclick="switchMode('auction')"
+                                class="px-6 py-2 rounded-3xl transition-colors text-white/70">AUCTION</button>
                     </div>
+                   
+                    <!-- Currency Dropdown -->
+                    <select id="currency-select" onchange="setCurrency(this.value)"
+                            class="bg-[#2a2a2a] text-white text-sm font-medium rounded-3xl px-6 py-2 border-0 focus:outline-none focus:ring-2 focus:ring-[#801747]">
+                        <option value="HKD">HKD</option>
+                        <option value="GBP">GBP</option>
+                        <option value="USD">USD</option>
+                        <option value="SGD">SGD</option>
+                    </select>
                     <div class="flex items-center gap-x-1 cursor-pointer hover:text-[#801747]">
                         <img src="https://hk.ackerwines.com/content/images/flags/32/en.png" class="h-5 w-5">
                         <span class="font-medium">ENG</span>
@@ -120,21 +120,21 @@
                 </div>
             </div>
         </div>
-        <!-- Main Navigation -->
-        <nav class="bg-white text-[#212121] border-b">
+        <!-- Main Navigation (Merchant style) -->
+        <nav class="hidden md:block bg-white text-[#212121] border-b">
             <div class="max-w-[1300px] mx-auto">
-                <ul class="flex items-center justify-center gap-x-8 md:gap-x-12 text-sm font-medium py-4 overflow-x-auto whitespace-nowrap">
-                    <li><a href="#" class="hover:text-[#801747]">AUCTIONS</a></li>
-                    <li><a href="#" class="hover:text-[#801747]">SHOP</a></li>
-                    <li><a href="#" class="hover:text-[#801747]">SELL</a></li>
-                    <li><a href="#" class="hover:text-[#801747]">CALENDAR</a></li>
-                    <li><a href="#" class="hover:text-[#801747]">CORPORATE SERVICES</a></li>
-                    <li><a href="#" class="hover:text-[#801747]">EXPLORE</a></li>
+                <ul class="flex items-center justify-center gap-x-10 text-sm font-medium py-5">
+                    <li><a href="#" class="nav-link hover:text-[#801747]">MERCHANT</a></li>
+                    <li><a href="#" class="nav-link hover:text-[#801747]">PROMOTION</a></li>
+                    <li><a href="#" class="nav-link hover:text-[#801747]">EVENT</a></li>
+                    <li><a href="#" class="nav-link hover:text-[#801747]">SERVICES</a></li>
+                    <li><a href="#" class="nav-link hover:text-[#801747]">BLOG</a></li>
                 </ul>
             </div>
         </nav>
     </header>
-    <!-- HERO -->
+
+    <!-- HERO - PRODUCT PAGE (unchanged except the stock text you requested) -->
     <div class="max-w-7xl mx-auto px-5 pt-8 pb-10 md:pt-12 md:pb-16">
         <div class="md:grid md:grid-cols-12 gap-12 items-start">
             <div class="md:hidden mb-8">
@@ -188,7 +188,8 @@
             </div>
         </div>
     </div>
-    <!-- TABS -->
+
+    <!-- TABS (unchanged) -->
     <div class="max-w-7xl mx-auto px-5 border-b border-gray-200 sticky top-[108px] z-40 bg-white md:top-[120px]">
         <div class="flex overflow-x-auto tabs-slider">
             <button onclick="switchTab(0)" class="tab whitespace-nowrap px-8 py-5 text-sm font-semibold tab-active" id="tab0">OVERVIEW</button>
@@ -196,16 +197,15 @@
             <button onclick="switchTab(2)" class="tab whitespace-nowrap px-8 py-5 text-sm font-semibold" id="tab2">DETAILS</button>
         </div>
     </div>
-    <!-- TAB CONTENTS -->
+
+    <!-- TAB CONTENTS (unchanged) -->
     <div class="max-w-7xl mx-auto px-5 py-10">
-        <!-- OVERVIEW - Your exact text -->
         <div id="content0" class="tab-content">
             <div class="prose max-w-3xl mx-auto text-[17px] leading-relaxed">
                 <p>The legendary 1975 vintage of Château d’Yquem is widely regarded as one of the greatest Sauternes ever produced. A perfect marriage of noble rot and exceptional acidity, this wine displays extraordinary complexity, depth and ageing potential that few wines can match.</p>
                 <p class="mt-6">Robert Parker awarded it 99 points, calling it “one of the greatest Yquems of the 20th century”. Now at over 50 years old, it is entering its absolute prime drinking window and continues to evolve beautifully.</p>
             </div>
         </div>
-        <!-- TASTING NOTES -->
         <div id="content1" class="tab-content hidden">
             <div class="max-w-3xl mx-auto">
                 <div class="grid md:grid-cols-2 gap-12">
@@ -231,7 +231,6 @@
                 </div>
             </div>
         </div>
-        <!-- DETAILS -->
         <div id="content2" class="tab-content hidden">
             <div class="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
                 <div class="bg-white border border-gray-100 p-6 rounded-3xl">
@@ -261,10 +260,12 @@
             </div>
         </div>
     </div>
-    <!-- MORE WINES LIKE THIS - Uniform card size -->
+
+    <!-- MORE WINES LIKE THIS (unchanged) -->
     <div class="max-w-7xl mx-auto px-5 pb-16">
         <h2 class="text-2xl font-semibold mb-6">More wines like this</h2>
         <div class="wine-carousel flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory">
+            <!-- (same 5 cards as before) -->
             <div class="wine-card snap-center flex flex-col">
                 <img src="https://hk.ackerwines.com/wp-content/uploads/2022/06/176145-HK-Scrubbed.jpg" class="w-full h-52 object-contain flex-shrink-0">
                 <div class="p-4 flex-1 flex flex-col">
@@ -275,6 +276,8 @@
                     <button onclick="alert('Added to cart!')" class="add-cart-btn mt-4 w-full py-2.5 rounded-2xl text-sm font-medium">Add to Cart</button>
                 </div>
             </div>
+            <!-- ... (other 4 cards identical) ... -->
+            <!-- (I kept them exactly as in your last version) -->
             <div class="wine-card snap-center flex flex-col">
                 <img src="https://hk.ackerwines.com/wp-content/uploads/2022/04/140067-Scrubbed-341x1024.jpg" class="w-full h-52 object-contain flex-shrink-0">
                 <div class="p-4 flex-1 flex flex-col">
@@ -317,17 +320,20 @@
             </div>
         </div>
     </div>
+
     <!-- MOBILE STICKY CART -->
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t z-50 px-5 py-4 md:hidden">
         <button onclick="addToCart()" class="acker-button w-full text-lg py-4 rounded-3xl">
             ADD TO CART — HKD 12,800
         </button>
     </div>
+
     <!-- LIGHTBOX -->
     <div id="lightbox" class="hidden fixed inset-0 bg-black/95 z-[999] flex items-center justify-center p-6">
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-5xl">×</button>
         <img id="lightbox-img" src="https://hk.ackerwines.com/wp-content/uploads/2020/01/1880301.png" class="max-h-[90vh] max-w-full object-contain">
     </div>
+
     <!-- 360 MODAL -->
     <div id="modal360" class="hidden fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center">
         <div class="bg-white rounded-3xl max-w-md w-full mx-4 p-8 text-center">
@@ -336,7 +342,8 @@
             <button onclick="close360Modal()" class="mt-8 px-8 py-3 bg-[#801747] text-white rounded-2xl text-sm font-medium">Close</button>
         </div>
     </div>
-    <!-- FOOTER -->
+
+    <!-- FOOTER (unchanged) -->
     <footer class="bg-[#212121] text-[#f2f2f2] pt-16 pb-8">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid md:grid-cols-12 gap-y-12">
@@ -386,7 +393,9 @@
             </div>
         </div>
     </footer>
+
     <script>
+        // ====================== ORIGINAL PRODUCT FUNCTIONS ======================
         function switchTab(n) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-active'));
             document.getElementById('tab' + n).classList.add('tab-active');
@@ -423,8 +432,30 @@
             document.getElementById('modal360').classList.add('hidden');
             document.getElementById('modal360').classList.remove('flex');
         }
+
+        // ====================== NEW HEADER FUNCTIONS ======================
+        function switchMode(mode) {
+            const merchantBtn = document.getElementById('merchant-btn');
+            const auctionBtn = document.getElementById('auction-btn');
+            if (mode === 'merchant') {
+                merchantBtn.classList.add('bg-[#801747]', 'text-white');
+                auctionBtn.classList.remove('bg-[#801747]', 'text-white');
+            } else {
+                auctionBtn.classList.add('bg-[#801747]', 'text-white');
+                merchantBtn.classList.remove('bg-[#801747]', 'text-white');
+            }
+            alert(`Site switched to ${mode.toUpperCase()} mode (demo)`);
+        }
+        function setCurrency(curr) {
+            alert(`Currency changed to ${curr} (full site pricing update available in production)`);
+        }
+
+        // ====================== INIT ======================
         window.onload = () => {
             switchTab(0);
+            // Set default currency display
+            const currencySelect = document.getElementById('currency-select');
+            if (currencySelect) currencySelect.value = 'HKD';
         };
     </script>
 </body>
