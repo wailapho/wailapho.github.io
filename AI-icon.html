@@ -7,22 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
-
         :root {
             --primary: #ff6600;
             --primary-light: #ff8533;
             --button-size: 68px;
             --half-offset: -34px;
         }
-
         .tail-container {
             font-family: 'Inter', system-ui, sans-serif;
         }
-
         .logo-font {
             font-family: 'Space Grotesk', sans-serif;
         }
-
         #ai-float {
             width: var(--button-size);
             height: var(--button-size);
@@ -35,30 +31,39 @@
             z-index: 9999;
             overflow: hidden;
         }
-
         #ai-float.minimized {
             left: var(--half-offset) !important;
         }
-
         #ai-float:hover {
-            box-shadow: 0 0 40px -10px var(--primary),
-                        0 20px 25px -5px rgb(0 0 0 / 0.2),
-                        0 8px 10px -6px rgb(0 0 0 / 0.1);
+            box-shadow: 0 0 40px -10px #888,
+                        0 20px 25px -5px rgb(0 0 0 / 0.25),
+                        0 8px 10px -6px rgb(0 0 0 / 0.15);
         }
-
         .ai-icon {
-            font-size: 42px;
-            line-height: 1;
-            color: white;
-            filter: drop-shadow(0 0 10px rgba(255, 102, 0, 0.7));
-            animation: gentlePulse 4s ease-in-out infinite;
+            animation: sparkleMagic 5s ease-in-out infinite;
         }
-
-        @keyframes gentlePulse {
-            0%, 100% { transform: scale(1); }
-            50%      { transform: scale(1.12); }
+        @keyframes sparkleMagic {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1) drop-shadow(0 0 10px rgba(253, 116, 32, 0.7));
+            }
+            20% {
+                transform: scale(1.07) rotate(3deg);
+                filter: brightness(1.2) drop-shadow(0 0 16px rgba(253, 116, 32, 1));
+            }
+            40% {
+                transform: scale(1.03) rotate(-2deg);
+                filter: brightness(0.95) drop-shadow(0 0 8px rgba(253, 116, 32, 0.5));
+            }
+            60% {
+                transform: scale(1.09) rotate(4deg);
+                filter: brightness(1.25) drop-shadow(0 0 18px rgba(253, 116, 32, 0.9));
+            }
+            80% {
+                transform: scale(1.05) rotate(-1deg);
+                filter: brightness(1.1) drop-shadow(0 0 12px rgba(253, 116, 32, 0.7));
+            }
         }
-
         /* Mobile adaptation */
         @media (max-width: 768px) {
             #ai-float {
@@ -70,10 +75,9 @@
                 --half-offset: -28px;
             }
             .ai-icon {
-                font-size: 34px;
+                animation: sparkleMagic 6s ease-in-out infinite;
             }
         }
-
         .content-section {
             scroll-margin-top: 80px;
         }
@@ -115,7 +119,7 @@
                     Your AI<br>creative<br>companion
                 </h1>
                 <p class="text-xl text-zinc-400 max-w-lg">
-                    Clean, simple floating assistant inspired by modern AI icons — always ready with a gentle glow.
+                    Clean floating assistant with colorful sparkles — always ready.
                 </p>
                 <div class="flex items-center gap-x-4">
                     <button onclick="document.getElementById('ai-float').click()"
@@ -131,7 +135,7 @@
             </div>
             <div class="hidden md:flex justify-end">
                 <div class="w-96 h-96 bg-gradient-to-br from-[var(--primary)]/20 to-[var(--primary-light)]/20 rounded-[4rem] flex items-center justify-center border border-white/10 backdrop-blur-xl">
-                    <div class="text-[180px] opacity-20">★</div>
+                    <div class="text-[180px] opacity-20">✨</div>
                 </div>
             </div>
         </div>
@@ -140,43 +144,42 @@
     <!-- Scrollable content -->
     <div class="max-w-screen-2xl mx-auto px-8 pb-24">
         <div class="h-24"></div>
-        
+       
         <section id="features" class="content-section grid md:grid-cols-3 gap-8">
             <div class="bg-zinc-900/50 border border-white/10 rounded-3xl p-10 hover:border-[var(--primary)]/30 transition-colors">
-                <div class="text-[var(--primary)] text-4xl mb-6">★</div>
+                <div class="text-[var(--primary)] text-4xl mb-6">✨</div>
                 <h3 class="text-2xl font-semibold mb-3">Simple & Clean</h3>
-                <p class="text-zinc-400">Single bold star icon with subtle pulse — modern and minimal like premium AI assistants.</p>
+                <p class="text-zinc-400">Colorful sparkles with subtle magical animation.</p>
             </div>
             <div class="bg-zinc-900/50 border border-white/10 rounded-3xl p-10 hover:border-[var(--primary)]/30 transition-colors">
                 <div class="text-[var(--primary)] text-4xl mb-6">🌗</div>
                 <h3 class="text-2xl font-semibold mb-3">Smart Peek</h3>
-                <p class="text-zinc-400">Auto-minimizes to half-circle after a few seconds for unobtrusive presence.</p>
+                <p class="text-zinc-400">Auto-minimizes after a few seconds.</p>
             </div>
             <div class="bg-zinc-900/50 border border-white/10 rounded-3xl p-10 hover:border-[var(--primary)]/30 transition-colors">
                 <div class="text-[var(--primary)] text-4xl mb-6">⚡</div>
                 <h3 class="text-2xl font-semibold mb-3">Hover / Tap Reveal</h3>
-                <p class="text-zinc-400">Approach or tap — instantly expands with warm orange glow.</p>
+                <p class="text-zinc-400">Expands instantly on approach or tap.</p>
             </div>
         </section>
-
         <div class="my-32 border-t border-zinc-800"></div>
-
+       
         <!-- Long content -->
         <div class="prose prose-invert max-w-3xl mx-auto space-y-16 text-lg">
-            <h2 class="text-5xl font-semibold tracking-tight logo-font text-center mb-12">Scroll freely – button stays visible</h2>
-            <p class="text-zinc-400">Now featuring a simpler single-star icon in vibrant orange tones (#ff6600 base + lighter #ff8533 accents), inspired by clean modern AI assistants.</p>
+            <h2 class="text-5xl font-semibold tracking-tight logo-font text-center mb-12">Scroll freely – sparkling button stays visible</h2>
+            <p class="text-zinc-400">White floating button with colorful sparkles SVG and nice animation.</p>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-            
+           
             <div class="bg-zinc-900 border border-white/10 rounded-3xl p-12 my-16">
-                <p class="text-center text-2xl italic text-zinc-500">"Clean, elegant, and perfectly minimal."</p>
+                <p class="text-center text-2xl italic text-zinc-500">"Clean, elegant, and perfectly magical."</p>
                 <p class="text-center text-sm mt-6 text-zinc-500">— Inspired by premium mobile AI design</p>
             </div>
-            
-            <p>Continue scrolling ↓ The floating button remains perfectly responsive on both desktop (left edge) and mobile (bottom-left).</p>
-            
+           
+            <p>Continue scrolling ↓ The floating button remains perfectly responsive.</p>
+           
             <div class="h-96 bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-3xl flex items-center justify-center border border-white/10">
                 <div class="text-center">
-                    <div class="text-8xl mb-6 opacity-30">★</div>
+                    <div class="text-8xl mb-6 opacity-30">✨</div>
                     <p class="text-3xl font-light tracking-widest text-zinc-400">MORE CONTENT</p>
                 </div>
             </div>
@@ -186,21 +189,36 @@
     <!-- Footer -->
     <footer class="bg-black py-20 border-t border-zinc-900">
         <div class="max-w-screen-2xl mx-auto px-8 text-center text-zinc-500 text-sm">
-            Updated demo with simpler single-star icon and full #ff6600 / #ff8533 color scheme.<br>
-            Copy → save as .html → open in browser (desktop or mobile).
+            Updated: floating button is now pure white background<br>
+            with colorful sparkles SVG + thin inner stroke + animation<br>
+            Copy → save as .html → open in browser
         </div>
     </footer>
 
-    <!-- The floating AI button – simplified version -->
-    <div id="ai-float" 
-         class="fixed rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] flex items-center justify-center cursor-pointer border border-white/20 shadow-2xl select-none"
+    <!-- Floating AI button – now pure white background -->
+    <div id="ai-float"
+         class="fixed rounded-full bg-white flex items-center justify-center cursor-pointer border border-gray-300 shadow-xl select-none"
          onclick="handleButtonClick()"
          tabindex="0"
          role="button"
          aria-label="AI Assistant – tap or hover to activate">
         
-        <div class="flex items-center justify-center">
-            <span class="ai-icon">★</span>
+        <!-- Inner white circle with thin border + colorful sparkles -->
+        <div class="w-5/6 h-5/6 rounded-full bg-white flex items-center justify-center shadow-inner border border-white/40">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="w-5/6 h-5/6 ai-icon">
+                <defs>
+                    <linearGradient id="sparkle-grad" x1="18.73" y1="42.43" x2="25.24" y2="5.54" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" stop-color="#fd7420"/>
+                        <stop offset="1" stop-color="#ce5100"/>
+                    </linearGradient>
+                    <linearGradient id="sparkle-grad2" x1="36.98" y1="45.84" x2="39.04" y2="34.17" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" stop-color="#fd7420"/>
+                        <stop offset="1" stop-color="#ce5100"/>
+                    </linearGradient>
+                </defs>
+                <path fill="url(#sparkle-grad)" d="M23.3,7.94l2.6,7.1c1.2,3.28,3.78,5.86,7.06,7.06l7.1,2.6c1.23.45,1.23,2.19,0,2.64l-7.1,2.6c-3.28,1.2-5.86,3.78-7.06,7.06l-2.6,7.1c-.45,1.23-2.19,1.23-2.64,0l-2.6-7.1c-1.2-3.28-3.78-5.86-7.06-7.06l-7.1-2.6c-1.23-.45-1.23-2.19,0-2.64l7.1-2.6c3.28-1.2,5.86-3.78,7.06-7.06l2.6-7.1c.45-1.23,2.19-1.23,2.64,0Z"/>
+                <path fill="url(#sparkle-grad2)" d="M38.82,4.6l.62,2.05c.28.92,1,1.63,1.91,1.91l2.05.62c.8.24.8,1.38,0,1.63l-2.05.62c-.92.28-1.63,1-1.91,1.91l-.62,2.05c-.24.8-1.38.8-1.63,0l-.62-2.05c-.28-.92-1-1.63-1.91-1.91l-2.05-.62c-.8-.24-.8-1.38,0-1.63l2.05-.62c.92-.28,1.63-1,1.91-1.91l.62-2.05c.24-.8,1.38-.8,1.63,0Z"/>
+            </svg>
         </div>
     </div>
 
@@ -220,14 +238,11 @@
             }, delay);
         }
 
-        // Desktop hover
         aiButton.addEventListener('mouseenter', expandButton);
         aiButton.addEventListener('mouseleave', () => scheduleHide());
 
-        // Mobile touch
         aiButton.addEventListener('touchstart', expandButton, { passive: true });
 
-        // Click action
         function handleButtonClick() {
             expandButton();
             setTimeout(() => {
@@ -236,14 +251,12 @@
             }, 120);
         }
 
-        // Auto-minimize after intro
         window.addEventListener('load', () => {
             setTimeout(() => {
                 aiButton.classList.add('minimized');
             }, 4200);
         });
 
-        // Keyboard focus
         document.addEventListener('keydown', (e) => {
             if (e.key === '/' && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
                 e.preventDefault();
