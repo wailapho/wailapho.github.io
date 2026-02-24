@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Floating Button Demo – Samsung-inspired Simple Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+
+        :root {
+            --primary: #ff6600;
+            --primary-light: #ff8533;
+            --button-size: 68px;
+            --half-offset: -34px;
+        }
+
+        .tail-container {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .logo-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        #ai-float {
+            width: var(--button-size);
+            height: var(--button-size);
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        box-shadow 0.4s ease,
+                        transform 0.4s ease;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        #ai-float.minimized {
+            left: var(--half-offset) !important;
+        }
+
+        #ai-float:hover {
+            box-shadow: 0 0 40px -10px var(--primary),
+                        0 20px 25px -5px rgb(0 0 0 / 0.2),
+                        0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .ai-icon {
+            font-size: 42px;
+            line-height: 1;
+            color: white;
+            filter: drop-shadow(0 0 10px rgba(255, 102, 0, 0.7));
+            animation: gentlePulse 4s ease-in-out infinite;
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.12); }
+        }
+
+        /* Mobile adaptation */
+        @media (max-width: 768px) {
+            #ai-float {
+                left: 20px;
+                bottom: 30px;
+                top: auto;
+                transform: none;
+                --button-size: 56px;
+                --half-offset: -28px;
+            }
+            .ai-icon {
+                font-size: 34px;
+            }
+        }
+
+        .content-section {
+            scroll-margin-top: 80px;
+        }
+    </style>
+</head>
+<body class="tail-container bg-zinc-950 text-zinc-200">
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-lg border-b border-zinc-800">
+        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-7 h-7 bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] rounded-xl flex items-center justify-center text-white text-xs font-bold logo-font">AI</div>
+                <span class="text-2xl font-semibold tracking-tighter logo-font">StellarAI</span>
+            </div>
+            <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                <a href="#" class="hover:text-[var(--primary)] transition-colors">Features</a>
+                <a href="#" class="hover:text-[var(--primary)] transition-colors">Solutions</a>
+                <a href="#" class="hover:text-[var(--primary)] transition-colors">Pricing</a>
+                <a href="#" class="hover:text-[var(--primary)] transition-colors">Blog</a>
+            </div>
+            <button onclick="alert('Demo: Sign up flow would open here.')"
+                    class="px-6 py-2.5 bg-white text-zinc-900 rounded-2xl font-semibold text-sm hover:bg-[var(--primary-light)] hover:text-white transition-all active:scale-95">
+                Get started free
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="min-h-screen flex items-center pt-20 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950">
+        <div class="max-w-screen-2xl mx-auto px-8 grid md:grid-cols-2 gap-16 items-center">
+            <div class="space-y-8">
+                <div class="inline-flex items-center gap-x-2 px-4 py-2 bg-white/5 border border-white/10 rounded-3xl text-sm backdrop-blur">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--primary)] opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-[var(--primary)]"></span>
+                    </span>
+                    Now powered by advanced AI
+                </div>
+                <h1 class="text-7xl md:text-8xl font-semibold tracking-tighter logo-font leading-none">
+                    Your AI<br>creative<br>companion
+                </h1>
+                <p class="text-xl text-zinc-400 max-w-lg">
+                    Clean, simple floating assistant inspired by modern AI icons — always ready with a gentle glow.
+                </p>
+                <div class="flex items-center gap-x-4">
+                    <button onclick="document.getElementById('ai-float').click()"
+                            class="px-8 py-4 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] rounded-3xl font-semibold text-lg flex items-center gap-x-3 hover:brightness-110 transition-all">
+                        <span>Try the demo button</span>
+                        <span class="text-2xl">→</span>
+                    </button>
+                    <button onclick="alert('Demo: Video modal would open here.')"
+                            class="px-8 py-4 border border-white/30 hover:border-white/60 rounded-3xl font-medium transition-colors">
+                        Watch demo
+                    </button>
+                </div>
+            </div>
+            <div class="hidden md:flex justify-end">
+                <div class="w-96 h-96 bg-gradient-to-br from-[var(--primary)]/20 to-[var(--primary-light)]/20 rounded-[4rem] flex items-center justify-center border border-white/10 backdrop-blur-xl">
+                    <div class="text-[180px] opacity-20">★</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scrollable content -->
+    <div class="max-w-screen-2xl mx-auto px-8 pb-24">
+        <div class="h-24"></div>
+        
+        <section id="features" class="content-section grid md:grid-cols-3 gap-8">
+            <div class="bg-zinc-900/50 border border-white/10 rounded-3xl p-10 hover:border-[var(--primary)]/30 transition-colors">
+                <div class="text-[var(--primary)] text-4xl mb-6">★</div>
+                <h3 class="text-2xl font-semibold mb-3">Simple & Clean</h3>
+                <p class="text-zinc-400">Single bold star icon with subtle pulse — modern and minimal like premium AI assistants.</p>
+            </div>
+            <div class="bg-zinc-900/50 border border-white/10 rounded-3xl p-10 hover:border-[var(--primary)]/30 transition-colors">
+                <div class="text-[var(--primary)] text-4xl mb-6">🌗</div>
+                <h3 class="text-2xl font-semibold mb-3">Smart Peek</h3>
+                <p class="text-zinc-400">Auto-minimizes to half-circle after a few seconds for unobtrusive presence.</p>
+            </div>
+            <div class="bg-zinc-900/50 border border-white/10 rounded-3xl p-10 hover:border-[var(--primary)]/30 transition-colors">
+                <div class="text-[var(--primary)] text-4xl mb-6">⚡</div>
+                <h3 class="text-2xl font-semibold mb-3">Hover / Tap Reveal</h3>
+                <p class="text-zinc-400">Approach or tap — instantly expands with warm orange glow.</p>
+            </div>
+        </section>
+
+        <div class="my-32 border-t border-zinc-800"></div>
+
+        <!-- Long content -->
+        <div class="prose prose-invert max-w-3xl mx-auto space-y-16 text-lg">
+            <h2 class="text-5xl font-semibold tracking-tight logo-font text-center mb-12">Scroll freely – button stays visible</h2>
+            <p class="text-zinc-400">Now featuring a simpler single-star icon in vibrant orange tones (#ff6600 base + lighter #ff8533 accents), inspired by clean modern AI assistants.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            
+            <div class="bg-zinc-900 border border-white/10 rounded-3xl p-12 my-16">
+                <p class="text-center text-2xl italic text-zinc-500">"Clean, elegant, and perfectly minimal."</p>
+                <p class="text-center text-sm mt-6 text-zinc-500">— Inspired by premium mobile AI design</p>
+            </div>
+            
+            <p>Continue scrolling ↓ The floating button remains perfectly responsive on both desktop (left edge) and mobile (bottom-left).</p>
+            
+            <div class="h-96 bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-3xl flex items-center justify-center border border-white/10">
+                <div class="text-center">
+                    <div class="text-8xl mb-6 opacity-30">★</div>
+                    <p class="text-3xl font-light tracking-widest text-zinc-400">MORE CONTENT</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black py-20 border-t border-zinc-900">
+        <div class="max-w-screen-2xl mx-auto px-8 text-center text-zinc-500 text-sm">
+            Updated demo with simpler single-star icon and full #ff6600 / #ff8533 color scheme.<br>
+            Copy → save as .html → open in browser (desktop or mobile).
+        </div>
+    </footer>
+
+    <!-- The floating AI button – simplified version -->
+    <div id="ai-float" 
+         class="fixed rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] flex items-center justify-center cursor-pointer border border-white/20 shadow-2xl select-none"
+         onclick="handleButtonClick()"
+         tabindex="0"
+         role="button"
+         aria-label="AI Assistant – tap or hover to activate">
+        
+        <div class="flex items-center justify-center">
+            <span class="ai-icon">★</span>
+        </div>
+    </div>
+
+    <script>
+        const aiButton = document.getElementById('ai-float');
+        let hideTimeout = null;
+
+        function expandButton() {
+            aiButton.classList.remove('minimized');
+            clearTimeout(hideTimeout);
+        }
+
+        function scheduleHide(delay = 1800) {
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+                aiButton.classList.add('minimized');
+            }, delay);
+        }
+
+        // Desktop hover
+        aiButton.addEventListener('mouseenter', expandButton);
+        aiButton.addEventListener('mouseleave', () => scheduleHide());
+
+        // Mobile touch
+        aiButton.addEventListener('touchstart', expandButton, { passive: true });
+
+        // Click action
+        function handleButtonClick() {
+            expandButton();
+            setTimeout(() => {
+                alert('✨ AI Assistant Ready!\n\nHow can I assist you today?');
+                setTimeout(() => aiButton.classList.add('minimized'), 400);
+            }, 120);
+        }
+
+        // Auto-minimize after intro
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                aiButton.classList.add('minimized');
+            }, 4200);
+        });
+
+        // Keyboard focus
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+                e.preventDefault();
+                aiButton.focus();
+                expandButton();
+            }
+        });
+    </script>
+</body>
+</html>
