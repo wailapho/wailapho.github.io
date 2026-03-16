@@ -155,7 +155,7 @@
 <div class="card">
     <div class="header">
         <h1>Performance Upload</h1>
-        <p>Upload screenshots for selected channels • Auto compress & base64</p>
+        <p>Upload screenshots for selected channels • Auto compress</p>
     </div>
     <div class="content">
         <form id="uploadForm">
@@ -296,16 +296,7 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     canvas.toBlob((blob) => {
-                        const compressedReader = new FileReader();
-                        compressedReader.onload = () => {
-                            resolve({
-                                filename: file.name.replace(/\.[^/.]+$/, ".jpg"),
-                                contentType: 'image/jpeg',
-                                data: compressedReader.result.split(',')[1] // Pure base64 data
-                            });
-                        };
-                        compressedReader.onerror = reject;
-                        compressedReader.readAsDataURL(blob);
+                        resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: 'image/jpeg' }));
                     }, 'image/jpeg', quality);
                 };
                 img.onerror = reject;
@@ -330,19 +321,15 @@
         }
         toggleLoader(true);
         showStatus('Compressing images...', 'info');
-        const imagesBase64 = await Promise.all(Array.from(imageInput.files).map(file => compressImage(file)));
-        const payload = {
-            post_id: postId,
-            channels: channels,
-            images: imagesBase64
-        };
+        const compressedImages = await Promise.all(Array.from(imageInput.files).map(file => compressImage(file)));
+        const formData = new FormData();
+        formData.append('post_id', postId);
+        channels.forEach(channel => formData.append('channels[]', channel));
+        compressedImages.forEach(image => formData.append('images[]', image));
         showStatus('Uploading...', 'info');
         fetch('https://hook.eu2.make.com/1m27xus1xn6m2v9g6huonlbaxlggq5ml', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
+            body: formData
         })
         .then(response => {
             if (response.ok) {
