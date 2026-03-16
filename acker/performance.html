@@ -143,7 +143,6 @@
         const postIdText = document.getElementById('post-id-text');
         const imageInput = document.getElementById('images');
         const imagePreview = document.getElementById('image-preview');
-
         function generatePostId() {
             const now = new Date();
             const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '-' +
@@ -151,11 +150,9 @@
             const random = Math.floor(1000 + Math.random() * 9000);
             return `POST-${dateStr}-${random}`;
         }
-
         const postId = generatePostId();
         postIdInput.value = postId;
         postIdText.textContent = postId;
-
         imageInput.addEventListener('change', function() {
             imagePreview.innerHTML = '';
             Array.from(this.files).forEach(file => {
@@ -169,7 +166,6 @@
                 reader.readAsDataURL(file);
             });
         });
-
         form.addEventListener('submit', function(event) {
             const channels = document.querySelectorAll('input[name="channels[]"]:checked');
             if (channels.length === 0) {
