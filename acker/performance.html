@@ -207,7 +207,7 @@
                                 resolve({
                                     filename: file.name.replace(/\.[^/.]+$/, ".jpg"),
                                     contentType: 'image/jpeg',
-                                    data: compressedReader.result  // Full data URL
+                                    data: compressedReader.result.split(',')[1]  // Pure base64 data
                                 });
                             };
                             compressedReader.onerror = reject;
@@ -237,7 +237,7 @@
 
             statusDiv.textContent = 'Compressing images...';
 
-            // Compress and convert images to base64 (full data URL)
+            // Compress and convert images to base64 (pure base64)
             const imagesBase64 = await Promise.all(Array.from(imageInput.files).map(file => compressImage(file)));
 
             const payload = {
