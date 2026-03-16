@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Performance Upload</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -15,45 +14,46 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 10px;
             color: #1f2937;
         }
         .card {
             background: white;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,.08);
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,.08);
             width: 100%;
-            max-width: 560px;
+            max-width: 500px;
             overflow: hidden;
             border: 1px solid #f3f4f6;
         }
         .header {
             background: #ffffff;
             color: #ff6600;
-            padding: 32px 28px;
+            padding: 20px 18px;
             text-align: center;
             border-bottom: 1px solid #f3f4f6;
         }
         .header img {
-            height: 58px;
-            margin-bottom: 16px;
+            height: 40px;
+            margin-bottom: 10px;
         }
-        .header h1 { font-size: 1.85rem; font-weight: 700; }
-        .header p { font-size: 1rem; color: #6b7280; margin-top: 8px; }
-        .content { padding: 32px; }
-        .form-group { margin-bottom: 24px; position: relative; }
+        .header h1 { font-size: 1.5rem; font-weight: 700; }
+        .header p { font-size: 0.9rem; color: #6b7280; margin-top: 5px; }
+        .content { padding: 20px; }
+        .form-group { margin-bottom: 15px; position: relative; }
         label {
             display: block;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             color: #111827;
+            font-size: 0.9rem;
         }
         input[type=text], select {
             width: 100%;
-            padding: 14px 16px;
+            padding: 10px 12px;
             border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
             transition: all .3s ease;
         }
         input[type=text]:focus, select:focus {
@@ -63,8 +63,8 @@
         }
         .upload-area {
             border: 3px dashed #ff8533;
-            border-radius: 18px;
-            padding: 45px 20px;
+            border-radius: 12px;
+            padding: 30px 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -72,44 +72,37 @@
         }
         .upload-area:hover { border-color: #ff6600; background: #fff5e6; }
         .upload-area.dragover { border-color: #ff6600; background: #ffedd5; }
-        .upload-area i { font-size: 50px; color: #ff6600; margin-bottom: 14px; display: block; }
+        .upload-area i { font-size: 35px; color: #ff6600; margin-bottom: 10px; display: block; }
         .upload-area input { display: none; }
-        .preview-box { margin: 22px 0; text-align: center; }
-        .preview-box p { font-weight: 600; margin-bottom: 10px; color: #1f2937; }
+        .preview-box { margin: 15px 0; text-align: center; }
+        .preview-box p { font-weight: 600; margin-bottom: 5px; color: #1f2937; font-size: 0.9rem; }
         .preview-box img {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 14px;
-            box-shadow: 0 6px 16px rgba(0,0,0,.1);
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,.1);
             border: 1px solid #f3f4f6;
         }
         .info {
             background: #fff7ed;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 0.94rem;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
             color: #9a3412;
-            margin: 18px 0;
+            margin: 12px 0;
             border-left: 4px solid #ff6600;
-        }
-        .upload-tip {
-            font-size: 0.9rem;
-            color: #6b7280;
-            text-align: center;
-            margin: 10px 0;
-            font-style: italic;
         }
         .btn {
             background: #ff6600;
             color: white;
             border: none;
-            padding: 16px 28px;
-            border-radius: 12px;
-            font-size: 1.1rem;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            margin-top: 16px;
+            margin-top: 10px;
             transition: .3s;
             display: flex;
             align-items: center;
@@ -119,28 +112,29 @@
         .btn:disabled { background: #fb923c; cursor: not-allowed; }
         .loader {
             display: inline-block;
-            width: 20px; height: 20px;
+            width: 16px; height: 16px;
             border: 3px solid #fff;
             border-radius: 50%;
             border-top-color: transparent;
             animation: spin 1s linear infinite;
-            margin-right: 10px;
+            margin-right: 8px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .hidden { display: none; }
         .channel-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
         .channel-label {
             display: flex;
             align-items: center;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border: 2px solid #e5e7eb;
-            border-radius: 12px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all .3s ease;
+            font-size: 0.85rem;
         }
         .channel-label input {
             display: none;
@@ -149,13 +143,25 @@
             border-color: #ff8533;
             background: #fff5e6;
         }
+        @media (min-width: 768px) {
+            .card {
+                max-width: 600px;
+            }
+            .header {
+                padding: 25px 20px;
+            }
+            .content {
+                padding: 25px;
+            }
+            .upload-area {
+                padding: 40px 20px;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="card">
     <div class="header">
-        <h1>Performance Upload</h1>
-        <p>Upload screenshots for selected channels • Auto compress</p>
     </div>
     <div class="content">
         <form id="uploadForm">
@@ -167,19 +173,19 @@
                 <label>Select Channels</label>
                 <div class="channel-group">
                     <label class="channel-label" for="channel-ig">
-                        <input type="checkbox" name="channels[]" value="Instagram" id="channel-ig">
+                        <input type="radio" name="channel" value="Instagram" id="channel-ig">
                         Instagram
                     </label>
                     <label class="channel-label" for="channel-xhs">
-                        <input type="checkbox" name="channels[]" value="Xiaohongshu" id="channel-xhs">
+                        <input type="radio" name="channel" value="Xiaohongshu" id="channel-xhs">
                         Xiaohongshu
                     </label>
                     <label class="channel-label" for="channel-fb">
-                        <input type="checkbox" name="channels[]" value="Facebook" id="channel-fb">
+                        <input type="radio" name="channel" value="Facebook" id="channel-fb">
                         Facebook
                     </label>
                     <label class="channel-label" for="channel-dy">
-                        <input type="checkbox" name="channels[]" value="Douyin" id="channel-dy">
+                        <input type="radio" name="channel" value="Douyin" id="channel-dy">
                         Douyin
                     </label>
                 </div>
@@ -190,7 +196,6 @@
                 <p style="font-size:0.85rem;color:#9ca3af;margin-top:6px;">JPG, PNG – multiple allowed</p>
                 <input type="file" id="images" name="images[]" accept="image/*" multiple>
             </div>
-            <p class="upload-tip">Tip: Upload high-quality screenshots for best results.</p>
             <div id="status" class="info hidden"></div>
             <div class="preview-box hidden" id="previewBox">
                 <p>Previews</p>
@@ -232,9 +237,10 @@
 
     channelLabels.forEach(label => {
         label.addEventListener('click', () => {
+            channelLabels.forEach(l => l.classList.remove('selected'));
             const input = label.querySelector('input');
-            input.checked = !input.checked;
-            label.classList.toggle('selected', input.checked);
+            input.checked = true;
+            label.classList.add('selected');
         });
     });
 
@@ -296,7 +302,16 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     canvas.toBlob((blob) => {
-                        resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: 'image/jpeg' }));
+                        const compressedReader = new FileReader();
+                        compressedReader.onload = () => {
+                            resolve({
+                                filename: file.name.replace(/\.[^/.]+$/, ".jpg"),
+                                contentType: 'image/jpeg',
+                                data: compressedReader.result // Full data URI
+                            });
+                        };
+                        compressedReader.onerror = reject;
+                        compressedReader.readAsDataURL(blob);
                     }, 'image/jpeg', quality);
                 };
                 img.onerror = reject;
@@ -309,27 +324,31 @@
 
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
-        const channelsChecked = document.querySelectorAll('input[name="channels[]"]:checked');
-        const channels = Array.from(channelsChecked).map(input => input.value);
-        if (channels.length === 0) {
-            showStatus('Please select at least one channel.', 'error');
+        const channelChecked = document.querySelector('input[name="channel"]:checked');
+        if (!channelChecked) {
+            showStatus('Please select a channel.', 'error');
             return;
         }
+        const channels = [channelChecked.value];
         if (imageInput.files.length === 0) {
             showStatus('Please upload at least one screenshot.', 'error');
             return;
         }
         toggleLoader(true);
         showStatus('Compressing images...', 'info');
-        const compressedImages = await Promise.all(Array.from(imageInput.files).map(file => compressImage(file)));
-        const formData = new FormData();
-        formData.append('post_id', postId);
-        channels.forEach(channel => formData.append('channels[]', channel));
-        compressedImages.forEach(image => formData.append('images[]', image));
+        const imagesBase64 = await Promise.all(Array.from(imageInput.files).map(file => compressImage(file)));
+        const payload = {
+            post_id: postId,
+            channels: channels,
+            images: imagesBase64
+        };
         showStatus('Uploading...', 'info');
         fetch('https://hook.eu2.make.com/1m27xus1xn6m2v9g6huonlbaxlggq5ml', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
         })
         .then(response => {
             if (response.ok) {
