@@ -95,6 +95,11 @@
             font-size: 0.85rem;
             color: #586069;
         }
+        #status {
+            margin-top: 16px;
+            text-align: center;
+            color: #0366d6;
+        }
     </style>
 </head>
 <body>
@@ -133,6 +138,7 @@
             <input type="hidden" id="postId" name="post_id" value="">
             <button type="submit" class="submit-button">Submit</button>
         </form>
+        <div id="status"></div>
     </div>
     <div class="footer">
         © 2026 Simple Upload
@@ -143,6 +149,7 @@
         const postIdText = document.getElementById('post-id-text');
         const imageInput = document.getElementById('images');
         const imagePreview = document.getElementById('image-preview');
+        const statusDiv = document.getElementById('status');
 
         function generatePostId() {
             const now = new Date();
@@ -198,9 +205,9 @@
                             const compressedReader = new FileReader();
                             compressedReader.onload = () => {
                                 resolve({
-                                    filename: file.name.replace(/\.[^/.]+$/, ".jpg"), // Convert to JPG
+                                    filename: file.name.replace(/\.[^/.]+$/, ".jpg"),
                                     contentType: 'image/jpeg',
-                                    data: compressedReader.result.split(',')[1]
+                                    data: compressedReader.result  // Full data URL
                                 });
                             };
                             compressedReader.onerror = reject;
@@ -228,7 +235,9 @@
                 return;
             }
 
-            // Compress and convert images to base64
+            statusDiv.textContent = 'Compressing images...';
+
+            // Compress and convert images to base64 (full data URL)
             const imagesBase64 = await Promise.all(Array.from(imageInput.files).map(file => compressImage(file)));
 
             const payload = {
@@ -236,6 +245,8 @@
                 channels: channels,
                 images: imagesBase64
             };
+
+            statusDiv.textContent = 'Uploading...';
 
             // Send JSON to webhook
             fetch('https://hook.eu2.make.com/1m27xus1xn6m2v9g6huonlbaxlggq5ml', {
@@ -247,13 +258,16 @@
             })
             .then(response => {
                 if (response.ok) {
+                    statusDiv.textContent = 'Upload successful!';
                     alert('Upload successful!');
                 } else {
+                    statusDiv.textContent = 'Upload failed.';
                     alert('Upload failed. Please try again.');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                statusDiv.textContent = 'Upload failed.';
                 alert('Upload failed. Please try again.');
             });
         });
