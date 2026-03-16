@@ -141,11 +141,11 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-        const CLIENT_ID = 'YOUR_CLIENT_ID';  // Replace with your OAuth Client ID
-        const API_KEY = 'YOUR_API_KEY';      // Optional: Replace if using API key
+        const CLIENT_ID = '124435785605-2lrhimp3e9lvbij5ihmlub53vuegq5e9.apps.googleusercontent.com';  // Your provided Client ID
+        const API_KEY = '';  // Leave blank if not using, or add your API key from Google Cloud Console if needed
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const FOLDER_ID = 'YOUR_FOLDER_ID';  // Optional: Replace with target folder ID
+        const FOLDER_ID = '';  // Replace with your target Google Drive folder ID (optional, leave blank for root)
 
         let tokenClient;
         let gapiInited = false;
