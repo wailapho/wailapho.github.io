@@ -198,7 +198,16 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         canvas.toBlob((blob) => {
-                            resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: 'image/jpeg' }));
+                            const compressedReader = new FileReader();
+                            compressedReader.onload = () => {
+                                resolve({
+                                    filename: file.name.replace(/\.[^/.]+$/, ".jpg"),
+                                    contentType: 'image/jpeg',
+                                    data: compressedReader.result.split(',')[1] // Pure base64 data
+                                });
+                            };
+                            compressedReader.onerror = reject;
+                            compressedReader.readAsDataURL(blob);
                         }, 'image/jpeg', quality);
                     };
                     img.onerror = reject;
@@ -221,15 +230,21 @@
                 return;
             }
             statusDiv.textContent = 'Compressing images...';
-            const compressedImages = await Promise.all(Array.from(imageInput.files).map(file => compressImage(file)));
-            const formData = new FormData();
-            formData.append('post_id', postId);
-            channels.forEach(channel => formData.append('channels[]', channel));
-            compressedImages.forEach(image => formData.append('images[]', image));
+            // Compress and convert images to base64 (pure base64)
+            const imagesBase64 = await Promise.all(Array.from(imageInput.files).map(file => compressImage(file)));
+            const payload = {
+                post_id: postId,
+                channels: channels,
+                images: imagesBase64
+            };
             statusDiv.textContent = 'Uploading...';
+            // Send JSON to webhook
             fetch('https://hook.eu2.make.com/1m27xus1xn6m2v9g6huonlbaxlggq5ml', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
             })
             .then(response => {
                 if (response.ok) {
