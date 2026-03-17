@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acker Wines Financial Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* Brand Palette */
+    --black:       #212121;
+    --black-deep:  #111111;
+    --burgundy:    #801747;
+    --gold:        #BEAD85;
+    --gold-dark:   #a8996e;
+    --grey:        #F2F2F2;
+    --grey-mid:    #d0d0d0;
+    --ink:         #212121;
+    --ink-soft:    #5a5755;
+    --ink-muted:   #8a8884;
+    --border-dark: rgba(255,255,255,0.09);
+    --border-light: rgba(33,33,33,0.12);
+    --font: 'Nunito Sans', 'Avenir Next', 'Avenir', 'Century Gothic', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--grey);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  /* ══════════════════════════════
+     HEADER
+  ══════════════════════════════ */
+  header { position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
+
+  /* Top Bar */
+  .header-top {
+    background: var(--black);
+    padding: 0 3.5rem;
+    display: flex; align-items: center; height: 68px; gap: 1.5rem;
+    transition: box-shadow 0.3s;
+  }
+
+  .logo-wrap { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; margin-right: 0; }
+  .logo-img { height: 42px; width: auto; display: block; }
+
+  .header-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.12); flex-shrink: 0; }
+
+  .header-tagline {
+    font-size: 11px; letter-spacing: 0.1em; font-weight: 300;
+    color: rgba(255,255,255,0.45); white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* Push everything after tagline to the right */
+  .header-spacer { flex: 1; }
+
+
+
+  /* Language dropdown */
+  .lang-wrap { position: relative; flex-shrink: 0; }
+  .lang-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: none; border: 1px solid rgba(255,255,255,0.12); cursor: pointer;
+    padding: 6px 14px;
+    font-family: var(--font); font-size: 11px; font-weight: 400;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .lang-btn:hover { color: #fff; border-color: rgba(190,173,133,0.4); }
+  .lang-caret {
+    width: 0; height: 0;
+    border-left: 3px solid transparent; border-right: 3px solid transparent;
+    border-top: 4px solid rgba(255,255,255,0.4);
+    transition: transform 0.2s;
+  }
+  .lang-wrap.open .lang-caret { transform: rotate(180deg); }
+  .lang-dropdown {
+    position: absolute; top: calc(100% + 4px); right: 0;
+    background: var(--black-deep); min-width: 140px;
+    border-top: 2px solid var(--gold); opacity: 0; pointer-events: none;
+    transform: translateY(-6px); transition: opacity 0.2s, transform 0.2s;
+  }
+  .lang-wrap.open .lang-dropdown { opacity: 1; pointer-events: all; transform: translateY(0); }
+  .lang-dropdown a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px;
+    font-family: var(--font); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.6); text-decoration: none; font-weight: 300;
+    transition: color 0.15s, background 0.15s;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .lang-dropdown a:last-child { border-bottom: none; }
+  .lang-dropdown a:hover { color: var(--gold); background: rgba(190,173,133,0.06); }
+  .lang-flag { font-size: 15px; }
+
+  .hamburger {
+    display: none; background: none; border: none; cursor: pointer;
+    flex-direction: column; gap: 5px; padding: 8px; flex-shrink: 0;
+  }
+  .hamburger span { display: block; width: 22px; height: 1.5px; background: rgba(255,255,255,0.7); transition: all 0.3s; }
+
+  /* Sub Nav — anchor links */
+  .header-nav {
+    background: #fff;
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 3.5rem;
+    box-shadow: 0 1px 0 rgba(33,33,33,0.06);
+  }
+  .nav-list {
+    display: flex; justify-content: center; align-items: center;
+    list-style: none; height: 48px;
+  }
+  .nav-item { position: relative; }
+  .nav-link {
+    display: flex; align-items: center;
+    padding: 0 1.5rem; height: 48px;
+    font-family: var(--font); font-size: 10.5px;
+    font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+    text-decoration: none; color: var(--ink); position: relative; transition: color 0.2s;
+  }
+  .nav-link::after {
+    content: ''; position: absolute; bottom: 0;
+    left: 1.5rem; right: 1.5rem; height: 2px;
+    background: var(--burgundy); transform: scaleX(0); transition: transform 0.25s ease;
+  }
+  .nav-link:hover { color: var(--burgundy); }
+  .nav-link:hover::after { transform: scaleX(1); }
+  .nav-link.active { color: var(--burgundy); }
+  .nav-link.active::after { transform: scaleX(1); }
+
+  /* ══════════════════════════════
+     PAGE OFFSET
+  ══════════════════════════════ */
+  .page-offset { height: 116px; }
+
+  /* ══════════════════════════════
+     SHARED
+  ══════════════════════════════ */
+  section { padding: 7rem 5rem; }
+  .section-label {
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+    font-weight: 600; color: var(--gold-dark); margin-bottom: 1.2rem;
+  }
+
+  /* ══════════════════════════════
+     HERO
+  ══════════════════════════════ */
+  #hero {
+    min-height: calc(100vh - 116px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative; overflow: hidden;
+    background: var(--black);
+  }
+
+  /* Left content column */
+  .hero-content {
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 5rem 4rem 5rem 5rem;
+    position: relative; z-index: 2;
+  }
+
+  /* Right wine image column */
+  .hero-image {
+    position: relative; overflow: hidden;
+  }
+  .hero-image img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block;
+    filter: brightness(0.6) saturate(0.9);
+  }
+  .hero-image::before {
+    content: '';
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(to right, var(--black) 0%, transparent 30%),
+                linear-gradient(to top, rgba(17,11,9,0.5) 0%, transparent 40%);
+  }
+  /* Gold accent line between columns */
+  .hero-image::after {
+    content: '';
+    position: absolute; top: 10%; bottom: 10%; left: 0; width: 1px; z-index: 2;
+    background: linear-gradient(to bottom, transparent, rgba(190,173,133,0.3) 30%, rgba(190,173,133,0.3) 70%, transparent);
+  }
+
+  /* Wine bottle / cellar background on left */
+  .hero-bg {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background:
+      radial-gradient(ellipse 70% 80% at 30% 60%, rgba(128,23,71,0.14) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 50% at 10% 80%, rgba(190,173,133,0.05) 0%, transparent 60%);
+  }
+  .hero-deco {
+    position: absolute; top: 7rem; left: 42%;
+    width: 1px; height: 60%;
+    background: linear-gradient(to bottom, transparent, rgba(190,173,133,0.15) 40%, rgba(190,173,133,0.15) 60%, transparent);
+    pointer-events: none; z-index: 3; display: none;
+  }
+  .hero-scroll {
+    position: absolute; right: 52%; bottom: 4.5rem; z-index: 3;
+    font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase;
+    font-weight: 600; color: rgba(255,255,255,0.3); writing-mode: vertical-rl;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .hero-scroll::before { content: ''; display: block; width: 1px; height: 44px; background: rgba(190,173,133,0.3); }
+
+  .hero-eyebrow {
+    font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase;
+    font-weight: 600; color: var(--gold); margin-bottom: 1.8rem; opacity: 0.8;
+  }
+  .hero-title {
+    font-size: clamp(3rem, 6vw, 5.8rem);
+    font-weight: 300; line-height: 1.06; letter-spacing: -0.01em;
+    max-width: 780px; margin-bottom: 1.2rem; color: #fff;
+  }
+  .hero-title strong { font-weight: 600; color: #fff; }
+  .hero-title em { font-style: italic; color: rgba(255,255,255,0.55); font-weight: 300; }
+  .hero-subtitle {
+    font-size: 13px; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 2rem; opacity: 0.85;
+  }
+  .hero-sub {
+    max-width: 480px; color: rgba(255,255,255,0.5); font-size: 14px;
+    line-height: 1.9; margin-bottom: 3rem; font-weight: 300;
+  }
+  .hero-ctas { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--burgundy); color: #fff;
+    font-family: var(--font); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    text-decoration: none; padding: 1rem 2rem;
+    transition: background 0.25s;
+  }
+  .btn-primary:hover { background: #9a1d57; }
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+    text-decoration: none; color: rgba(255,255,255,0.75);
+    border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 4px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-outline:hover { color: var(--gold); border-color: var(--gold); }
+
+  .hero-stat-row {
+    display: flex; gap: 3rem; flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2.5rem; margin-top: 4rem;
+  }
+  .hero-stat-num { font-size: 2.2rem; font-weight: 300; line-height: 1; color: #fff; }
+  .hero-stat-num sup { font-size: 0.52em; vertical-align: super; }
+  .hero-stat-label { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 5px; font-weight: 300; }
+
+  /* ══════════════════════════════
+     ABOUT — with wine banner
+  ══════════════════════════════ */
+  #about { padding: 0; background: #fff; }
+
+  /* Wine image banner (CSS-generated atmospheric banner) */
+  .wine-banner {
+    width: 100%; height: 320px;
+    background:
+      linear-gradient(to right, rgba(33,33,33,0.7) 0%, rgba(33,33,33,0.3) 50%, rgba(33,33,33,0.6) 100%),
+      /* Deep wine cellar pattern */
+      repeating-linear-gradient(
+        90deg,
+        rgba(128,23,71,0.08) 0px, rgba(128,23,71,0.08) 2px,
+        transparent 2px, transparent 60px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        rgba(190,173,133,0.05) 0px, rgba(190,173,133,0.05) 1px,
+        transparent 1px, transparent 40px
+      ),
+      linear-gradient(135deg, #1a0a0f 0%, #2d0d1c 30%, #1a1410 60%, #0e0c09 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .wine-banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(128,23,71,0.25) 0%, transparent 70%);
+  }
+  .wine-banner-text {
+    position: relative; text-align: center;
+  }
+  .wine-banner-title {
+    font-size: clamp(1.4rem, 3vw, 2.4rem);
+    font-weight: 300; color: #fff; letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .wine-banner-title em { font-style: italic; color: var(--gold); }
+  .wine-banner-sub {
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    font-weight: 600; color: rgba(190,173,133,0.65);
+  }
+  /* Decorative bottle silhouettes */
+  .wine-banner-bottles {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: 18px; opacity: 0.12;
+  }
+  .bottle {
+    background: rgba(255,255,255,0.8);
+    border-radius: 4px 4px 2px 2px;
+    position: relative;
+  }
+  .bottle::before {
+    content: ''; position: absolute; top: -18px; left: 50%;
+    transform: translateX(-50%);
+    width: 30%; background: rgba(255,255,255,0.8);
+    border-radius: 3px 3px 0 0;
+  }
+
+  .about-inner { padding: 5rem 5rem; }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
+  .about-heading {
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 300; line-height: 1.25; margin-bottom: 1.5rem;
+  }
+  .about-heading em { font-style: italic; }
+  .about-heading strong { font-weight: 600; }
+  .about-body { color: var(--ink-soft); line-height: 1.9; margin-bottom: 1.5rem; font-size: 14px; font-weight: 300; }
+  .about-link {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+    text-decoration: none; color: var(--ink);
+    border-bottom: 1px solid var(--border-light); padding-bottom: 4px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .about-link:hover { border-color: var(--burgundy); color: var(--burgundy); }
+
+  /* Leadership cards with profile circles */
+  .leadership-label {
+    font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase;
+    font-weight: 600; color: var(--gold-dark); margin-bottom: 1.8rem;
+  }
+  .leader-card {
+    display: flex; gap: 1.5rem; align-items: flex-start;
+    padding: 1.8rem 0; border-bottom: 1px solid var(--border-light);
+  }
+  .leader-card:first-of-type { border-top: 1px solid var(--border-light); }
+  .leader-avatar {
+    width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; font-weight: 600; color: #fff;
+    letter-spacing: 0.04em;
+    border: 2px solid rgba(190,173,133,0.3);
+    position: relative; overflow: hidden;
+  }
+  .leader-avatar.ig { background: linear-gradient(135deg, #2d1520 0%, var(--burgundy) 100%); }
+  .leader-avatar.xd { background: linear-gradient(135deg, #1a1200 0%, #6b5828 100%); }
+  .leader-avatar .initials { position: relative; z-index: 1; }
+  .leader-info { flex: 1; }
+  .leader-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .leader-title { font-size: 11.5px; color: var(--burgundy); letter-spacing: 0.06em; font-weight: 400; margin-bottom: 8px; }
+  .leader-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.75; font-weight: 300; }
+
+  /* ══════════════════════════════
+     SERVICES (dark bg)
+  ══════════════════════════════ */
+  #services { border-top: 1px solid var(--border-light); background: var(--black); }
+  #services .section-label { color: rgba(190,173,133,0.6); }
+  .services-heading {
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 300; line-height: 1.2; max-width: 520px;
+    color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;
+  }
+  .services-heading em { font-style: italic; }
+  .services-sub { font-size: 13px; color: rgba(255,255,255,0.35); max-width: 480px; margin-bottom: 4rem; font-weight: 300; }
+
+  /* 3-col grid of cards with image banners */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .service-card {
+    background: #1a1714;
+    border: 1px solid rgba(255,255,255,0.07);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform 0.3s, border-color 0.3s;
+    cursor: default;
+  }
+  .service-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(190,173,133,0.25);
+  }
+
+  /* Image banner at top of each card */
+  .service-img {
+    width: 100%; height: 180px; overflow: hidden;
+    position: relative; flex-shrink: 0;
+  }
+  .service-img img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block;
+    filter: brightness(0.75) saturate(0.85);
+    transition: transform 0.5s ease, filter 0.3s;
+  }
+  .service-card:hover .service-img img {
+    transform: scale(1.04);
+    filter: brightness(0.85) saturate(1);
+  }
+  /* Overlay gradient on image */
+  .service-img::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(17,11,9,0.1) 0%, rgba(17,11,9,0.55) 100%);
+  }
+
+  /* Number badge overlaid on image bottom-left */
+  .service-num-badge {
+    position: absolute; bottom: 0; left: 0; z-index: 2;
+    padding: 0.8rem 1.2rem;
+    font-size: 2.6rem; font-weight: 300; line-height: 1;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: -0.02em;
+    font-family: var(--font);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  }
+  .service-num-badge span {
+    font-size: 0.85rem; font-weight: 600;
+    letter-spacing: 0.1em; color: var(--gold); vertical-align: super;
+    font-size: 1rem;
+  }
+
+  /* Card body */
+  .service-body {
+    padding: 1.8rem 1.8rem 2rem;
+    flex: 1; display: flex; flex-direction: column;
+  }
+  .service-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.75rem; line-height: 1.3; color: rgba(255,255,255,0.9); }
+  .service-desc { font-size: 13px; color: rgba(255,255,255,0.42); line-height: 1.85; font-weight: 300; flex: 1; }
+  .service-highlight {
+    display: inline-block; margin-top: 1.4rem;
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600;
+    color: var(--gold); border-bottom: 1px solid rgba(190,173,133,0.3); padding-bottom: 2px;
+  }
+
+  /* ══════════════════════════════
+     WHY AWFS
+  ══════════════════════════════ */
+  #why { border-top: 1px solid var(--border-light); background: #fff; }
+  .why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3.5rem 4rem; margin-top: 3.5rem; }
+  .why-icon {
+    width: 36px; height: 36px; margin-bottom: 1.2rem;
+    border: 1px solid rgba(128,23,71,0.25); display: flex; align-items: center; justify-content: center;
+  }
+  .why-icon svg { width: 16px; height: 16px; stroke: var(--burgundy); fill: none; stroke-width: 1.5; }
+  .why-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.6rem; }
+  .why-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.85; font-weight: 300; }
+
+  /* ══════════════════════════════
+     STATS BAND
+  ══════════════════════════════ */
+  #stats {
+    background: var(--burgundy);
+    padding: 4.5rem 5rem;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    text-align: center;
+  }
+  .stat-item { padding: 0 2rem; border-right: 1px solid rgba(255,255,255,0.15); }
+  .stat-item:last-child { border-right: none; }
+  .stat-num { font-size: 2.8rem; font-weight: 300; line-height: 1; color: #fff; }
+  .stat-num sup { font-size: 0.5em; vertical-align: super; }
+  .stat-label { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 8px; letter-spacing: 0.06em; font-weight: 300; }
+
+  /* ══════════════════════════════
+     QUOTE
+  ══════════════════════════════ */
+  #quote {
+    background: var(--grey); border-top: 1px solid var(--border-light);
+    text-align: center; padding: 6rem 5rem;
+  }
+  .quote-mark { font-size: 5rem; line-height: 1; color: var(--burgundy); opacity: 0.2; margin-bottom: 1.5rem; font-weight: 300; }
+  .quote-text {
+    font-size: clamp(1.1rem, 2vw, 1.6rem);
+    font-weight: 300; font-style: italic; line-height: 1.65;
+    max-width: 800px; margin: 0 auto 2.5rem; color: var(--ink);
+  }
+  .quote-author { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--burgundy); }
+  .quote-role { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+
+  /* ══════════════════════════════
+     CONTACT
+  ══════════════════════════════ */
+  #contact { border-top: 1px solid var(--border-light); background: #fff; padding: 0; }
+  .contact-grid {
+    display: grid; grid-template-columns: 1fr 1fr; min-height: 520px;
+  }
+  .contact-content {
+    padding: 6rem 5rem;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .contact-image {
+    position: relative; overflow: hidden;
+  }
+  .contact-image img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: brightness(0.65) saturate(0.85);
+  }
+  .contact-image::before {
+    content: ''; position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(to left, transparent 40%, rgba(255,255,255,0.08) 100%);
+  }
+  /* Gold accent strip */
+  .contact-image::after {
+    content: ''; position: absolute; top: 15%; bottom: 15%; right: 0;
+    width: 1px; z-index: 2;
+    background: linear-gradient(to bottom, transparent, rgba(190,173,133,0.3) 30%, rgba(190,173,133,0.3) 70%, transparent);
+  }
+  .contact-heading {
+    font-size: clamp(1.8rem, 3.2vw, 3.2rem);
+    font-weight: 300; line-height: 1.1; margin-bottom: 1rem; max-width: 520px;
+  }
+  .contact-heading em { font-style: italic; color: var(--ink-soft); }
+  .contact-sub { font-size: 14px; color: var(--ink-soft); max-width: 480px; margin-bottom: 3.5rem; font-weight: 300; line-height: 1.85; }
+  .contact-row { display: flex; gap: 4.5rem; margin-bottom: 3.5rem; flex-wrap: wrap; }
+  .contact-item-label {
+    font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+    font-weight: 600; color: var(--ink-muted); margin-bottom: 6px;
+  }
+  .contact-item-val { font-size: 14px; color: var(--ink); text-decoration: none; display: block; font-weight: 300; transition: color 0.2s; }
+  .contact-item-val:hover { color: var(--burgundy); }
+  .btn-contact {
+    display: inline-flex; align-items: center; gap: 14px;
+    background: var(--black); color: #fff;
+    font-family: var(--font); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    text-decoration: none; padding: 1.1rem 2.2rem;
+    transition: background 0.25s;
+  }
+  .btn-contact:hover { background: var(--burgundy); }
+  .contact-disclaimer {
+    margin-top: 2.5rem; font-size: 11px; color: var(--ink-muted); font-weight: 300;
+    max-width: 600px; line-height: 1.75; border-top: 1px solid var(--border-light); padding-top: 1.5rem;
+  }
+
+  /* ══════════════════════════════
+     FOOTER
+  ══════════════════════════════ */
+  footer {
+    background: var(--black); padding: 3.5rem 3.5rem 2rem;
+    border-top: 2px solid var(--burgundy);
+  }
+  .footer-top {
+    display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 3rem; padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border-dark);
+  }
+  .footer-brand p {
+    font-size: 12px; color: rgba(255,255,255,0.28); margin-top: 1.2rem;
+    line-height: 1.85; font-weight: 300; max-width: 260px;
+  }
+  .footer-col-title {
+    font-size: 9.5px; letter-spacing: 0.24em; text-transform: uppercase;
+    font-weight: 600; color: rgba(255,255,255,0.3); margin-bottom: 1.3rem;
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 0.75rem; }
+  .footer-col ul a {
+    font-size: 12.5px; color: rgba(255,255,255,0.42); text-decoration: none;
+    font-weight: 300; transition: color 0.2s;
+  }
+  .footer-col ul a:hover { color: var(--gold); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 1.8rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-copy { font-size: 11px; color: rgba(255,255,255,0.22); font-weight: 300; }
+  .footer-socials { display: flex; gap: 1.8rem; list-style: none; }
+  .footer-socials a {
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 600; color: rgba(255,255,255,0.28); text-decoration: none; transition: color 0.2s;
+  }
+  .footer-socials a:hover { color: var(--gold); }
+
+  /* ══════════════════════════════
+     RESPONSIVE
+  ══════════════════════════════ */
+  @media (max-width: 1100px) {
+    .services-grid { grid-template-columns: 1fr 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 860px) {
+    section { padding: 5rem 1.5rem; }
+    .about-inner { padding: 4rem 1.5rem; }
+    #stats { padding: 3rem 1.5rem; }
+    .header-top { padding: 0 1.2rem; gap: 0.8rem; }
+    .header-nav { padding: 0 1.5rem; }
+    .header-tagline { display: none; }
+    .header-divider { display: none; }
+    .hamburger { display: flex; flex-shrink: 0; }
+    .lang-wrap { margin-left: auto; }
+    .nav-list { display: none; flex-direction: column; height: auto; background: #fff; padding: 0.5rem 0; }
+    .nav-list.open { display: flex; }
+    .nav-link { height: auto; padding: 13px 1.5rem; width: 100%; justify-content: center; }
+    .nav-link::after { left: 1.5rem; right: 1.5rem; }
+    /* Hero: stack vertically */
+    #hero { grid-template-columns: 1fr; }
+    .hero-content { padding: 3.5rem 1.5rem 4rem; order: 2; }
+    .hero-image { order: 1; height: 260px; }
+    .hero-image img { height: 100%; }
+    .hero-scroll { display: none; }
+    .hero-deco { display: none; }
+    .hero-stat-row { flex-wrap: wrap; gap: 2rem; }
+    /* Contact: stack vertically */
+    .contact-grid { grid-template-columns: 1fr; }
+    .contact-content { padding: 4rem 1.5rem; }
+    .contact-image { height: 260px; order: -1; }
+    .contact-row { flex-direction: column; gap: 2rem; }
+    .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .why-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .services-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .service-card { transform: none !important; }
+    .service-img { height: 160px; }
+    #stats { grid-template-columns: 1fr 1fr; row-gap: 2.5rem; }
+    .stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 2rem; }
+    .stat-item:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.12); }
+    .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+    footer { padding: 2.5rem 1.5rem 1.5rem; }
+    .footer-bottom { flex-direction: column; text-align: center; }
+    .wine-banner { height: 220px; }
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fu  { animation: fadeUp 0.65s ease both; }
+  .d1  { animation-delay: 0.08s; }
+  .d2  { animation-delay: 0.2s; }
+  .d3  { animation-delay: 0.34s; }
+  .d4  { animation-delay: 0.48s; }
+  .d5  { animation-delay: 0.62s; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     HEADER
+══════════════════════════════ -->
+<header>
+  <div class="header-top" id="header-top">
+
+    <!-- Logo -->
+    <a href="#hero" class="logo-wrap">
+      <img class="logo-img" src="https://wailapho.github.io/acker/img/acker-logo-white.svg" alt="Acker Wines — Since 1820" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <!-- Fallback SVG if img fails -->
+      <svg style="display:none;height:42px;width:auto;" viewBox="0 0 180 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="4" y="36" font-family="Georgia,serif" font-size="36" font-style="italic" font-weight="400" fill="#ffffff" letter-spacing="0.5">Acker</text>
+        <line x1="4" y1="41" x2="116" y2="41" stroke="#BEAD85" stroke-width="0.8" opacity="0.5"/>
+        <text x="5" y="50" font-family="Arial,sans-serif" font-size="7.5" font-weight="300" fill="#8a8580" letter-spacing="4">SINCE  1820</text>
+      </svg>
+    </a>
+
+    <div class="header-divider"></div>
+    <span class="header-tagline">World's #1 Fine Wine Auction House</span>
+    <div class="header-spacer"></div>
+
+    <!-- Language Dropdown -->
+    <div class="lang-wrap" id="lang-wrap">
+      <button class="lang-btn" id="lang-btn" aria-label="Select Language">
+        <span class="lang-flag">🇺🇸</span>
+        <span id="lang-label">ENG</span>
+        <span class="lang-caret"></span>
+      </button>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <a href="#" data-lang="ENG" data-flag="🇺🇸">
+          <span class="lang-flag">🇺🇸</span> English
+        </a>
+        <a href="#" data-lang="中文" data-flag="🇨🇳">
+          <span class="lang-flag">🇨🇳</span> 中文
+        </a>
+      </div>
+    </div>
+
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Anchor nav -->
+  <nav class="header-nav">
+    <ul class="nav-list" id="nav-list">
+      <li class="nav-item"><a href="#about"    class="nav-link" data-section="about">About AWFS</a></li>
+      <li class="nav-item"><a href="#services" class="nav-link" data-section="services">Financial Products</a></li>
+      <li class="nav-item"><a href="#why"      class="nav-link" data-section="why">Why AWFS</a></li>
+      <li class="nav-item"><a href="#stats"    class="nav-link" data-section="stats">At a Glance</a></li>
+      <li class="nav-item"><a href="#quote"    class="nav-link" data-section="quote">Leadership</a></li>
+      <li class="nav-item"><a href="#contact"  class="nav-link" data-section="contact">Get in Touch</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="page-offset"></div>
+
+<!-- ══════════════════════════════
+     HERO
+══════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-deco"></div>
+  <div class="hero-scroll">Scroll</div>
+
+  <!-- Left: content -->
+  <div class="hero-content">
+    <p class="hero-eyebrow fu">New York · Hong Kong · Global</p>
+    <h1 class="hero-title fu d1">
+      Acker Wines<br><strong>Financial Services</strong>
+    </h1>
+    <p class="hero-subtitle fu d2">Institutional-Grade Liquidity for the Fine Wine Market</p>
+    <p class="hero-sub fu d3">The world's #1 fine wine auction house now extends its expertise into structured finance — empowering collectors, consignors, and investors with the tools they need to thrive.</p>
+    <div class="hero-ctas fu d4">
+      <a href="#services" class="btn-primary">Explore Solutions &nbsp;→</a>
+      <a href="#contact"  class="btn-outline">Speak to Our Team &nbsp;→</a>
+    </div>
+
+    <div class="hero-stat-row fu d5">
+      <div>
+        <div class="hero-stat-num">#1</div>
+        <div class="hero-stat-label">Fine wine auction house globally</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">200<sup>+</sup></div>
+        <div class="hero-stat-label">Years of Acker heritage</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">60<sup>yrs</sup></div>
+        <div class="hero-stat-label">Combined leadership expertise</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">3<sup>day</sup></div>
+        <div class="hero-stat-label">Full payout after auction</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: wine image -->
+  <div class="hero-image">
+    <img
+      src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=1200&q=85"
+      alt="Fine wine cellar collection"
+    >
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     ABOUT AWFS
+══════════════════════════════ -->
+<section id="about" style="padding:0;">
+
+  <!-- Wine atmosphere banner -->
+  <div class="wine-banner">
+    <div class="wine-banner-bottles" aria-hidden="true">
+      <div class="bottle" style="width:28px;height:110px;"><div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);width:9px;height:22px;background:rgba(255,255,255,0.8);border-radius:3px 3px 0 0;"></div></div>
+      <div class="bottle" style="width:32px;height:130px;"><div style="position:absolute;top:-24px;left:50%;transform:translateX(-50%);width:10px;height:24px;background:rgba(255,255,255,0.8);border-radius:3px 3px 0 0;"></div></div>
+      <div class="bottle" style="width:30px;height:120px;"><div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:9px;height:20px;background:rgba(255,255,255,0.8);border-radius:3px 3px 0 0;"></div></div>
+      <div class="bottle" style="width:34px;height:140px;"><div style="position:absolute;top:-26px;left:50%;transform:translateX(-50%);width:11px;height:26px;background:rgba(255,255,255,0.8);border-radius:3px 3px 0 0;"></div></div>
+      <div class="bottle" style="width:28px;height:115px;"><div style="position:absolute;top:-21px;left:50%;transform:translateX(-50%);width:9px;height:21px;background:rgba(255,255,255,0.8);border-radius:3px 3px 0 0;"></div></div>
+      <div class="bottle" style="width:32px;height:128px;"><div style="position:absolute;top:-23px;left:50%;transform:translateX(-50%);width:10px;height:23px;background:rgba(255,255,255,0.8);border-radius:3px 3px 0 0;"></div></div>
+      <div class="bottle" style="width:30px;height:118px;"><div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:9px;height:20px;background:rgba(255,255,255,0.8);border-radius:3px 3px 0 0;"></div></div>
+    </div>
+    <div class="wine-banner-text">
+      <h2 class="wine-banner-title">About <em>Acker Wines Financial Services</em></h2>
+      <p class="wine-banner-sub">A new standard in fine wine finance</p>
+    </div>
+  </div>
+
+  <div class="about-inner">
+    <div class="about-grid">
+      <div>
+        <p class="section-label">AWFS</p>
+        <h2 class="about-heading">Institutional-Grade <em>Finance for Collectors</em></h2>
+        <p class="about-body">Acker Wines Financial Services (AWFS) is a dedicated independent entity designed to provide tailored financial solutions for discerning clients in the fine and rare wine market. With decades of unrivaled expertise and record-breaking auction results, Acker now extends its commitment to excellence into the world of structured finance.</p>
+        <p class="about-body">AWFS adheres strictly to institutional lending standards, operating entirely separate from all other Acker business lines — ensuring professionalism, transparency, and confidence in every transaction.</p>
+        <a href="#services" class="about-link">View our financial solutions &nbsp;→</a>
+      </div>
+
+      <!-- Leadership -->
+      <div>
+        <p class="leadership-label">Leadership</p>
+
+        <div class="leader-card">
+          <div class="leader-avatar ig">
+            <span class="initials">IG</span>
+          </div>
+          <div class="leader-info">
+            <div class="leader-name">Irvin Goldman</div>
+            <div class="leader-title">Chief Executive Officer, Acker</div>
+            <p class="leader-desc">With decades of leadership at the helm of the world's foremost fine wine auction house, Irvin brings unmatched depth of market knowledge and institutional relationships to AWFS.</p>
+          </div>
+        </div>
+
+        <div class="leader-card">
+          <div class="leader-avatar xd">
+            <span class="initials">XD</span>
+          </div>
+          <div class="leader-info">
+            <div class="leader-name">Xiomy Dow</div>
+            <div class="leader-title">Managing Director, Finance & Treasury Management</div>
+            <p class="leader-desc">Newly appointed to lead AWFS, Xiomy brings deep expertise in finance and capital markets. Together, the leadership team combines 60 years of experience to deliver innovative, institutional-grade financial services.</p>
+          </div>
+        </div>
+
+        <p style="margin-top:1.8rem;font-size:12px;color:var(--ink-muted);font-weight:300;line-height:1.8;padding-top:1.5rem;border-top:1px solid var(--border-light);">
+          AWFS is a separate, independent entity operating with strict adherence to institutional lending standards — distinct from all other Acker business lines.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     FINANCIAL SERVICES
+══════════════════════════════ -->
+<section id="services">
+  <p class="section-label">Financial Products</p>
+  <h2 class="services-heading">Institutional-Grade <em>Liquidity Solutions</em></h2>
+  <p class="services-sub">Purpose-built for the unique dynamics of the fine and rare wine market.</p>
+  <div class="services-grid">
+
+    <!-- Card 1 -->
+    <div class="service-card">
+      <div class="service-img">
+        <img src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=80" alt="Wine cellar collection">
+        <div class="service-num-badge"><span>/</span>01</div>
+      </div>
+      <div class="service-body">
+        <h3 class="service-name">Collection-Backed Financing</h3>
+        <p class="service-desc">Access liquidity while retaining full ownership and storage of your collection. Your wines remain in Acker's world-class storage — you receive the capital you need.</p>
+        <span class="service-highlight">Retain Ownership →</span>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="service-card">
+      <div class="service-img">
+        <img src="https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?w=600&q=80" alt="Fine wine bottles">
+        <div class="service-num-badge"><span>/</span>02</div>
+      </div>
+      <div class="service-body">
+        <h3 class="service-name">Purchase Lending</h3>
+        <p class="service-desc">Enabling clients to acquire desired wines with flexible, tailored financing options — move quickly on acquisition opportunities without tying up existing capital.</p>
+        <span class="service-highlight">Flexible Terms →</span>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="service-card">
+      <div class="service-img">
+        <img src="https://images.unsplash.com/photo-1567529692333-de9fd6772897?w=600&q=80" alt="Wine auction">
+        <div class="service-num-badge"><span>/</span>03</div>
+      </div>
+      <div class="service-body">
+        <h3 class="service-name">Consignor Advances</h3>
+        <p class="service-desc">A 30-day standard advance structure for consignors — providing immediate working capital to sellers consigning wine to Acker's premier global auctions.</p>
+        <span class="service-highlight">Immediate Capital →</span>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="service-card">
+      <div class="service-img">
+        <img src="https://images.unsplash.com/photo-1516594798947-e65505dbb29d?w=600&q=80" alt="Luxury wine payout">
+        <div class="service-num-badge"><span>/</span>04</div>
+      </div>
+      <div class="service-body">
+        <h3 class="service-name">Rapid Auction Payouts</h3>
+        <p class="service-desc">Full payout within 3 business days following an auction — ensuring swift and certain access to proceeds for all successful consignors worldwide.</p>
+        <span class="service-highlight">3-Day Settlement →</span>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="service-card">
+      <div class="service-img">
+        <img src="https://images.unsplash.com/photo-1470158499416-75be9aa0c4db?w=600&q=80" alt="Large wine collection">
+        <div class="service-num-badge"><span>/</span>05</div>
+      </div>
+      <div class="service-body">
+        <h3 class="service-name">Large-Scale Retail Buyouts</h3>
+        <p class="service-desc">Facilitating swift and substantial purchases of entire collections or significant retail inventories with the full force of Acker's global liquidity and reach.</p>
+        <span class="service-highlight">Entire Collections →</span>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="service-card">
+      <div class="service-img">
+        <img src="https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=600&q=80" alt="Wine investment portfolio">
+        <div class="service-num-badge"><span>/</span>06</div>
+      </div>
+      <div class="service-body">
+        <h3 class="service-name">Portfolio Management</h3>
+        <p class="service-desc">Unlock capital without selling prized holdings — supporting long-term investment strategies and enabling faster reinvestment in new market opportunities.</p>
+        <span class="service-highlight">Strategic Solutions →</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     WHY AWFS
+══════════════════════════════ -->
+<section id="why">
+  <p class="section-label">Why AWFS</p>
+  <h2 class="about-heading" style="max-width:580px;margin-bottom:0;">Empowering Clients Across <em>the Fine Wine Ecosystem</em></h2>
+  <div class="why-grid">
+    <div class="why-item">
+      <div class="why-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="why-title">Unlock Capital</div>
+      <p class="why-desc">Access liquidity without sacrificing ownership of your most prized bottles. Support portfolio management and long-term investment strategies without forced sales.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-icon">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="why-title">Accelerate Cash Flow</div>
+      <p class="why-desc">Receive proceeds from consignments and auctions faster than ever — enabling rapid reinvestment and the ability to capture emerging market opportunities.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      </div>
+      <div class="why-title">Pursue Acquisitions</div>
+      <p class="why-desc">Act with confidence on individual bottles, full collections, or large retail transactions — backed by tailored financing structured around your specific needs.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="why-title">Institutional Standards</div>
+      <p class="why-desc">Every transaction is governed by strict institutional lending protocols, providing the same level of rigor and confidence expected by the world's most sophisticated investors.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="why-title">Independent Structure</div>
+      <p class="why-desc">AWFS operates as a fully independent entity — ensuring professional separation, complete transparency, and strict compliance at every step of the process.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div class="why-title">Acker's Global Network</div>
+      <p class="why-desc">From New York to Hong Kong, leverage the world's foremost fine wine network. Our unmatched market intelligence informs every financial solution we structure for you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     STATS
+══════════════════════════════ -->
+<div id="stats">
+  <div class="stat-item">
+    <div class="stat-num">#1</div>
+    <div class="stat-label">Fine wine auction house worldwide</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">200<sup>+</sup></div>
+    <div class="stat-label">Years of Acker heritage</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">3<sup>day</sup></div>
+    <div class="stat-label">Post-auction full payout</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">30<sup>day</sup></div>
+    <div class="stat-label">Standard consignor advance</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     LEADERSHIP QUOTE
+══════════════════════════════ -->
+<section id="quote">
+  <p class="section-label" style="text-align:center;">Leadership</p>
+  <div class="quote-mark">"</div>
+  <p class="quote-text">
+    In today's dynamic fine wine market, where collections often represent significant assets, access to efficient and reliable liquidity is essential. AWFS empowers our clients to unlock capital, accelerate cash flow, and pursue acquisitions with confidence — backed by Acker's unmatched expertise in the fine wine market.
+  </p>
+  <p class="quote-author">Xiomy Dow</p>
+  <p class="quote-role">Managing Director, Acker Financial Services</p>
+</section>
+
+<!-- ══════════════════════════════
+     CONTACT
+══════════════════════════════ -->
+<section id="contact">
+  <div class="contact-grid">
+
+    <!-- Left: content -->
+    <div class="contact-content">
+      <p class="section-label">Get in Touch</p>
+      <h2 class="contact-heading">Ready to Unlock <em>Your Collection's Potential?</em></h2>
+      <p class="contact-sub">Our team is available to discuss bespoke financial solutions tailored to your needs. Whether you're a collector, consignor, or institutional investor — AWFS has a solution for you.</p>
+      <div class="contact-row">
+        <div>
+          <p class="contact-item-label">Phone</p>
+          <a href="tel:+12126286800" class="contact-item-val">+1 (212) 628-6800</a>
+        </div>
+        <div>
+          <p class="contact-item-label">Email</p>
+          <a href="mailto:financial@ackerwines.com" class="contact-item-val">financial@ackerwines.com</a>
+        </div>
+        <div>
+          <p class="contact-item-label">Headquarters</p>
+          <span class="contact-item-val">New York, USA</span>
+        </div>
+        <div>
+          <p class="contact-item-label">Asia Office</p>
+          <span class="contact-item-val">Hong Kong</span>
+        </div>
+      </div>
+      <a href="mailto:financial@ackerwines.com" class="btn-contact">Request a Consultation &nbsp;→</a>
+      <p class="contact-disclaimer">Acker Wines Financial Services (AWFS) is an independent entity offering institutional-grade financial products tailored to the fine and rare wine market. AWFS operates separately from all other Acker business lines and adheres strictly to institutional lending standards.</p>
+    </div>
+
+    <!-- Right: wine image -->
+    <div class="contact-image">
+      <img
+        src="https://images.unsplash.com/photo-1574096079513-d8259312b785?w=1000&q=85"
+        alt="Fine wine — Acker collection"
+      >
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     FOOTER
+══════════════════════════════ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <img src="https://wailapho.github.io/acker/img/acker-logo-white.svg" alt="Acker Wines" style="height:36px;width:auto;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <svg style="display:none;height:36px;width:auto;" viewBox="0 0 180 52" fill="none"><text x="4" y="36" font-family="Georgia,serif" font-size="36" font-style="italic" font-weight="400" fill="#ffffff" letter-spacing="0.5">Acker</text><line x1="4" y1="41" x2="116" y2="41" stroke="#BEAD85" stroke-width="0.8" opacity="0.4"/><text x="5" y="50" font-family="Arial,sans-serif" font-size="7.5" font-weight="300" fill="#8a8580" letter-spacing="4">SINCE  1820</text></svg>
+      <p>The world's number one fine and rare wine auction house, with a legacy of record-breaking sales and a trusted global network of collectors and investors.</p>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Financial Services</p>
+      <ul>
+        <li><a href="#services">Collection Financing</a></li>
+        <li><a href="#services">Purchase Lending</a></li>
+        <li><a href="#services">Consignor Advances</a></li>
+        <li><a href="#services">Retail Buyouts</a></li>
+        <li><a href="#services">Portfolio Management</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Acker</p>
+      <ul>
+        <li><a href="#">Auctions</a></li>
+        <li><a href="#">Shop</a></li>
+        <li><a href="#">Sell</a></li>
+        <li><a href="#">Calendar</a></li>
+        <li><a href="#">Corporate Services</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Company</p>
+      <ul>
+        <li><a href="#">About Acker</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Wine Education</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 Acker Wines Financial Services. All Rights Reserved. AWFS is an independent entity.</p>
+    <ul class="footer-socials">
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#">LinkedIn</a></li>
+      <li><a href="#">Facebook</a></li>
+      <li><a href="#">WeChat</a></li>
+    </ul>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════
+     JAVASCRIPT
+══════════════════════════════ -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // ── Mobile hamburger ──
+  const hamburger = document.getElementById('hamburger');
+  const navList   = document.getElementById('nav-list');
+  hamburger.addEventListener('click', () => {
+    navList.classList.toggle('open');
+    const spans = hamburger.querySelectorAll('span');
+    if (navList.classList.contains('open')) {
+      spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+      spans[1].style.opacity   = '0';
+      spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+    } else {
+      spans.forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
+    }
+  });
+
+  // ── Language dropdown ──
+  const langWrap     = document.getElementById('lang-wrap');
+  const langBtn      = document.getElementById('lang-btn');
+  const langDropdown = document.getElementById('lang-dropdown');
+  const langLabel    = document.getElementById('lang-label');
+
+  langBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    langWrap.classList.toggle('open');
+  });
+  document.addEventListener('click', () => langWrap.classList.remove('open'));
+
+  langDropdown.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      langLabel.textContent = a.dataset.lang;
+      langBtn.querySelector('.lang-flag').textContent = a.dataset.flag;
+      langWrap.classList.remove('open');
+    });
+  });
+
+  // ── Sticky shadow ──
+  const headerTop = document.getElementById('header-top');
+  window.addEventListener('scroll', () => {
+    headerTop.style.boxShadow = window.scrollY > 10
+      ? '0 4px 24px rgba(0,0,0,0.5)'
+      : 'none';
+  });
+
+  // ── Active nav highlight on scroll ──
+  const sections  = document.querySelectorAll('section[id], div[id="stats"]');
+  const navLinks  = document.querySelectorAll('.nav-link[data-section]');
+  const OFFSET    = 140;
+
+  function setActive() {
+    let current = '';
+    sections.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - OFFSET) current = sec.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.dataset.section === current);
+    });
+  }
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+
+  // ── Scroll-triggered reveal ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity    = '1';
+        entry.target.style.transform  = 'translateY(0)';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+ 
