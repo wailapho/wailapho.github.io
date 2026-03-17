@@ -628,6 +628,8 @@
     .header-divider { display: none; }
     .header-nav { display: none; }
     .page-offset { height: 68px; }
+    /* Thin accent line below header on mobile */
+    .header-top { border-bottom: 1px solid rgba(190,173,133,0.3); }
     .hamburger { display: flex; flex-shrink: 0; }
     .lang-wrap { margin-left: auto; }
     .nav-list { display: none; flex-direction: column; height: auto; background: #fff; padding: 0.5rem 0; }
@@ -636,7 +638,7 @@
     .nav-link::after { left: 1.5rem; right: 1.5rem; }
     /* Hero: single column, image injected via JS between body and CTAs */
     #hero { grid-template-columns: 1fr; }
-    .hero-content { padding: 3.5rem 1.5rem 4rem; order: 1; display: block; }
+    .hero-content { padding: 1.2rem 1.5rem 3rem; order: 1; display: block; }
     .hero-image { display: none; }
     .hero-image-mobile { width: 100%; height: 240px; overflow: hidden; margin: 2rem 0; }
     .hero-image-mobile img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7) saturate(0.9); display: block; }
