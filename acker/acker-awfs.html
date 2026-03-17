@@ -701,22 +701,32 @@
     <span class="header-tagline">World's #1 Fine Wine Auction House</span>
     <div class="header-spacer"></div>
 
-    <!-- Language Dropdown -->
-    <div class="lang-wrap" id="lang-wrap">
-      <button class="lang-btn" id="lang-btn" aria-label="Select Language">
-        <span class="lang-flag">🇺🇸</span>
-        <span id="lang-label">ENG</span>
-        <span class="lang-caret"></span>
-      </button>
-      <div class="lang-dropdown" id="lang-dropdown">
-        <a href="#" data-lang="ENG" data-flag="🇺🇸">
-          <span class="lang-flag">🇺🇸</span> English
-        </a>
-        <a href="https://wailapho.github.io/acker/acker-awfs-zh.html" data-lang="中文" data-flag="🇨🇳">
-          <span class="lang-flag">🇨🇳</span> 中文
-        </a>
-      </div>
-    </div>
+<!-- Language Dropdown -->
+<div class="lang-wrap" id="lang-wrap">
+  <button class="lang-btn" id="lang-btn" aria-label="Select Language" aria-expanded="false">
+    <span class="lang-flag">🇺🇸</span>
+    <span id="lang-label">English</span>
+    <span class="lang-caret"></span>
+  </button>
+
+  <div class="lang-dropdown" id="lang-dropdown">
+    <!-- English (current page) -->
+    <a href="https://wailapho.github.io/acker/acker-awfs.html" 
+       class="lang-option active" 
+       data-lang="ENG" 
+       data-flag="🇺🇸">
+      <span class="lang-flag">🇺🇸</span> English
+    </a>
+
+    <!-- Chinese version -->
+    <a href="https://wailapho.github.io/acker/acker-awfs-zh.html" 
+       class="lang-option" 
+       data-lang="中文" 
+       data-flag="🇨🇳">
+      <span class="lang-flag">🇨🇳</span> 中文
+    </a>
+  </div>
+</div>
 
     <button class="hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
