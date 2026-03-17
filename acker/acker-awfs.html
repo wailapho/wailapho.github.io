@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Acker Wines Financial Services</title>
-<link rel="icon" href="https://wailapho.github.io/acker/img/favicon.ico" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
@@ -701,32 +700,22 @@
     <span class="header-tagline">World's #1 Fine Wine Auction House</span>
     <div class="header-spacer"></div>
 
-<!-- Language Dropdown -->
-<div class="lang-wrap" id="lang-wrap">
-  <button class="lang-btn" id="lang-btn" aria-label="Select Language" aria-expanded="false">
-    <span class="lang-flag">🇺🇸</span>
-    <span id="lang-label">English</span>
-    <span class="lang-caret"></span>
-  </button>
-
-  <div class="lang-dropdown" id="lang-dropdown">
-    <!-- English (current page) -->
-    <a href="https://wailapho.github.io/acker/acker-awfs.html" 
-       class="lang-option active" 
-       data-lang="ENG" 
-       data-flag="🇺🇸">
-      <span class="lang-flag">🇺🇸</span> English
-    </a>
-
-    <!-- Chinese version -->
-    <a href="https://wailapho.github.io/acker/acker-awfs-zh.html" 
-       class="lang-option" 
-       data-lang="中文" 
-       data-flag="🇨🇳">
-      <span class="lang-flag">🇨🇳</span> 中文
-    </a>
-  </div>
-</div>
+    <!-- Language Dropdown -->
+    <div class="lang-wrap" id="lang-wrap">
+      <button class="lang-btn" id="lang-btn" aria-label="Select Language">
+        <span class="lang-flag">🇺🇸</span>
+        <span id="lang-label">ENG</span>
+        <span class="lang-caret"></span>
+      </button>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <a href="https://wailapho.github.io/acker/acker-awfs.html" data-lang="ENG" data-flag="🇺🇸">
+          <span class="lang-flag">🇺🇸</span> English
+        </a>
+        <a href="https://wailapho.github.io/acker/acker-awfs-zh.html" data-lang="中文" data-flag="🇨🇳">
+          <span class="lang-flag">🇨🇳</span> 中文
+        </a>
+      </div>
+    </div>
 
     <button class="hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -1216,10 +1205,11 @@
 
   langDropdown.querySelectorAll('a').forEach(function(a) {
     a.addEventListener('click', function(e) {
-      e.preventDefault();
       e.stopPropagation();
-      langLabel.textContent = a.dataset.lang;
-      langBtn.querySelector('.lang-flag').textContent = a.dataset.flag;
+      // Navigate to the href (language page switch)
+      if (a.href && a.href !== '#' && a.href !== window.location.href) {
+        window.location.href = a.href;
+      }
       langWrap.classList.remove('open');
     });
   });
