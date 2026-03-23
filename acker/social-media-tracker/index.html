@@ -3,19 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Xiaohongshu OCR → Text → Make.com</title>
+  <title>Xiaohongshu Screenshot → Perfect Collage → Make.com</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Tesseract.js CDN -->
-  <script src="https://unpkg.com/tesseract.js@v5.1.0/dist/tesseract.min.js"></script>
   <style>
     body { background: linear-gradient(to bottom, #0f172a, #1e293b); color: #e2e8f0; min-height: 100vh; }
     .card { background: rgba(30,41,59,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(148,163,184,0.2); }
     .upload-zone { border: 2px dashed #64748b; transition: all 0.3s; }
     .upload-zone:hover, .upload-zone.dragover { border-color: #60a5fa; background: rgba(96,165,250,0.08); }
     .preview-container { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
-    .preview-img { max-height: 180px; object-fit: contain; border-radius: 8px; }
-    #progress { display: none; }
+    .preview-img { max-height: 180px; object-fit: contain; border-radius: 8px; border: 1px solid #4b5563; }
+    .toast { transition: all 0.4s ease-out; }
   </style>
 </head>
 <body class="flex items-center justify-center p-4 sm:p-6">
@@ -24,10 +22,10 @@
 
     <div class="text-center mb-8">
       <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 mb-4 shadow-lg">
-        <i class="fas fa-text text-3xl text-white"></i>
+        <i class="fas fa-images text-3xl text-white"></i>
       </div>
-      <h1 class="text-3xl font-bold text-white">Xiaohongshu OCR Extractor</h1>
-      <p class="text-slate-400 mt-2">Upload screenshots → OCR text extraction → send clean text to Make.com</p>
+      <h1 class="text-3xl font-bold text-white">Screenshot Collage Tracker</h1>
+      <p class="text-slate-400 mt-2">Upload screenshots → perfect aspect-ratio collage → send to Make.com</p>
     </div>
 
     <div class="card rounded-2xl p-6 sm:p-8 shadow-2xl">
@@ -65,23 +63,21 @@
 
         <!-- Upload -->
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Screenshots</label>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Screenshots (multiple OK)</label>
           <div id="dropzone" class="upload-zone rounded-xl p-8 text-center cursor-pointer">
             <input type="file" id="fileInput" accept="image/*" multiple class="hidden"/>
             <div id="upload-content">
               <i class="fas fa-cloud-arrow-up text-5xl text-slate-500 mb-4"></i>
-              <p class="text-slate-400">Click or drag images</p>
+              <p class="text-slate-400">Click or drag images here</p>
             </div>
             <div id="preview-container" class="preview-container"></div>
           </div>
         </div>
 
-        <div id="progress" class="text-center text-yellow-400 hidden">OCR in progress... (may take 5–30 seconds)</div>
-
         <button id="submitBtn" type="submit"
           class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium py-4 rounded-xl flex items-center justify-center gap-3 text-lg">
-          <i class="fas fa-file-lines"></i>
-          Extract Text & Send to Make.com
+          <i class="fas fa-paper-plane"></i>
+          Create Non-Distorted Collage & Send
         </button>
 
       </form>
@@ -102,7 +98,6 @@
     const dropzone = document.getElementById('dropzone');
     const previewContainer = document.getElementById('preview-container');
     const submitBtn = document.getElementById('submitBtn');
-    const progress = document.getElementById('progress');
 
     dropzone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', e => handleFiles(e.target.files));
@@ -128,57 +123,84 @@
       });
     }
 
-    // OCR + send text
-    async function extractAndSend() {
+    async function createCollageAndSend() {
       if (selectedFiles.length === 0) return showToast('error', 'No images');
 
       submitBtn.disabled = true;
-      progress.classList.remove('hidden');
-      progress.textContent = 'OCR in progress... (5–30s)';
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating collage...';
 
-      let allText = `Platform: ${document.getElementById('channel').value}\nType: ${document.querySelector('input[name="type"]:checked').value}\n\n`;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Target width per column
+      const targetWidth = 1400;
+      const cols = 2;
+      let maxHeightPerRow = 0;
+      const images = [];
+
+      // Load all images and calculate real aspect ratios
+      for (let file of selectedFiles) {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        await new Promise(r => img.onload = r);
+        const aspect = img.width / img.height;
+        const scaledHeight = targetWidth / aspect;
+        images.push({ img, scaledWidth: targetWidth, scaledHeight });
+        maxHeightPerRow = Math.max(maxHeightPerRow, scaledHeight);
+      }
+
+      // Canvas size
+      const rows = Math.ceil(images.length / cols);
+      canvas.width = targetWidth * cols;
+      canvas.height = maxHeightPerRow * rows + 40 * (rows - 1); // small padding between rows
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      let x = 0, y = 0, col = 0;
+
+      for (let { img, scaledWidth, scaledHeight } of images) {
+        ctx.drawImage(img, x + (targetWidth - scaledWidth) / 2, y, scaledWidth, scaledHeight);
+        col++;
+        if (col === cols) {
+          col = 0;
+          x = 0;
+          y += maxHeightPerRow + 40;
+        } else {
+          x += targetWidth;
+        }
+      }
+
+      // Export high quality
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/png', 1.0));
+      const collageFile = new File([blob], "xiaohongshu-collage.png", { type: "image/png" });
+
+      // Send
+      const formData = new FormData();
+      formData.append('screenshot', collageFile);
+      formData.append('type', document.querySelector('input[name="type"]:checked').value);
+      formData.append('channel', document.getElementById('channel').value);
 
       try {
-        const worker = await Tesseract.createWorker(['chi_sim', 'eng'], 1, {
-          logger: m => console.log(m),
-        });
-
-        for (let i = 0; i < selectedFiles.length; i++) {
-          progress.textContent = `Processing image ${i+1}/${selectedFiles.length}...`;
-          const { data: { text } } = await worker.recognize(selectedFiles[i]);
-          allText += `--- Screenshot ${i+1} ---\n${text.trim()}\n\n`;
-        }
-
-        await worker.terminate();
-
-        const blob = new Blob([allText], { type: 'text/plain' });
-        const textFile = new File([blob], "xiaohongshu_ocr.txt", { type: "text/plain" });
-
-        const formData = new FormData();
-        formData.append('text_data', textFile);
-        formData.append('type', document.querySelector('input[name="type"]:checked').value);
-        formData.append('channel', document.getElementById('channel').value);
-
         const res = await fetch(WEBHOOK_URL, { method: 'POST', body: formData });
         if (res.ok) {
-          showToast('success', `Text extracted & sent (${selectedFiles.length} images)`);
+          showToast('success', `Sent (${selectedFiles.length} images)`);
           document.getElementById('uploadForm').reset();
           previewContainer.innerHTML = '';
         } else {
-          showToast('error', `Server error ${res.status}`);
+          showToast('error', `Error ${res.status}`);
         }
-      } catch (err) {
-        showToast('error', 'OCR failed');
-        console.error(err);
-      } finally {
-        submitBtn.disabled = false;
-        progress.classList.add('hidden');
+      } catch (e) {
+        showToast('error', 'Network error');
       }
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Create Collage & Send';
     }
 
     document.getElementById('uploadForm').addEventListener('submit', e => {
       e.preventDefault();
-      extractAndSend();
+      createCollageAndSend();
     });
 
     function showToast(type, msg) {
