@@ -161,7 +161,7 @@
     const toastText = document.getElementById('toast-text');
     const toastIcon = document.getElementById('toast-icon');
 
-    // Replace with YOUR webhook URL
+    // ── YOUR Make.com WEBHOOK URL ──
     const WEBHOOK_URL = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";
 
     // Show/hide lead fields
@@ -171,7 +171,7 @@
       });
     });
 
-    // File handling
+    // File handling + preview
     function handleFile(file) {
       if (!file || !file.type.startsWith('image/')) {
         showToast('error', 'Please upload an image (jpg/png)');
@@ -181,7 +181,6 @@
         showToast('error', 'File too large (max 10 MB)');
         return;
       }
-
       const reader = new FileReader();
       reader.onload = e => {
         preview.src = e.target.result;
@@ -193,7 +192,7 @@
 
     fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-    // Drag & drop
+    // Drag & drop support
     ['dragover', 'dragenter'].forEach(ev => dropzone.addEventListener(ev, e => {
       e.preventDefault();
       dropzone.classList.add('dragover');
@@ -210,7 +209,7 @@
 
     dropzone.addEventListener('click', () => fileInput.click());
 
-    // Toast helper
+    // Toast notification
     function showToast(type, message, duration = 4000) {
       toastIcon.className = type === 'success' 
         ? 'fas fa-check-circle text-green-400' 
@@ -218,13 +217,12 @@
       toastText.textContent = message;
       toast.classList.remove('opacity-0', 'pointer-events-none');
       toast.classList.add('opacity-100');
-
       setTimeout(() => {
         toast.classList.add('opacity-0', 'pointer-events-none');
       }, duration);
     }
 
-    // Submit
+    // Form submit → send to Make.com
     form.addEventListener('submit', async e => {
       e.preventDefault();
 
