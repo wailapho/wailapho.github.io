@@ -3,120 +3,194 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Multi Screenshot → Collage → Make.com</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <title>Xiaohongshu Screenshot → Collage → Make.com</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/7PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background: linear-gradient(to bottom, #0f172a, #1e293b); color: #e2e8f0; min-height: 100vh; }
-    .card { background: rgba(30,41,59,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(148,163,184,0.2); }
-    .upload-zone { border: 2px dashed #64748b; transition: all 0.3s; }
-    .upload-zone:hover, .upload-zone.dragover { border-color: #60a5fa; background: rgba(96,165,250,0.08); }
-    .preview-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
-    .preview-img { max-height: 140px; object-fit: contain; border-radius: 8px; }
-    .toast { transition: all 0.4s ease-out; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(to bottom, #0f172a, #1e293b);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .upload-zone {
+      border: 2px dashed #64748b;
+      transition: all 0.3s;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: #60a5fa;
+      background: rgba(96, 165, 250, 0.08);
+    }
+    .preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .preview-img {
+      max-height: 160px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+    }
+    .toast {
+      transition: all 0.4s ease-out;
+    }
   </style>
 </head>
-<body class="flex items-center justify-center p-4">
+<body class="flex items-center justify-center p-4 sm:p-6">
 
   <div class="w-full max-w-lg">
 
+    <!-- Header -->
     <div class="text-center mb-8">
       <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 mb-4 shadow-lg">
         <i class="fas fa-images text-3xl text-white"></i>
       </div>
-      <h1 class="text-3xl font-bold text-white">Screenshot Collage Tracker</h1>
-      <p class="text-slate-400 mt-2">Upload many screenshots → auto collage → one image to Make.com</p>
+      <h1 class="text-3xl font-bold text-white tracking-tight">Screenshot Collage Tracker</h1>
+      <p class="text-slate-400 mt-2">Upload any number of screenshots → auto high-res collage → send to Make.com</p>
     </div>
 
-    <div class="card rounded-2xl p-8 shadow-2xl">
+    <!-- Main Card -->
+    <div class="card rounded-2xl p-6 sm:p-8 shadow-2xl">
 
       <form id="uploadForm" class="space-y-6">
 
         <!-- Channel -->
         <div>
           <label class="block text-sm font-medium text-slate-300 mb-2">Platform / Channel</label>
-          <select id="channel" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3">
+          <select id="channel" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
             <option value="">Select channel…</option>
             <option value="Xiaohongshu">小红书 (Xiaohongshu)</option>
             <option value="Douyin">抖音</option>
             <option value="Instagram">Instagram</option>
             <option value="Facebook">Facebook</option>
+            <option value="WeChat">WeChat</option>
             <option value="Other">Other</option>
           </select>
         </div>
 
         <!-- Type -->
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Type</label>
+          <label class="block text-sm font-medium text-slate-300 mb-2">What are you uploading?</label>
           <div class="grid grid-cols-2 gap-3">
-            <label class="relative flex flex-col items-center p-4 rounded-xl border border-slate-600 cursor-pointer has-[:checked]:border-blue-500">
+            <label class="relative flex flex-col items-center justify-center p-4 rounded-xl border border-slate-600 cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-950/30">
               <input type="radio" name="type" value="performance" class="absolute opacity-0" checked>
-              <div class="text-3xl mb-1">📈</div>
+              <div class="text-2xl mb-2">📈</div>
               <div class="text-sm font-medium">Post Performance</div>
             </label>
-            <label class="relative flex flex-col items-center p-4 rounded-xl border border-slate-600 cursor-pointer has-[:checked]:border-blue-500">
+            <label class="relative flex flex-col items-center justify-center p-4 rounded-xl border border-slate-600 cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-950/30">
               <input type="radio" name="type" value="leads" class="absolute opacity-0">
-              <div class="text-3xl mb-1">👤</div>
-              <div class="text-sm font-medium">New Lead</div>
+              <div class="text-2xl mb-2">👤</div>
+              <div class="text-sm font-medium">New Lead / Chat</div>
             </label>
           </div>
         </div>
 
-        <!-- Multiple Upload -->
+        <!-- Leads extra fields -->
+        <div id="lead-fields" class="space-y-4 hidden">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Communication channel</label>
+            <select id="comm" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+              <option value="">Select…</option>
+              <option value="WeChat">WeChat</option>
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Douyin DM">Douyin DM</option>
+              <option value="Xiaohongshu DM">小红书私信</option>
+              <option value="Instagram DM">Instagram DM</option>
+              <option value="Email">Email</option>
+              <option value="Phone">Phone</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Notes</label>
+            <textarea id="notes" rows="3" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Budget • Timeline • What they said…"></textarea>
+          </div>
+        </div>
+
+        <!-- Upload area -->
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Screenshots (any number)</label>
-          <div id="dropzone" class="upload-zone rounded-xl p-8 text-center cursor-pointer">
-            <input type="file" id="fileInput" accept="image/*" multiple class="hidden"/>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Screenshots (multiple allowed)</label>
+          <div id="dropzone" class="upload-zone rounded-xl p-8 text-center cursor-pointer transition-all">
+            <input type="file" id="fileInput" accept="image/*" multiple class="hidden" />
             <div id="upload-content">
               <i class="fas fa-cloud-arrow-up text-5xl text-slate-500 mb-4"></i>
-              <p class="text-slate-400">Click or drag images here</p>
+              <p class="text-slate-400 mb-1">Click or drag screenshots here</p>
+              <p class="text-xs text-slate-500">JPG, PNG • any number</p>
             </div>
             <div id="preview-container" class="preview-container"></div>
           </div>
         </div>
 
+        <!-- Submit -->
         <button id="submitBtn" type="submit"
-          class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium py-4 rounded-xl flex items-center justify-center gap-3 text-lg">
+          class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-4 px-6 rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg">
           <i class="fas fa-paper-plane"></i>
-          Create Collage & Send to Make.com
+          Create High-Res Collage & Send
         </button>
+
       </form>
+
     </div>
+
+    <!-- Footer -->
+    <p class="text-center text-slate-500 text-sm mt-8">
+      All images combined into 1 high-res collage → Make.com → Gemini → Google Sheets
+    </p>
+
   </div>
 
   <!-- Toast -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 opacity-0 pointer-events-none">
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 opacity-0 pointer-events-none max-w-md w-full z-50">
     <i id="toast-icon" class="text-xl"></i>
-    <span id="toast-text"></span>
+    <span id="toast-text" class="flex-1"></span>
   </div>
 
   <script>
-    const WEBHOOK_URL = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";
-    let selectedFiles = [];
-
+    const form = document.getElementById('uploadForm');
     const fileInput = document.getElementById('fileInput');
     const dropzone = document.getElementById('dropzone');
     const previewContainer = document.getElementById('preview-container');
+    const uploadContent = document.getElementById('upload-content');
     const submitBtn = document.getElementById('submitBtn');
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toast-text');
+    const toastIcon = document.getElementById('toast-icon');
 
-    // Drag & Drop + Click
-    dropzone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    // Your Make.com webhook URL
+    const WEBHOOK_URL = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";
 
-    ['dragover', 'dragenter'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
-    ['dragleave', 'drop'].forEach(ev => dropzone.addEventListener(ev, e => {
-      e.preventDefault(); dropzone.classList.remove('dragover');
-      if (e.type === 'drop') handleFiles(e.dataTransfer.files);
-    }));
+    let selectedFiles = [];
 
+    // Show/hide lead fields
+    document.querySelectorAll('input[name="type"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        document.getElementById('lead-fields').classList.toggle('hidden', radio.value !== 'leads');
+      });
+    });
+
+    // Handle files
     function handleFiles(files) {
-      selectedFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+      selectedFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+      if (selectedFiles.length === 0) {
+        showToast('error', 'No valid images selected');
+        return;
+      }
+
       previewContainer.innerHTML = '';
+      uploadContent.classList.add('hidden');
+
       selectedFiles.forEach(file => {
         const reader = new FileReader();
-        reader.onload = ev => {
+        reader.onload = e => {
           const img = document.createElement('img');
-          img.src = ev.target.result;
+          img.src = e.target.result;
           img.className = 'preview-img';
           previewContainer.appendChild(img);
         };
@@ -124,78 +198,128 @@
       });
     }
 
-    // Create Collage & Send
-    async function createCollageAndSend() {
-      if (selectedFiles.length === 0) return;
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+    // Drag & drop
+    ['dragover', 'dragenter'].forEach(ev => dropzone.addEventListener(ev, e => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    }));
+
+    ['dragleave', 'drop'].forEach(ev => dropzone.addEventListener(ev, e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.type === 'drop' && e.dataTransfer.files.length) {
+        handleFiles(e.dataTransfer.files);
+      }
+    }));
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    // Toast
+    function showToast(type, message, duration = 4000) {
+      toastIcon.className = type === 'success' 
+        ? 'fas fa-check-circle text-green-400' 
+        : 'fas fa-exclamation-circle text-red-400';
+      toastText.textContent = message;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+      setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), duration);
+    }
+
+    // Create high-res collage and send
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      if (selectedFiles.length === 0) {
+        showToast('error', 'Please upload at least one screenshot');
+        return;
+      }
+
+      if (!document.getElementById('channel').value) {
+        showToast('error', 'Please select a channel');
+        return;
+      }
 
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating collage...';
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
-      const cols = 2;
-      const rows = Math.ceil(selectedFiles.length / cols);
-      const imgWidth = 800;
-      const imgHeight = 600;
-      canvas.width = imgWidth * cols;
-      canvas.height = imgHeight * rows;
+        // High resolution per image (adjust if needed)
+        const imgWidth = 1600;
+        const imgHeight = 1200;
+        const cols = 2;
+        const rows = Math.ceil(selectedFiles.length / cols);
 
-      let x = 0, y = 0, count = 0;
+        canvas.width = imgWidth * cols;
+        canvas.height = imgHeight * rows;
 
-      for (let file of selectedFiles) {
-        const img = new Image();
-        img.src = await new Promise(res => {
-          const reader = new FileReader();
-          reader.onload = e => res(e.target.result);
-          reader.readAsDataURL(file);
+        // White background for better contrast
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let x = 0, y = 0, count = 0;
+
+        for (let file of selectedFiles) {
+          const img = new Image();
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
+          });
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, x, y, imgWidth, imgHeight);
+
+          count++;
+          x += imgWidth;
+          if (count % cols === 0) {
+            x = 0;
+            y += imgHeight;
+          }
+        }
+
+        // Export high-quality PNG
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 1.0));
+        const collageFile = new File([blob], "xiaohongshu-collage.png", { type: "image/png" });
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('screenshot', collageFile);
+        formData.append('type', document.querySelector('input[name="type"]:checked').value);
+        formData.append('channel', document.getElementById('channel').value);
+
+        if (document.querySelector('input[name="type"]:checked').value === 'leads') {
+          formData.append('comm_channel', document.getElementById('comm').value || 'Unknown');
+          formData.append('notes', document.getElementById('notes').value || '');
+        }
+
+        const response = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          body: formData
         });
 
-        await new Promise(resolve => { img.onload = resolve; });
-
-        ctx.drawImage(img, x, y, imgWidth, imgHeight);
-        count++;
-        x += imgWidth;
-        if (count % cols === 0) { x = 0; y += imgHeight; }
-      }
-
-      // Convert to blob
-      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-      const collageFile = new File([blob], "collage.png", { type: "image/png" });
-
-      // Send to Make.com
-      const formData = new FormData();
-      formData.append('screenshot', collageFile);
-      formData.append('type', document.querySelector('input[name="type"]:checked').value);
-      formData.append('channel', document.getElementById('channel').value);
-
-      try {
-        const res = await fetch(WEBHOOK_URL, { method: 'POST', body: formData });
-        if (res.ok) {
-          showToast('success', `Collage created & sent! (${selectedFiles.length} images)`);
-          document.getElementById('uploadForm').reset();
+        if (response.ok) {
+          showToast('success', `Collage sent successfully (${selectedFiles.length} images combined)`);
+          form.reset();
           previewContainer.innerHTML = '';
+          uploadContent.classList.remove('hidden');
+        } else {
+          showToast('error', `Server error: ${response.status}`);
         }
-      } catch (e) {
-        showToast('error', 'Send failed');
+      } catch (err) {
+        showToast('error', 'Error creating or sending collage');
+        console.error(err);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Create High-Res Collage & Send';
       }
-
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Create Collage & Send to Make.com';
-    }
-
-    document.getElementById('uploadForm').addEventListener('submit', e => {
-      e.preventDefault();
-      createCollageAndSend();
     });
-
-    function showToast(type, msg) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-icon').className = type === 'success' ? 'fas fa-check-circle text-green-400' : 'fas fa-exclamation-circle text-red-400';
-      document.getElementById('toast-text').textContent = msg;
-      toast.classList.remove('opacity-0');
-      setTimeout(() => toast.classList.add('opacity-0'), 4000);
-    }
   </script>
+
 </body>
 </html>
