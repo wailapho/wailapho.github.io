@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Screenshot → Make.com</title>
+  <title>Multi Screenshot → Make.com</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/7PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -13,46 +13,29 @@
       color: #e2e8f0;
       min-height: 100vh;
     }
-    .card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-    }
-    .upload-zone {
-      border: 2px dashed #64748b;
-      transition: all 0.3s;
-    }
-    .upload-zone:hover, .upload-zone.dragover {
-      border-color: #60a5fa;
-      background: rgba(96, 165, 250, 0.08);
-    }
-    .preview-img {
-      max-height: 280px;
-      object-fit: contain;
-      border-radius: 0.75rem;
-    }
-    .toast {
-      transition: all 0.4s ease-out;
-    }
+    .card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(148, 163, 184, 0.2); }
+    .upload-zone { border: 2px dashed #64748b; transition: all 0.3s; }
+    .upload-zone:hover, .upload-zone.dragover { border-color: #60a5fa; background: rgba(96, 165, 250, 0.08); }
+    .preview-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+    .preview-item { position: relative; }
+    .preview-img { max-height: 160px; object-fit: contain; border-radius: 0.5rem; border: 1px solid #4b5563; }
+    .toast { transition: all 0.4s ease-out; }
   </style>
 </head>
 <body class="flex items-center justify-center p-4 sm:p-6">
 
   <div class="w-full max-w-lg">
 
-    <!-- Header -->
     <div class="text-center mb-8">
       <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 mb-4 shadow-lg">
-        <i class="fas fa-chart-line text-3xl text-white"></i>
+        <i class="fas fa-images text-3xl text-white"></i>
       </div>
-      <h1 class="text-3xl font-bold text-white tracking-tight">Screenshot Tracker</h1>
-      <p class="text-slate-400 mt-2">Upload → Make.com → AI + Google Sheets</p>
+      <h1 class="text-3xl font-bold text-white tracking-tight">Multi Screenshot Tracker</h1>
+      <p class="text-slate-400 mt-2">Upload multiple images → Make.com → AI analysis</p>
     </div>
 
-    <!-- Main Card -->
     <div class="card rounded-2xl p-6 sm:p-8 shadow-2xl">
 
-      <!-- Status messages -->
       <div id="status" class="min-h-[3rem] mb-6 text-center text-sm font-medium"></div>
 
       <form id="uploadForm" class="space-y-6">
@@ -60,27 +43,27 @@
         <!-- Channel -->
         <div>
           <label class="block text-sm font-medium text-slate-300 mb-2">Platform / Channel</label>
-          <select id="channel" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
+          <select id="channel" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
             <option value="">Select channel…</option>
-            <option value="Xiaohongshu">小红书 (Xiaohongshu / Little Red Book)</option>
-            <option value="Douyin">抖音 (Douyin / TikTok China)</option>
+            <option value="Xiaohongshu">小红书 (Xiaohongshu)</option>
+            <option value="Douyin">抖音</option>
             <option value="Instagram">Instagram</option>
             <option value="Facebook">Facebook</option>
-            <option value="WeChat">WeChat Moments / Official Account</option>
+            <option value="WeChat">WeChat</option>
             <option value="Other">Other</option>
           </select>
         </div>
 
         <!-- Type -->
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">What are you uploading?</label>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Upload type</label>
           <div class="grid grid-cols-2 gap-3">
-            <label class="relative flex flex-col items-center justify-center p-4 rounded-xl border border-slate-600 cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-950/30">
+            <label class="relative flex flex-col items-center p-4 rounded-xl border border-slate-600 cursor-pointer hover:border-blue-500 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-950/30">
               <input type="radio" name="type" value="performance" class="absolute opacity-0" checked>
               <div class="text-2xl mb-2">📈</div>
               <div class="text-sm font-medium">Post Performance</div>
             </label>
-            <label class="relative flex flex-col items-center justify-center p-4 rounded-xl border border-slate-600 cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-950/30">
+            <label class="relative flex flex-col items-center p-4 rounded-xl border border-slate-600 cursor-pointer hover:border-blue-500 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-950/30">
               <input type="radio" name="type" value="leads" class="absolute opacity-0">
               <div class="text-2xl mb-2">👤</div>
               <div class="text-sm font-medium">New Lead / Chat</div>
@@ -88,18 +71,17 @@
           </div>
         </div>
 
-        <!-- Extra fields for leads -->
+        <!-- Leads extra fields -->
         <div id="lead-fields" class="space-y-4 hidden">
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-2">Communication channel</label>
-            <select id="comm" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none">
+            <select id="comm" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
               <option value="">Select…</option>
               <option value="WeChat">WeChat</option>
               <option value="WhatsApp">WhatsApp</option>
               <option value="Douyin DM">Douyin DM</option>
               <option value="Xiaohongshu DM">小红书私信</option>
               <option value="Instagram DM">Instagram DM</option>
-              <option value="Facebook Messenger">Messenger</option>
               <option value="Email">Email</option>
               <option value="Phone">Phone</option>
               <option value="Other">Other</option>
@@ -107,38 +89,35 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-2">Notes</label>
-            <textarea id="notes" rows="3" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Budget • Timeline • What they said…"></textarea>
+            <textarea id="notes" rows="3" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Budget • Timeline • What they said…"></textarea>
           </div>
         </div>
 
-        <!-- Screenshot upload -->
+        <!-- Multiple file upload -->
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Screenshot</label>
-          <div id="dropzone" class="upload-zone rounded-xl p-8 text-center cursor-pointer transition-all">
-            <input type="file" id="fileInput" accept="image/*" class="hidden" />
+          <label class="block text-sm font-medium text-slate-300 mb-2">Screenshots (multiple allowed)</label>
+          <div id="dropzone" class="upload-zone rounded-xl p-8 text-center cursor-pointer">
+            <input type="file" id="fileInput" accept="image/*" multiple class="hidden" />
             <div id="upload-content">
               <i class="fas fa-cloud-arrow-up text-5xl text-slate-500 mb-4"></i>
-              <p class="text-slate-400 mb-1">Click or drag screenshot here</p>
-              <p class="text-xs text-slate-500">JPG, PNG • max 10 MB</p>
+              <p class="text-slate-400 mb-1">Click or drag images here</p>
+              <p class="text-xs text-slate-500">JPG, PNG • max 10 MB per file</p>
             </div>
-            <img id="preview" class="preview-img mx-auto mt-4 hidden" alt="preview"/>
+            <div id="preview-container" class="preview-container"></div>
           </div>
         </div>
 
-        <!-- Submit -->
         <button id="submitBtn" type="submit"
-          class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-4 px-6 rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg">
+          class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-4 px-6 rounded-xl shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-3 text-lg">
           <i class="fas fa-paper-plane"></i>
-          Send to Make.com
+          Send all images to Make.com
         </button>
 
       </form>
-
     </div>
 
-    <!-- Footer note -->
     <p class="text-center text-slate-500 text-sm mt-8">
-      Image → Make.com → Gemini → Google Sheets
+      Multiple images → Make.com → Vision AI → Google Sheets
     </p>
 
   </div>
@@ -153,16 +132,14 @@
     const form = document.getElementById('uploadForm');
     const fileInput = document.getElementById('fileInput');
     const dropzone = document.getElementById('dropzone');
-    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('preview-container');
     const uploadContent = document.getElementById('upload-content');
-    const statusDiv = document.getElementById('status');
     const submitBtn = document.getElementById('submitBtn');
     const toast = document.getElementById('toast');
     const toastText = document.getElementById('toast-text');
     const toastIcon = document.getElementById('toast-icon');
 
-    // ── YOUR Make.com WEBHOOK URL ──
-    const WEBHOOK_URL = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";
+    const WEBHOOK_URL = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";  // ← your webhook
 
     // Show/hide lead fields
     document.querySelectorAll('input[name="type"]').forEach(radio => {
@@ -171,28 +148,37 @@
       });
     });
 
-    // File handling + preview
-    function handleFile(file) {
-      if (!file || !file.type.startsWith('image/')) {
-        showToast('error', 'Please upload an image (jpg/png)');
+    let selectedFiles = [];
+
+    function handleFiles(files) {
+      selectedFiles = Array.from(files).filter(file => file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024);
+
+      if (selectedFiles.length === 0) {
+        showToast('error', 'No valid images selected (jpg/png, max 10MB each)');
         return;
       }
-      if (file.size > 10 * 1024 * 1024) {
-        showToast('error', 'File too large (max 10 MB)');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = e => {
-        preview.src = e.target.result;
-        preview.classList.remove('hidden');
-        uploadContent.classList.add('hidden');
-      };
-      reader.readAsDataURL(file);
+
+      previewContainer.innerHTML = '';
+      uploadContent.classList.add('hidden');
+
+      selectedFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const div = document.createElement('div');
+          div.className = 'preview-item';
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'preview-img';
+          div.appendChild(img);
+          previewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
     }
 
-    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
-    // Drag & drop support
+    // Drag & drop
     ['dragover', 'dragenter'].forEach(ev => dropzone.addEventListener(ev, e => {
       e.preventDefault();
       dropzone.classList.add('dragover');
@@ -203,31 +189,25 @@
       dropzone.classList.remove('dragover');
       if (e.type === 'drop' && e.dataTransfer.files.length) {
         fileInput.files = e.dataTransfer.files;
-        handleFile(e.dataTransfer.files[0]);
+        handleFiles(e.dataTransfer.files);
       }
     }));
 
     dropzone.addEventListener('click', () => fileInput.click());
 
-    // Toast notification
     function showToast(type, message, duration = 4000) {
-      toastIcon.className = type === 'success' 
-        ? 'fas fa-check-circle text-green-400' 
-        : 'fas fa-exclamation-circle text-red-400';
+      toastIcon.className = type === 'success' ? 'fas fa-check-circle text-green-400' : 'fas fa-exclamation-circle text-red-400';
       toastText.textContent = message;
       toast.classList.remove('opacity-0', 'pointer-events-none');
       toast.classList.add('opacity-100');
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'pointer-events-none');
-      }, duration);
+      setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), duration);
     }
 
-    // Form submit → send to Make.com
     form.addEventListener('submit', async e => {
       e.preventDefault();
 
-      if (!fileInput.files[0]) {
-        showToast('error', 'Please upload a screenshot');
+      if (selectedFiles.length === 0) {
+        showToast('error', 'Please select at least one image');
         return;
       }
 
@@ -241,10 +221,15 @@
 
       try {
         const formData = new FormData();
-        formData.append('screenshot', fileInput.files[0]);
+
+        // Append ALL images with the SAME field name
+        selectedFiles.forEach(file => {
+          formData.append('screenshot', file);
+        });
+
         formData.append('type', document.querySelector('input[name="type"]:checked').value);
         formData.append('channel', document.getElementById('channel').value);
-        
+
         if (document.querySelector('input[name="type"]:checked').value === 'leads') {
           formData.append('comm_channel', document.getElementById('comm').value || 'Unknown');
           formData.append('notes', document.getElementById('notes').value || '');
@@ -256,22 +241,22 @@
         });
 
         if (response.ok) {
-          showToast('success', 'Screenshot sent successfully ✓ Data will appear in sheet soon');
+          showToast('success', `Sent ${selectedFiles.length} image(s) successfully ✓`);
           form.reset();
-          preview.classList.add('hidden');
+          selectedFiles = [];
+          previewContainer.innerHTML = '';
           uploadContent.classList.remove('hidden');
         } else {
-          showToast('error', `Error: ${response.status} ${response.statusText}`);
+          showToast('error', `Server error: ${response.status}`);
         }
       } catch (err) {
-        showToast('error', 'Network error – please try again');
+        showToast('error', 'Network error – try again');
         console.error(err);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to Make.com';
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send all images to Make.com';
       }
     });
   </script>
-
 </body>
 </html>
