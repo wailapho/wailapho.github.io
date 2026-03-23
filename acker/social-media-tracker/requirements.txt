@@ -1,6 +1,0 @@
-streamlit>=1.38.0
-requests
-pandas
-gspread
-google-auth
-google-generativeai
