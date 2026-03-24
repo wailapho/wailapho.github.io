@@ -1,215 +1,751 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Xiaohongshu Screenshot → Perfect Collage → Make.com</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Acker — Content & Ads Tracker</title>
+  <link rel="icon" type="image/x-icon" href="https://wailapho.github.io/acker/img/favicon.ico"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
+
   <style>
-    body { background: linear-gradient(to bottom, #0f172a, #1e293b); color: #e2e8f0; min-height: 100vh; }
-    .card { background: rgba(30,41,59,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(148,163,184,0.2); }
-    .upload-zone { border: 2px dashed #64748b; transition: all 0.3s; }
-    .upload-zone:hover, .upload-zone.dragover { border-color: #60a5fa; background: rgba(96,165,250,0.08); }
-    .preview-container { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
-    .preview-img { max-height: 180px; object-fit: contain; border-radius: 8px; border: 1px solid #4b5563; }
-    .toast { transition: all 0.4s ease-out; }
+    :root {
+      --bg:          #0c0e13;
+      --surface:     #13161e;
+      --surface2:    #1a1e29;
+      --surface3:    #222738;
+      --border:      rgba(255,255,255,0.06);
+      --border-hi:   rgba(255,255,255,0.14);
+      --text:        #eceef4;
+      --sub:         #9298a8;
+      --muted:       #555c70;
+      --orange:      #f97316;
+      --orange-dim:  rgba(249,115,22,0.12);
+      --orange-glow: rgba(249,115,22,0.25);
+      --indigo:      #6366f1;
+      --indigo-dim:  rgba(99,102,241,0.12);
+      --indigo-glow: rgba(99,102,241,0.25);
+      --green:       #22c55e;
+      --red:         #f43f5e;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box; margin: 0; padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html { height: 100%; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+    }
+
+    /* ── App shell: phone-width column ── */
+    .app-shell {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: var(--bg);
+    }
+
+    /* Blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(70px);
+    }
+    .blob-orange {
+      width: 320px; height: 320px;
+      top: -100px; right: -80px;
+      background: radial-gradient(circle, rgba(249,115,22,0.10), transparent 70%);
+    }
+    .blob-indigo {
+      width: 260px; height: 260px;
+      bottom: 130px; left: -60px;
+      background: radial-gradient(circle, rgba(99,102,241,0.09), transparent 70%);
+    }
+
+    /* ── Header ── */
+    .app-header {
+      padding: 20px 18px 16px;
+      position: relative;
+      z-index: 1;
+      animation: slideUp 0.4s ease both;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .brand-icon {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border-hi);
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .brand-icon img { width: 20px; height: 20px; object-fit: contain; }
+
+    .brand-logo img { height: 16px; width: auto; display: block; opacity: 0.88; }
+
+    .page-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 30px;
+      font-weight: 400;
+      line-height: 1.15;
+      color: #fff;
+      letter-spacing: -0.3px;
+      margin-bottom: 5px;
+    }
+    .page-title em { font-style: italic; color: var(--orange); }
+
+    .page-sub {
+      font-size: 13px;
+      color: var(--sub);
+      font-weight: 300;
+    }
+
+    /* ── Scroll body ── */
+    .scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px 110px;
+      position: relative;
+      z-index: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── Tab bar ── */
+    .tab-bar {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 14px;
+      animation: slideUp 0.4s 0.06s ease both;
+    }
+
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 11px 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.22s;
+      white-space: nowrap;
+    }
+
+    .tab-btn i { font-size: 13px; }
+
+    .tab-btn.active {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border-hi);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      display: none;
+      animation: slideUp 0.4s 0.1s ease both;
+    }
+    .card.active { display: block; }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 16px; }
+
+    .field-label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 13px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .input::placeholder { color: var(--muted); }
+    .input:focus {
+      border-color: var(--border-hi);
+      box-shadow: 0 0 0 3px var(--orange-dim);
+    }
+
+    select.input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555c70' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
+      padding-right: 36px;
+    }
+    select.input option { background: #1a1e29; }
+
+    .prefix-wrap { position: relative; }
+    .prefix-wrap .prefix {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--sub);
+      font-size: 15px;
+      pointer-events: none;
+    }
+    .prefix-wrap .input { padding-left: 30px; }
+
+    /* ── Radio grid ── */
+    .radio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .radio-card { cursor: pointer; }
+    .radio-card input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+    .radio-inner {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 13px 13px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--sub);
+      transition: all 0.2s;
+    }
+
+    .radio-inner i { font-size: 15px; width: 16px; text-align: center; flex-shrink: 0; }
+
+    .radio-card input:checked + .radio-inner {
+      border-color: var(--orange);
+      color: var(--text);
+      background: var(--orange-dim);
+    }
+
+    /* ── Drop zone ── */
+    .dropzone {
+      border: 1.5px dashed var(--border-hi);
+      border-radius: 14px;
+      padding: 26px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--surface2);
+      transition: all 0.22s;
+    }
+
+    .dropzone:active, .dropzone.over {
+      border-color: var(--orange);
+      background: var(--orange-dim);
+    }
+
+    .dropzone input[type="file"] { display: none; }
+
+    .dz-icon-wrap {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, rgba(249,115,22,0.18), rgba(249,115,22,0.05));
+      border: 1px solid rgba(249,115,22,0.22);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 17px;
+      color: var(--orange);
+    }
+
+    .dz-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+    .dz-sub   { font-size: 12px; color: var(--muted); }
+
+    /* Preview */
+    .preview-strip { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+
+    .preview-thumb {
+      width: 62px; height: 62px;
+      object-fit: cover;
+      border-radius: 9px;
+      border: 1px solid var(--border-hi);
+    }
+
+    .preview-more {
+      width: 62px; height: 62px;
+      border-radius: 9px;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--sub);
+    }
+
+    .file-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--orange-dim);
+      border: 1px solid rgba(249,115,22,0.22);
+      color: var(--orange);
+      border-radius: 100px;
+      padding: 3px 10px;
+      font-size: 12px; font-weight: 600;
+      margin-top: 4px;
+    }
+    .file-badge i { font-size: 10px; }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+    /* ── Submit ── */
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(140deg, var(--orange) 0%, #c2410c 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px var(--orange-glow);
+      position: relative; overflow: hidden;
+    }
+    .submit-btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 60%);
+      pointer-events: none;
+    }
+    .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
+    .submit-btn:disabled { opacity: 0.55; pointer-events: none; }
+
+    /* Ads overrides */
+    #panelAds .input:focus { box-shadow: 0 0 0 3px var(--indigo-dim); border-color: rgba(99,102,241,0.3); }
+    #panelAds .dropzone:active, #panelAds .dropzone.over { border-color: var(--indigo); background: var(--indigo-dim); }
+    #panelAds .dz-icon-wrap { background: linear-gradient(145deg, rgba(99,102,241,0.18), rgba(99,102,241,0.05)); border-color: rgba(99,102,241,0.22); color: var(--indigo); }
+    #panelAds .file-badge { background: var(--indigo-dim); border-color: rgba(99,102,241,0.22); color: var(--indigo); }
+    #panelAds .radio-card input:checked + .radio-inner { border-color: var(--indigo); background: var(--indigo-dim); }
+    #panelAds .submit-btn { background: linear-gradient(140deg, var(--indigo), #3730a3); box-shadow: 0 4px 20px var(--indigo-glow); }
+
+    /* ── Footer ── */
+    .app-footer {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 430px;
+      background: rgba(12,14,19,0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 12px 18px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 50;
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-icon {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--border-hi);
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .footer-icon img { width: 15px; height: 15px; object-fit: contain; }
+
+    .footer-wordmark img { height: 13px; width: auto; display: block; opacity: 0.55; }
+
+    .footer-right {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 72px; left: 50%;
+      transform: translateX(-50%) translateY(14px);
+      background: var(--surface2);
+      border: 1px solid var(--border-hi);
+      color: var(--text);
+      padding: 11px 16px;
+      border-radius: 14px;
+      display: flex; align-items: center; gap: 9px;
+      font-size: 13.5px;
+      opacity: 0; pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 200;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      white-space: nowrap;
+      max-width: calc(100vw - 36px);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .toast.success .toast-dot { background: var(--green); }
+    .toast.error   .toast-dot { background: var(--red); }
+
+    /* ── Animations ── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
-<body class="flex items-center justify-center p-4 sm:p-6">
+<body>
 
-  <div class="w-full max-w-lg">
+<div class="app-shell">
+  <div class="blob blob-orange"></div>
+  <div class="blob blob-indigo"></div>
 
-    <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 mb-4 shadow-lg">
-        <i class="fas fa-images text-3xl text-white"></i>
+  <!-- Header -->
+  <div class="app-header">
+    <div class="brand-row">
+      <div class="brand-icon">
+        <img src="https://wailapho.github.io/acker/img/favicon.ico" alt="">
       </div>
-      <h1 class="text-3xl font-bold text-white">Screenshot Collage Tracker</h1>
-      <p class="text-slate-400 mt-2">Upload screenshots → perfect aspect-ratio collage → send to Make.com</p>
+      <div class="brand-logo">
+        <img src="https://wailapho.github.io/acker/img/acker-logo-white.svg" alt="Acker">
+      </div>
+    </div>
+    <div class="page-title">Track <em>growth</em><br>&amp; ad spend</div>
+    <div class="page-sub">Screenshot → collage → synced to Make.com</div>
+  </div>
+
+  <!-- Scroll area -->
+  <div class="scroll-area">
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabPost" onclick="switchTab('post')">
+        <i class="fas fa-chart-line"></i> Post Performance
+      </button>
+      <button class="tab-btn" id="tabAds" onclick="switchTab('ads')">
+        <i class="fas fa-wallet"></i> Ads Spend
+      </button>
     </div>
 
-    <div class="card rounded-2xl p-6 sm:p-8 shadow-2xl">
+    <!-- ═══ POST PANEL ═══ -->
+    <div class="card active" id="panelPost">
 
-      <form id="uploadForm" class="space-y-6">
+      <div class="field">
+        <label class="field-label">Platform</label>
+        <select class="input" id="postChannel">
+          <option value="">Select platform…</option>
+          <option value="Xiaohongshu">小红书 Xiaohongshu</option>
+          <option value="Douyin">抖音 Douyin</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
 
-        <!-- Channel -->
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Platform / Channel</label>
-          <select id="channel" class="w-full bg-slate-800 border border-slate-600 text-white rounded-xl px-4 py-3">
-            <option value="">Select…</option>
-            <option value="Xiaohongshu">小红书</option>
-            <option value="Douyin">抖音</option>
-            <option value="Instagram">Instagram</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-
-        <!-- Type -->
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Type</label>
-          <div class="grid grid-cols-2 gap-3">
-            <label class="relative flex flex-col items-center p-4 rounded-xl border border-slate-600 cursor-pointer has-[:checked]:border-blue-500">
-              <input type="radio" name="type" value="performance" class="absolute opacity-0" checked>
-              <div class="text-3xl mb-1">📈</div>
-              <div>Post Performance</div>
-            </label>
-            <label class="relative flex flex-col items-center p-4 rounded-xl border border-slate-600 cursor-pointer has-[:checked]:border-blue-500">
-              <input type="radio" name="type" value="leads" class="absolute opacity-0">
-              <div class="text-3xl mb-1">👤</div>
-              <div>New Lead</div>
-            </label>
-          </div>
-        </div>
-
-        <!-- Upload -->
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Screenshots (multiple OK)</label>
-          <div id="dropzone" class="upload-zone rounded-xl p-8 text-center cursor-pointer">
-            <input type="file" id="fileInput" accept="image/*" multiple class="hidden"/>
-            <div id="upload-content">
-              <i class="fas fa-cloud-arrow-up text-5xl text-slate-500 mb-4"></i>
-              <p class="text-slate-400">Click or drag images here</p>
+      <div class="field">
+        <label class="field-label">Record Type</label>
+        <div class="radio-grid">
+          <label class="radio-card">
+            <input type="radio" name="postType" value="performance" checked>
+            <div class="radio-inner">
+              <i class="fas fa-arrow-trend-up"></i>
+              Performance
             </div>
-            <div id="preview-container" class="preview-container"></div>
-          </div>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="postType" value="leads">
+            <div class="radio-inner">
+              <i class="fas fa-user-plus"></i>
+              New Lead
+            </div>
+          </label>
         </div>
+      </div>
 
-        <button id="submitBtn" type="submit"
-          class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium py-4 rounded-xl flex items-center justify-center gap-3 text-lg">
-          <i class="fas fa-paper-plane"></i>
-          Create Non-Distorted Collage & Send
-        </button>
+      <div class="field">
+        <label class="field-label">Screenshots</label>
+        <div class="dropzone" id="postDropzone">
+          <input type="file" id="postFileInput" accept="image/*" multiple>
+          <div class="dz-icon-wrap"><i class="fas fa-arrow-up-from-bracket"></i></div>
+          <div class="dz-title">Tap to upload</div>
+          <div class="dz-sub">Multiple screenshots OK</div>
+        </div>
+        <div id="postPreview" class="preview-strip"></div>
+      </div>
 
-      </form>
+      <hr class="divider">
+
+      <button class="submit-btn" id="postSubmitBtn" onclick="handlePostSubmit()">
+        <i class="fas fa-layer-group"></i>
+        Create Collage &amp; Send
+      </button>
     </div>
-  </div>
 
-  <!-- Toast -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 opacity-0 pointer-events-none max-w-md w-full z-50">
-    <i id="toast-icon" class="text-xl"></i>
-    <span id="toast-text"></span>
-  </div>
+    <!-- ═══ ADS PANEL ═══ -->
+    <div class="card" id="panelAds">
 
-  <script>
-    const WEBHOOK_URL = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";
-    let selectedFiles = [];
+      <div class="field">
+        <label class="field-label">Campaign Name</label>
+        <input class="input" type="text" id="campaignName" placeholder="e.g. CNY Sale — XHS Jan 2025">
+      </div>
 
-    const fileInput = document.getElementById('fileInput');
-    const dropzone = document.getElementById('dropzone');
-    const previewContainer = document.getElementById('preview-container');
-    const submitBtn = document.getElementById('submitBtn');
+      <div class="field">
+        <label class="field-label">Platform</label>
+        <select class="input" id="adsChannel">
+          <option value="">Select platform…</option>
+          <option value="Xiaohongshu Ads">小红书 Ads</option>
+          <option value="Douyin Ads">抖音 Ads</option>
+          <option value="Meta Ads">Meta Ads</option>
+          <option value="Google Ads">Google Ads</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
 
-    dropzone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+      <div class="field">
+        <label class="field-label">Amount Spent</label>
+        <div class="prefix-wrap">
+          <span class="prefix">¥</span>
+          <input class="input" type="number" id="adsAmount" placeholder="0.00" step="0.01" min="0">
+        </div>
+      </div>
 
-    ['dragover', 'dragenter'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
-    ['dragleave', 'drop'].forEach(ev => dropzone.addEventListener(ev, e => {
-      e.preventDefault(); dropzone.classList.remove('dragover');
-      if (e.type === 'drop') handleFiles(e.dataTransfer.files);
-    }));
+      <div class="field">
+        <label class="field-label">Payment Screenshot</label>
+        <div class="dropzone" id="adsDropzone">
+          <input type="file" id="adsFileInput" accept="image/*" multiple>
+          <div class="dz-icon-wrap"><i class="fas fa-receipt"></i></div>
+          <div class="dz-title">Tap to upload receipt</div>
+          <div class="dz-sub">Payment confirmation screenshot</div>
+        </div>
+        <div id="adsPreview" class="preview-strip"></div>
+      </div>
 
-    function handleFiles(files) {
-      selectedFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-      previewContainer.innerHTML = '';
-      selectedFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          img.className = 'preview-img';
-          previewContainer.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
+      <hr class="divider">
 
-    async function createCollageAndSend() {
-      if (selectedFiles.length === 0) return showToast('error', 'No images');
+      <button class="submit-btn" id="adsSubmitBtn" onclick="handleAdsSubmit()">
+        <i class="fas fa-paper-plane"></i>
+        Record Ad Spend &amp; Send
+      </button>
+    </div>
 
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating collage...';
+  </div><!-- /scroll-area -->
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+  <!-- Sticky footer -->
+  <footer class="app-footer">
+    <div class="footer-left">
+      <div class="footer-icon">
+        <img src="https://wailapho.github.io/acker/img/favicon.ico" alt="">
+      </div>
+      <div class="footer-wordmark">
+        <img src="https://wailapho.github.io/acker/img/acker-logo-white.svg" alt="Acker">
+      </div>
+    </div>
+    <div class="footer-right">Content Studio v1.0</div>
+  </footer>
 
-      // Target width per column
-      const targetWidth = 1400;
-      const cols = 2;
-      let maxHeightPerRow = 0;
-      const images = [];
+</div><!-- /app-shell -->
 
-      // Load all images and calculate real aspect ratios
-      for (let file of selectedFiles) {
-        const img = new Image();
-        img.src = URL.createObjectURL(file);
-        await new Promise(r => img.onload = r);
-        const aspect = img.width / img.height;
-        const scaledHeight = targetWidth / aspect;
-        images.push({ img, scaledWidth: targetWidth, scaledHeight });
-        maxHeightPerRow = Math.max(maxHeightPerRow, scaledHeight);
-      }
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastText"></span>
+</div>
 
-      // Canvas size
-      const rows = Math.ceil(images.length / cols);
-      canvas.width = targetWidth * cols;
-      canvas.height = maxHeightPerRow * rows + 40 * (rows - 1); // small padding between rows
+<script>
+  const WEBHOOK = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";
 
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+  /* Tab switch */
+  function switchTab(t) {
+    document.getElementById('panelPost').classList.toggle('active', t === 'post');
+    document.getElementById('panelAds').classList.toggle('active', t === 'ads');
+    document.getElementById('tabPost').classList.toggle('active', t === 'post');
+    document.getElementById('tabAds').classList.toggle('active', t === 'ads');
+  }
 
-      let x = 0, y = 0, col = 0;
+  /* Dropzones */
+  const postFiles = [], adsFiles = [];
 
-      for (let { img, scaledWidth, scaledHeight } of images) {
-        ctx.drawImage(img, x + (targetWidth - scaledWidth) / 2, y, scaledWidth, scaledHeight);
-        col++;
-        if (col === cols) {
-          col = 0;
-          x = 0;
-          y += maxHeightPerRow + 40;
-        } else {
-          x += targetWidth;
-        }
-      }
+  function initDZ(dzId, inputId, previewId, store) {
+    const dz = document.getElementById(dzId);
+    const input = document.getElementById(inputId);
+    dz.addEventListener('click', () => input.click());
+    input.addEventListener('change', e => loadFiles(e.target.files, previewId, store));
+    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); loadFiles(e.dataTransfer.files, previewId, store); });
+  }
 
-      // Export high quality
-      const blob = await new Promise(r => canvas.toBlob(r, 'image/png', 1.0));
-      const collageFile = new File([blob], "xiaohongshu-collage.png", { type: "image/png" });
+  initDZ('postDropzone', 'postFileInput', 'postPreview', postFiles);
+  initDZ('adsDropzone',  'adsFileInput',  'adsPreview',  adsFiles);
 
-      // Send
-      const formData = new FormData();
-      formData.append('screenshot', collageFile);
-      formData.append('type', document.querySelector('input[name="type"]:checked').value);
-      formData.append('channel', document.getElementById('channel').value);
-
-      try {
-        const res = await fetch(WEBHOOK_URL, { method: 'POST', body: formData });
-        if (res.ok) {
-          showToast('success', `Sent (${selectedFiles.length} images)`);
-          document.getElementById('uploadForm').reset();
-          previewContainer.innerHTML = '';
-        } else {
-          showToast('error', `Error ${res.status}`);
-        }
-      } catch (e) {
-        showToast('error', 'Network error');
-      }
-
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Create Collage & Send';
-    }
-
-    document.getElementById('uploadForm').addEventListener('submit', e => {
-      e.preventDefault();
-      createCollageAndSend();
+  function loadFiles(files, previewId, store) {
+    store.length = 0;
+    Array.from(files).filter(f => f.type.startsWith('image/')).forEach(f => store.push(f));
+    const wrap = document.getElementById(previewId);
+    wrap.innerHTML = '';
+    const max = 5;
+    store.slice(0, max).forEach(file => {
+      const r = new FileReader();
+      r.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'preview-thumb';
+        wrap.appendChild(img);
+      };
+      r.readAsDataURL(file);
     });
-
-    function showToast(type, msg) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-icon').className = type === 'success' ? 'fas fa-check-circle text-green-400' : 'fas fa-exclamation-circle text-red-400';
-      document.getElementById('toast-text').textContent = msg;
-      toast.classList.remove('opacity-0');
-      setTimeout(() => toast.classList.add('opacity-0'), 4000);
+    if (store.length > max) {
+      const m = document.createElement('div');
+      m.className = 'preview-more';
+      m.textContent = '+' + (store.length - max);
+      wrap.appendChild(m);
     }
-  </script>
+    if (store.length) {
+      const b = document.createElement('div');
+      b.className = 'file-badge';
+      b.innerHTML = `<i class="fas fa-check"></i> ${store.length} image${store.length > 1 ? 's' : ''} ready`;
+      wrap.appendChild(b);
+    }
+  }
+
+  /* Build collage */
+  async function buildCollage(files) {
+    const colW = 1400, gap = 40;
+    const cols = Math.min(files.length, 2);
+    const images = await Promise.all(files.map(file => new Promise(res => {
+      const img = new Image();
+      img.onload = () => res({ img, w: colW, h: colW / (img.width / img.height) });
+      img.src = URL.createObjectURL(file);
+    })));
+    const rows = Math.ceil(images.length / cols);
+    const rowH = Array.from({ length: rows }, (_, r) =>
+      Math.max(...images.slice(r * cols, r * cols + cols).map(i => i.h))
+    );
+    const canvas = document.createElement('canvas');
+    canvas.width  = colW * cols + gap * (cols - 1);
+    canvas.height = rowH.reduce((a, b) => a + b, 0) + gap * (rows - 1);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let yOff = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const im = images[r * cols + c];
+        if (!im) continue;
+        ctx.drawImage(im.img, c * (colW + gap), yOff + (rowH[r] - im.h) / 2, im.w, im.h);
+      }
+      yOff += rowH[r] + gap;
+    }
+    return new Promise(res => canvas.toBlob(res, 'image/png', 1.0));
+  }
+
+  /* Post submit */
+  async function handlePostSubmit() {
+    if (!postFiles.length) return toast('error', 'Add at least one screenshot');
+    const btn = document.getElementById('postSubmitBtn');
+    setLoading(btn, true, 'Building collage…');
+    const blob = await buildCollage(postFiles);
+    const fd = new FormData();
+    fd.append('screenshot', new File([blob], 'collage.png', { type: 'image/png' }));
+    fd.append('type',        document.querySelector('input[name="postType"]:checked').value);
+    fd.append('channel',     document.getElementById('postChannel').value);
+    fd.append('record_type', 'post_performance');
+    await sendWebhook(fd, btn, '<i class="fas fa-layer-group"></i> Create Collage &amp; Send');
+  }
+
+  /* Ads submit */
+  async function handleAdsSubmit() {
+    const name = document.getElementById('campaignName').value.trim();
+    if (!name)            return toast('error', 'Enter a campaign name');
+    if (!adsFiles.length) return toast('error', 'Add a payment screenshot');
+    const btn = document.getElementById('adsSubmitBtn');
+    setLoading(btn, true, 'Uploading…');
+    const blob = await buildCollage(adsFiles);
+    const fd = new FormData();
+    fd.append('screenshot',    new File([blob], 'receipt.png', { type: 'image/png' }));
+    fd.append('campaign_name', name);
+    fd.append('channel',       document.getElementById('adsChannel').value);
+    fd.append('amount_spent',  document.getElementById('adsAmount').value);
+    fd.append('record_type',   'ads_spend');
+    await sendWebhook(fd, btn, '<i class="fas fa-paper-plane"></i> Record Ad Spend &amp; Send');
+  }
+
+  async function sendWebhook(fd, btn, resetHTML) {
+    try {
+      const res = await fetch(WEBHOOK, { method: 'POST', body: fd });
+      if (res.ok) {
+        toast('success', 'Sent successfully');
+        postFiles.length = 0; adsFiles.length = 0;
+        ['postPreview','adsPreview'].forEach(id => document.getElementById(id).innerHTML = '');
+        ['campaignName','adsAmount'].forEach(id => document.getElementById(id).value = '');
+        ['postChannel','adsChannel'].forEach(id => document.getElementById(id).value = '');
+      } else {
+        toast('error', `Server error ${res.status}`);
+      }
+    } catch { toast('error', 'Network error'); }
+    setLoading(btn, false, resetHTML);
+  }
+
+  function setLoading(btn, on, label) {
+    btn.disabled = on;
+    btn.innerHTML = on ? `<i class="fas fa-spinner fa-spin"></i> ${label}` : label;
+  }
+
+  function toast(type, msg) {
+    const el = document.getElementById('toast');
+    el.className = `toast ${type}`;
+    document.getElementById('toastText').textContent = msg;
+    void el.offsetWidth;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3600);
+  }
+</script>
 </body>
 </html>
