@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
   <title>Content & Ads Tracker</title>
   <link rel="icon" href="https://wailapho.github.io/acker/img/favicon.ico"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -10,276 +10,263 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
 
   <style>
-    /* ── Palette ── */
     :root {
-      --bg:        #161414;
-      --burg:      #801747;
-      --gold:      #BEAD85;
-      --grey:      #F2F2F2;
-
-      /* glass surfaces */
-      --glass-bg:  rgba(255,255,255,0.045);
-      --glass-bg2: rgba(255,255,255,0.07);
-      --glass-border: rgba(255,255,255,0.10);
-      --glass-hi:  rgba(255,255,255,0.12);
-
-      /* type */
-      --text:   #F2F2F2;
-      --sub:    rgba(242,242,242,0.55);
-      --muted:  rgba(242,242,242,0.28);
-
-      /* accents */
-      --burg-dim:  rgba(128,23,71,0.18);
-      --gold-dim:  rgba(190,173,133,0.16);
-      --burg-glow: rgba(128,23,71,0.35);
-      --gold-glow: rgba(190,173,133,0.28);
+      --bg:          #161414;
+      --burg:        #801747;
+      --gold:        #BEAD85;
+      --grey:        #F2F2F2;
+      --glass:       rgba(255,255,255,0.045);
+      --glass2:      rgba(255,255,255,0.07);
+      --gb:          rgba(255,255,255,0.09);
+      --ghi:         rgba(255,255,255,0.11);
+      --text:        #F2F2F2;
+      --sub:         rgba(242,242,242,0.55);
+      --muted:       rgba(242,242,242,0.28);
+      --burg-dim:    rgba(128,23,71,0.18);
+      --gold-dim:    rgba(190,173,133,0.16);
+      --burg-glow:   rgba(128,23,71,0.38);
+      --gold-glow:   rgba(190,173,133,0.30);
     }
 
-    *, *::before, *::after {
-      box-sizing: border-box; margin: 0; padding: 0;
-      -webkit-tap-highlight-color: transparent;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      /* prevent horizontal scroll on mobile */
+      overflow-x: hidden;
+      width: 100%;
     }
-    html { height: 100%; }
 
     body {
       font-family: 'DM Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100dvh;
-      display: flex;
-      justify-content: center;
       -webkit-font-smoothing: antialiased;
-      overscroll-behavior: none;
+      overscroll-behavior-x: none;
     }
 
-    /* ── App shell ── */
-    .app {
-      width: 100%;
-      max-width: 430px;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    /* ── Background layer: orbs that give glass something to blur ── */
+    /* ── Background orbs ── */
     .bg-layer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
       overflow: hidden;
     }
     .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(90px);
+      position: absolute; border-radius: 50%; filter: blur(90px);
     }
-    .orb-1 {
-      width: 380px; height: 380px;
-      top: -100px; right: -120px;
-      background: radial-gradient(circle at 40% 40%, rgba(128,23,71,0.55), rgba(128,23,71,0.08) 70%, transparent);
-    }
-    .orb-2 {
-      width: 320px; height: 320px;
-      bottom: 60px; left: -100px;
-      background: radial-gradient(circle at 60% 60%, rgba(190,173,133,0.45), rgba(190,173,133,0.06) 70%, transparent);
-    }
-    .orb-3 {
-      width: 200px; height: 200px;
-      top: 45%; left: 30%;
-      background: radial-gradient(circle, rgba(128,23,71,0.18), transparent 70%);
-    }
+    .orb-1 { width: 420px; height: 420px; top: -120px; right: -120px; background: radial-gradient(circle at 40% 40%, rgba(128,23,71,0.55), transparent 70%); }
+    .orb-2 { width: 340px; height: 340px; bottom: 80px; left: -100px; background: radial-gradient(circle at 60% 60%, rgba(190,173,133,0.42), transparent 70%); }
+    .orb-3 { width: 180px; height: 180px; top: 50%; left: 35%; background: radial-gradient(circle, rgba(128,23,71,0.15), transparent 70%); }
 
-    /* Thin gold diagonal accent line */
-    .accent-line {
-      position: absolute;
-      top: 0; right: 80px;
-      width: 1px;
-      height: 100vh;
-      background: linear-gradient(to bottom, transparent 0%, rgba(190,173,133,0.15) 30%, rgba(190,173,133,0.08) 70%, transparent 100%);
+    /* ── Layout: mobile = full width, desktop = centered column ── */
+    .app {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      min-height: 100dvh;
+      /* Mobile: full width */
+      width: 100%;
+      margin: 0 auto;
     }
 
     /* ── Header ── */
     .header {
-      position: relative;
-      z-index: 1;
-      padding: 56px 24px 24px;
-      animation: up .5s ease both;
+      padding: 52px 20px 20px;
+      animation: up .35s ease both;
     }
 
     .header-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 11px;
+      margin-bottom: 5px;
     }
 
     .brand-pill {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: var(--glass-bg2);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(12px);
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--glass2); border: 1px solid var(--gb);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       display: flex; align-items: center; justify-content: center;
       overflow: hidden; flex-shrink: 0;
-      box-shadow: inset 0 1px 0 var(--glass-hi);
+      box-shadow: inset 0 1px 0 var(--ghi);
     }
-    .brand-pill img { width: 22px; height: 22px; object-fit: contain; }
+    .brand-pill img { width: 21px; height: 21px; object-fit: contain; }
 
     .tagline {
       font-family: 'Instrument Serif', serif;
-      font-size: 22px;
-      font-weight: 400;
-      color: var(--text);
-      letter-spacing: -0.2px;
-      line-height: 1;
+      font-size: 20px; font-weight: 400;
+      color: var(--text); letter-spacing: -0.2px; line-height: 1;
     }
     .tagline em { font-style: italic; color: var(--gold); }
 
     .header-sub {
-      font-size: 12px;
-      color: var(--muted);
-      padding-left: 48px;
-      font-weight: 300;
-      letter-spacing: 0.02em;
+      font-size: 12px; color: var(--muted);
+      padding-left: 45px; font-weight: 300; letter-spacing: 0.02em;
     }
 
     /* ── Scroll area ── */
     .scroll {
-      flex: 1;
-      overflow-y: auto;
+      flex: 1; overflow-y: auto; overflow-x: hidden;
       padding: 0 16px 110px;
-      position: relative;
-      z-index: 1;
       -webkit-overflow-scrolling: touch;
     }
 
-    /* ── Tab bar ── */
+    /* ── Tab bar — instant switching, no slow transition ── */
     .tab-bar {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
       margin-bottom: 14px;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 16px;
-      padding: 5px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: inset 0 1px 0 var(--glass-hi), 0 4px 24px rgba(0,0,0,0.25);
-      animation: up .5s .07s ease both;
+      background: var(--glass); border: 1px solid var(--gb);
+      border-radius: 14px; padding: 4px;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      box-shadow: inset 0 1px 0 var(--ghi), 0 4px 20px rgba(0,0,0,0.22);
+      animation: up .35s .06s ease both;
     }
 
     .tab-btn {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 11px 10px;
-      border: none;
-      background: transparent;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 10px 8px;
+      border: none; background: transparent;
       color: var(--muted);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      border-radius: 11px;
-      cursor: pointer;
-      transition: color 0.25s;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      border-radius: 10px; cursor: pointer;
+      /* NO transition so it feels instant */
       white-space: nowrap;
+      position: relative;
     }
     .tab-btn i { font-size: 13px; }
 
     .tab-btn.active {
-      background: var(--glass-bg2);
-      border: 1px solid var(--glass-border);
+      background: var(--glass2);
+      border: 1px solid var(--gb);
       color: var(--text);
-      box-shadow: inset 0 1px 0 var(--glass-hi), 0 2px 12px rgba(0,0,0,0.3);
+      box-shadow: inset 0 1px 0 var(--ghi), 0 2px 10px rgba(0,0,0,0.28);
     }
-
-    /* Colored indicator dot on active tab */
     .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: 6px;
-      width: 18px; height: 2px;
-      border-radius: 2px;
+      content: ''; position: absolute; bottom: 5px;
+      width: 16px; height: 2px; border-radius: 2px;
     }
     #tabPost.active::after { background: var(--burg); }
     #tabAds.active::after  { background: var(--gold); }
 
     /* ── Glass card ── */
     .card {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      padding: 22px;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      box-shadow:
-        inset 0 1px 0 var(--glass-hi),
-        0 8px 32px rgba(0,0,0,0.3),
-        0 1px 0 rgba(0,0,0,0.5);
+      background: var(--glass); border: 1px solid var(--gb);
+      border-radius: 20px; padding: 20px;
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      box-shadow: inset 0 1px 0 var(--ghi), 0 8px 32px rgba(0,0,0,0.28);
       display: none;
-      animation: up .5s .12s ease both;
+      animation: up .35s .1s ease both;
     }
     .card.active { display: block; }
 
     /* ── Field ── */
-    .field { margin-bottom: 16px; }
-
+    .field { margin-bottom: 15px; }
     .field-label {
-      display: block;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.10em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 7px;
+      display: block; font-size: 10px; font-weight: 600;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px;
     }
 
-    /* ── Input ── */
+    /* ── Input base ── */
     .input {
       width: 100%;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.09);
-      color: var(--text);
-      border-radius: 12px;
+      color: var(--text); border-radius: 11px;
       padding: 13px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-      -webkit-appearance: none;
-      appearance: none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none; appearance: none;
     }
     .input::placeholder { color: var(--muted); }
 
-    select.input {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6' viewBox='0 0 11 6'%3E%3Cpath d='M1 1l4.5 4L10 1' stroke='%23ffffff' stroke-opacity='0.3' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 13px center;
-      padding-right: 36px;
-    }
-    select.input option { background: #1a1414; }
-
-    .prefix-wrap { position: relative; }
-    .prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--sub); font-size: 15px; pointer-events: none; }
-    .prefix-wrap .input { padding-left: 28px; }
-
-    /* Focus: burgundy for post, gold for ads */
     #panelPost .input:focus {
       border-color: rgba(128,23,71,0.5);
-      background: rgba(128,23,71,0.06);
-      box-shadow: 0 0 0 3px var(--burg-dim), inset 0 1px 0 rgba(255,255,255,0.04);
+      box-shadow: 0 0 0 3px var(--burg-dim);
     }
     #panelAds .input:focus {
       border-color: rgba(190,173,133,0.4);
-      background: rgba(190,173,133,0.05);
-      box-shadow: 0 0 0 3px var(--gold-dim), inset 0 1px 0 rgba(255,255,255,0.04);
+      box-shadow: 0 0 0 3px var(--gold-dim);
     }
+
+    /* ── Custom platform dropdown ── */
+    .custom-select { position: relative; }
+
+    .cs-trigger {
+      width: 100%; display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      color: var(--text); border-radius: 11px;
+      padding: 11px 14px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 15px;
+      transition: border-color 0.15s;
+    }
+    .cs-trigger:focus { outline: none; }
+    .cs-trigger.open { border-radius: 11px 11px 0 0; border-color: rgba(255,255,255,0.16); }
+
+    .cs-icon { width: 24px; height: 24px; border-radius: 6px; object-fit: contain; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .cs-icon img { width: 20px; height: 20px; object-fit: contain; }
+    .cs-icon i { font-size: 15px; color: var(--sub); }
+    .cs-placeholder { color: var(--muted); }
+    .cs-label { flex: 1; text-align: left; }
+    .cs-arrow { margin-left: auto; color: var(--muted); font-size: 11px; transition: transform 0.15s; flex-shrink: 0; }
+    .cs-trigger.open .cs-arrow { transform: rotate(180deg); }
+
+    .cs-dropdown {
+      position: absolute; left: 0; right: 0; top: 100%;
+      background: rgba(26,22,22,0.97);
+      border: 1px solid rgba(255,255,255,0.12); border-top: none;
+      border-radius: 0 0 11px 11px;
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      z-index: 100; display: none;
+      max-height: 260px; overflow-y: auto;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    }
+    .cs-dropdown.open { display: block; }
+
+    .cs-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; cursor: pointer;
+      font-size: 14px; color: var(--sub);
+      transition: background 0.1s;
+    }
+    .cs-option:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .cs-option:last-child { border-radius: 0 0 11px 11px; }
+    .cs-option.selected { color: var(--text); }
+
+    /* platform icon in option */
+    .opt-icon { width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); }
+    .opt-icon img { width: 16px; height: 16px; object-fit: contain; }
+    .opt-icon i { font-size: 14px; }
+
+    /* "Other" text input that appears */
+    .other-input-wrap {
+      display: none; margin-top: 8px;
+    }
+    .other-input-wrap.show { display: block; }
+
+    /* ── Currency + amount row ── */
+    .currency-amount-row { display: flex; gap: 8px; }
+
+    .currency-select {
+      flex-shrink: 0; width: 88px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      color: var(--text); border-radius: 11px;
+      padding: 13px 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+      outline: none; cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      text-align: center;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23ffffff' stroke-opacity='0.3' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 24px;
+    }
+    .currency-select option { background: #1a1414; }
+    #panelAds .currency-select:focus { border-color: rgba(190,173,133,0.4); box-shadow: 0 0 0 3px var(--gold-dim); outline: none; }
+
+    .amount-input { flex: 1; }
 
     /* ── Radio grid ── */
     .radio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -287,55 +274,39 @@
     .radio-card input { position: absolute; opacity: 0; width: 0; height: 0; }
 
     .radio-inner {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 13px;
+      display: flex; align-items: center; gap: 9px;
+      padding: 12px 13px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      font-size: 13.5px;
-      font-weight: 500;
+      border-radius: 11px; font-size: 13.5px; font-weight: 500;
       color: var(--sub);
-      transition: all 0.2s;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      /* instant, no transition */
     }
-    .radio-inner i { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
+    .radio-inner i { font-size: 14px; width: 15px; text-align: center; flex-shrink: 0; }
 
     #panelPost .radio-card input:checked + .radio-inner {
-      border-color: rgba(128,23,71,0.6);
-      color: var(--text);
-      background: var(--burg-dim);
-      box-shadow: 0 0 0 1px rgba(128,23,71,0.2) inset, inset 0 1px 0 rgba(255,255,255,0.06);
+      border-color: rgba(128,23,71,0.6); color: var(--text); background: var(--burg-dim);
     }
     #panelAds .radio-card input:checked + .radio-inner {
-      border-color: rgba(190,173,133,0.5);
-      color: var(--text);
-      background: var(--gold-dim);
-      box-shadow: 0 0 0 1px rgba(190,173,133,0.2) inset, inset 0 1px 0 rgba(255,255,255,0.06);
+      border-color: rgba(190,173,133,0.5); color: var(--text); background: var(--gold-dim);
     }
 
-    /* ── Drop zone ── */
+    /* ── Dropzone ── */
     .dropzone {
-      border: 1px dashed rgba(255,255,255,0.14);
-      border-radius: 14px;
-      padding: 28px 20px;
-      text-align: center;
-      cursor: pointer;
-      background: rgba(255,255,255,0.025);
-      transition: all 0.22s;
+      border: 1px dashed rgba(255,255,255,0.13);
+      border-radius: 13px; padding: 26px 20px;
+      text-align: center; cursor: pointer;
+      background: rgba(255,255,255,0.02);
     }
     .dropzone input[type="file"] { display: none; }
 
-    #postDropzone:active, #postDropzone.over { border-color: rgba(128,23,71,0.7); background: var(--burg-dim); }
-    #adsDropzone:active,  #adsDropzone.over  { border-color: rgba(190,173,133,0.6); background: var(--gold-dim); }
+    #postDropzone.over { border-color: rgba(128,23,71,0.7); background: var(--burg-dim); }
+    #adsDropzone.over  { border-color: rgba(190,173,133,0.6); background: var(--gold-dim); }
 
     .dz-icon {
-      width: 42px; height: 42px;
-      border-radius: 11px;
+      width: 42px; height: 42px; border-radius: 11px;
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 10px;
-      font-size: 16px;
+      margin: 0 auto 10px; font-size: 16px;
     }
     #panelPost .dz-icon { background: rgba(128,23,71,0.2); border: 1px solid rgba(128,23,71,0.3); color: #c45a82; }
     #panelAds  .dz-icon { background: rgba(190,173,133,0.18); border: 1px solid rgba(190,173,133,0.3); color: var(--gold); }
@@ -343,126 +314,69 @@
     .dz-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
     .dz-sub   { font-size: 12px; color: var(--muted); }
 
-    /* Preview */
     .preview-strip { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
-
-    .preview-thumb {
-      width: 60px; height: 60px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid var(--glass-border);
-    }
-    .preview-more {
-      width: 60px; height: 60px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--glass-border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 600; color: var(--sub);
-    }
-    .file-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      border-radius: 100px;
-      padding: 3px 10px;
-      font-size: 11.5px; font-weight: 600;
-      margin-top: 4px;
-    }
+    .preview-thumb { width: 58px; height: 58px; object-fit: cover; border-radius: 8px; border: 1px solid var(--gb); }
+    .preview-more  { width: 58px; height: 58px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid var(--gb); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--sub); }
+    .file-badge    { display: inline-flex; align-items: center; gap: 5px; border-radius: 100px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; margin-top: 4px; }
     #postPreview .file-badge { background: var(--burg-dim); border: 1px solid rgba(128,23,71,0.25); color: #d47099; }
     #adsPreview  .file-badge { background: var(--gold-dim); border: 1px solid rgba(190,173,133,0.25); color: var(--gold); }
 
-    /* ── Divider ── */
     .divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 18px 0; }
 
-    /* ── Submit buttons ── */
+    /* ── Submit ── */
     .submit-btn {
-      width: 100%;
-      border: none;
-      border-radius: 14px;
-      padding: 16px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px; font-weight: 600;
-      cursor: pointer;
+      width: 100%; border: none; border-radius: 13px;
+      padding: 16px; font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 600; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 9px;
-      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
       letter-spacing: 0.01em;
     }
-    .submit-btn:active { transform: scale(0.98); }
-    .submit-btn:disabled { opacity: 0.45; pointer-events: none; }
+    .submit-btn:active { opacity: 0.85; transform: scale(0.99); }
+    .submit-btn:disabled { opacity: 0.4; pointer-events: none; }
 
     #postSubmitBtn {
-      background: var(--burg);
-      color: #F2F2F2;
+      background: var(--burg); color: #F2F2F2;
       box-shadow: 0 4px 24px var(--burg-glow), inset 0 1px 0 rgba(255,255,255,0.12);
     }
-    #postSubmitBtn:hover { box-shadow: 0 6px 30px rgba(128,23,71,0.5), inset 0 1px 0 rgba(255,255,255,0.12); }
-
     #adsSubmitBtn {
-      background: var(--gold);
-      color: #1a1414;
+      background: var(--gold); color: #1a1414;
       box-shadow: 0 4px 24px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,0.25);
     }
-    #adsSubmitBtn:hover { box-shadow: 0 6px 30px rgba(190,173,133,0.45), inset 0 1px 0 rgba(255,255,255,0.25); }
 
     /* ── Footer ── */
     .footer {
-      position: fixed;
-      bottom: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 100%; max-width: 430px;
-      background: rgba(16,14,14,0.75);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border-top: 1px solid rgba(255,255,255,0.07);
-      padding: 14px 22px;
-      padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(16,14,14,0.82);
+      backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 13px 20px; padding-bottom: calc(13px + env(safe-area-inset-bottom, 0px));
+      display: flex; align-items: center; justify-content: space-between;
       z-index: 50;
     }
-
-    /* Gold shimmer rule on footer */
     .footer::before {
-      content: '';
-      position: absolute;
-      top: -1px; left: 15%; right: 15%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(190,173,133,0.4) 50%, transparent);
+      content: ''; position: absolute; top: -1px; left: 20%; right: 20%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(190,173,133,0.38) 50%, transparent);
     }
-
     .footer-icon {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: var(--glass-bg2);
-      border: 1px solid var(--glass-border);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-      box-shadow: inset 0 1px 0 var(--glass-hi);
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--glass2); border: 1px solid var(--gb);
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
-    .footer-icon img { width: 17px; height: 17px; object-fit: contain; }
-
+    .footer-icon img { width: 16px; height: 16px; object-fit: contain; }
     .footer-meta { font-size: 11px; color: var(--muted); letter-spacing: 0.04em; }
 
     /* ── Toast ── */
     .toast {
-      position: fixed;
-      bottom: 76px; left: 50%;
+      position: fixed; bottom: 76px; left: 50%;
       transform: translateX(-50%) translateY(12px);
-      background: rgba(22,20,20,0.95);
-      border: 1px solid var(--glass-border);
-      color: var(--text);
-      padding: 11px 16px;
-      border-radius: 13px;
-      display: flex; align-items: center; gap: 9px;
-      font-size: 13.5px;
+      background: rgba(22,20,20,0.97);
+      border: 1px solid var(--gb); color: var(--text);
+      padding: 11px 16px; border-radius: 12px;
+      display: flex; align-items: center; gap: 9px; font-size: 13.5px;
       opacity: 0; pointer-events: none;
-      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      z-index: 200;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-      white-space: nowrap;
-      max-width: calc(100vw - 32px);
+      transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 200; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      white-space: nowrap; max-width: calc(100vw - 32px);
       backdrop-filter: blur(20px);
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -470,23 +384,66 @@
     .toast.success .toast-dot { background: #22c55e; }
     .toast.error   .toast-dot { background: var(--burg); }
 
-    /* ── Anim ── */
     @keyframes up {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══════════════════════════════════════
+       DESKTOP layout  ≥ 768px
+    ══════════════════════════════════════ */
+    @media (min-width: 768px) {
+      body { display: flex; justify-content: center; align-items: flex-start; background: #0f0d0d; padding: 40px 20px 60px; }
+
+      .bg-layer { max-width: 100%; }
+
+      .app {
+        max-width: 460px; width: 100%;
+        min-height: auto;
+        background: rgba(22,18,18,0.6);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 28px;
+        backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+        box-shadow: 0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+        overflow: hidden;
+      }
+
+      .header { padding: 36px 28px 20px; }
+      .header-sub { padding-left: 45px; }
+
+      .scroll {
+        padding: 0 24px 28px;
+        overflow-y: visible;
+        /* desktop: no footer needed so no bottom padding */
+      }
+
+      .footer { display: none; }
+
+      /* desktop: add a small footer inside the card */
+      .desktop-footer {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 24px 24px; border-top: 1px solid rgba(255,255,255,0.06);
+        margin-top: 4px;
+      }
+      .desktop-footer .footer-icon { width: 24px; height: 24px; }
+      .desktop-footer .footer-icon img { width: 14px; height: 14px; }
+      .desktop-footer .footer-meta { font-size: 11px; color: var(--muted); }
+
+      .toast { bottom: 30px; }
+    }
+
+    @media (max-width: 767px) {
+      .desktop-footer { display: none; }
     }
   </style>
 </head>
 <body>
 
 <div class="app">
-
-  <!-- Background orbs -->
   <div class="bg-layer">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
-    <div class="accent-line"></div>
   </div>
 
   <!-- Header -->
@@ -503,7 +460,7 @@
   <!-- Scroll -->
   <div class="scroll">
 
-    <!-- Tab bar -->
+    <!-- Tabs -->
     <div class="tab-bar">
       <button class="tab-btn active" id="tabPost" onclick="switchTab('post')">
         <i class="fas fa-chart-line"></i> Post Performance
@@ -513,18 +470,44 @@
       </button>
     </div>
 
-    <!-- POST PANEL -->
+    <!-- ═══ POST PANEL ═══ -->
     <div class="card active" id="panelPost">
 
       <div class="field">
         <label class="field-label">Platform</label>
-        <select class="input" id="postChannel">
-          <option value="">Select platform…</option>
-          <option value="Xiaohongshu">小红书 Xiaohongshu</option>
-          <option value="Douyin">抖音 Douyin</option>
-          <option value="Instagram">Instagram</option>
-          <option value="Other">Other</option>
-        </select>
+        <div class="custom-select" id="postPlatformSelect">
+          <div class="cs-trigger" tabindex="0" onclick="toggleDrop('postDrop', this)">
+            <div class="cs-icon"><i class="fas fa-layer-group"></i></div>
+            <span class="cs-label cs-placeholder">Select platform…</span>
+            <i class="fas fa-chevron-down cs-arrow"></i>
+          </div>
+          <div class="cs-dropdown" id="postDrop">
+            <div class="cs-option" data-value="Xiaohongshu" onclick="pickOption('postPlatformSelect','postDrop',this)">
+              <div class="opt-icon" style="background:rgba(255,60,80,0.15)"><i class="fas fa-bookmark" style="color:#ff3c50;font-size:13px"></i></div>
+              小红书 Xiaohongshu
+            </div>
+            <div class="cs-option" data-value="Douyin" onclick="pickOption('postPlatformSelect','postDrop',this)">
+              <div class="opt-icon" style="background:rgba(0,0,0,0.3)"><i class="fab fa-tiktok" style="color:#e0e0e0;font-size:13px"></i></div>
+              抖音 Douyin
+            </div>
+            <div class="cs-option" data-value="Instagram" onclick="pickOption('postPlatformSelect','postDrop',this)">
+              <div class="opt-icon" style="background:linear-gradient(135deg,rgba(240,148,51,0.25),rgba(230,73,128,0.25))"><i class="fab fa-instagram" style="color:#e4405f;font-size:14px"></i></div>
+              Instagram
+            </div>
+            <div class="cs-option" data-value="Facebook" onclick="pickOption('postPlatformSelect','postDrop',this)">
+              <div class="opt-icon" style="background:rgba(24,119,242,0.18)"><i class="fab fa-facebook-f" style="color:#1877f2;font-size:13px"></i></div>
+              Facebook
+            </div>
+            <div class="cs-option" data-value="Other" onclick="pickOption('postPlatformSelect','postDrop',this)">
+              <div class="opt-icon"><i class="fas fa-ellipsis" style="color:var(--sub);font-size:12px"></i></div>
+              Other
+            </div>
+          </div>
+          <input type="hidden" id="postChannel" value="">
+        </div>
+        <div class="other-input-wrap" id="postOtherWrap">
+          <input class="input" type="text" id="postOtherText" placeholder="Enter platform name…">
+        </div>
       </div>
 
       <div class="field">
@@ -532,15 +515,11 @@
         <div class="radio-grid">
           <label class="radio-card">
             <input type="radio" name="postType" value="performance" checked>
-            <div class="radio-inner">
-              <i class="fas fa-arrow-trend-up"></i> Performance
-            </div>
+            <div class="radio-inner"><i class="fas fa-arrow-trend-up"></i> Performance</div>
           </label>
           <label class="radio-card">
             <input type="radio" name="postType" value="leads">
-            <div class="radio-inner">
-              <i class="fas fa-user-plus"></i> New Lead
-            </div>
+            <div class="radio-inner"><i class="fas fa-user-plus"></i> New Lead</div>
           </label>
         </div>
       </div>
@@ -557,14 +536,12 @@
       </div>
 
       <hr class="divider">
-
       <button class="submit-btn" id="postSubmitBtn" onclick="handlePost()">
-        <i class="fas fa-layer-group"></i>
-        Create Collage &amp; Send
+        <i class="fas fa-layer-group"></i> Create Collage &amp; Send
       </button>
     </div>
 
-    <!-- ADS PANEL -->
+    <!-- ═══ ADS PANEL ═══ -->
     <div class="card" id="panelAds">
 
       <div class="field">
@@ -574,21 +551,59 @@
 
       <div class="field">
         <label class="field-label">Platform</label>
-        <select class="input" id="adsChannel">
-          <option value="">Select platform…</option>
-          <option value="Xiaohongshu Ads">小红书 Ads</option>
-          <option value="Douyin Ads">抖音 Ads</option>
-          <option value="Meta Ads">Meta Ads</option>
-          <option value="Google Ads">Google Ads</option>
-          <option value="Other">Other</option>
-        </select>
+        <div class="custom-select" id="adsPlatformSelect">
+          <div class="cs-trigger" tabindex="0" onclick="toggleDrop('adsDrop', this)">
+            <div class="cs-icon"><i class="fas fa-layer-group"></i></div>
+            <span class="cs-label cs-placeholder">Select platform…</span>
+            <i class="fas fa-chevron-down cs-arrow"></i>
+          </div>
+          <div class="cs-dropdown" id="adsDrop">
+            <div class="cs-option" data-value="Xiaohongshu Ads" onclick="pickOption('adsPlatformSelect','adsDrop',this)">
+              <div class="opt-icon" style="background:rgba(255,60,80,0.15)"><i class="fas fa-bookmark" style="color:#ff3c50;font-size:13px"></i></div>
+              小红书 Ads
+            </div>
+            <div class="cs-option" data-value="Douyin Ads" onclick="pickOption('adsPlatformSelect','adsDrop',this)">
+              <div class="opt-icon" style="background:rgba(0,0,0,0.3)"><i class="fab fa-tiktok" style="color:#e0e0e0;font-size:13px"></i></div>
+              抖音 Ads
+            </div>
+            <div class="cs-option" data-value="Meta Ads" onclick="pickOption('adsPlatformSelect','adsDrop',this)">
+              <div class="opt-icon" style="background:rgba(24,119,242,0.18)"><i class="fab fa-meta" style="color:#1877f2;font-size:13px"></i></div>
+              Meta Ads
+            </div>
+            <div class="cs-option" data-value="Facebook Ads" onclick="pickOption('adsPlatformSelect','adsDrop',this)">
+              <div class="opt-icon" style="background:rgba(24,119,242,0.18)"><i class="fab fa-facebook-f" style="color:#1877f2;font-size:13px"></i></div>
+              Facebook Ads
+            </div>
+            <div class="cs-option" data-value="Instagram Ads" onclick="pickOption('adsPlatformSelect','adsDrop',this)">
+              <div class="opt-icon" style="background:linear-gradient(135deg,rgba(240,148,51,0.25),rgba(230,73,128,0.25))"><i class="fab fa-instagram" style="color:#e4405f;font-size:14px"></i></div>
+              Instagram Ads
+            </div>
+            <div class="cs-option" data-value="Google Ads" onclick="pickOption('adsPlatformSelect','adsDrop',this)">
+              <div class="opt-icon" style="background:rgba(66,133,244,0.15)"><i class="fab fa-google" style="color:#4285f4;font-size:13px"></i></div>
+              Google Ads
+            </div>
+            <div class="cs-option" data-value="Other" onclick="pickOption('adsPlatformSelect','adsDrop',this)">
+              <div class="opt-icon"><i class="fas fa-ellipsis" style="color:var(--sub);font-size:12px"></i></div>
+              Other
+            </div>
+          </div>
+          <input type="hidden" id="adsChannel" value="">
+        </div>
+        <div class="other-input-wrap" id="adsOtherWrap">
+          <input class="input" type="text" id="adsOtherText" placeholder="Enter platform name…">
+        </div>
       </div>
 
       <div class="field">
         <label class="field-label">Amount Spent</label>
-        <div class="prefix-wrap">
-          <span class="prefix">¥</span>
-          <input class="input" type="number" id="adsAmount" placeholder="0.00" step="0.01" min="0">
+        <div class="currency-amount-row">
+          <select class="currency-select" id="adsCurrency">
+            <option value="RMB">¥ RMB</option>
+            <option value="HKD">HK$</option>
+            <option value="USD">USD</option>
+            <option value="SGD">SGD</option>
+          </select>
+          <input class="input amount-input" type="number" id="adsAmount" placeholder="0.00" step="0.01" min="0">
         </div>
       </div>
 
@@ -604,16 +619,22 @@
       </div>
 
       <hr class="divider">
-
       <button class="submit-btn" id="adsSubmitBtn" onclick="handleAds()">
-        <i class="fas fa-paper-plane"></i>
-        Record Ad Spend &amp; Send
+        <i class="fas fa-paper-plane"></i> Record Ad Spend &amp; Send
       </button>
     </div>
 
+  </div><!-- /scroll -->
+
+  <!-- Desktop inline footer -->
+  <div class="desktop-footer">
+    <div class="footer-icon">
+      <img src="https://wailapho.github.io/acker/img/favicon.ico" alt="">
+    </div>
+    <div class="footer-meta">Content Studio v1.0</div>
   </div>
 
-  <!-- Footer -->
+  <!-- Mobile sticky footer -->
   <footer class="footer">
     <div class="footer-icon">
       <img src="https://wailapho.github.io/acker/img/favicon.ico" alt="">
@@ -632,124 +653,191 @@
 <script>
   const WEBHOOK = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";
 
-  /* Tab switch */
+  /* ── Tab switch (no animation delay) ── */
   function switchTab(t) {
-    ['post','ads'].forEach(k => {
-      const K = k[0].toUpperCase() + k.slice(1);
-      document.getElementById('panel'+K).classList.toggle('active', k === t);
-      document.getElementById('tab'+K).classList.toggle('active', k === t);
-    });
+    document.getElementById('panelPost').classList.toggle('active', t==='post');
+    document.getElementById('panelAds').classList.toggle('active',  t==='ads');
+    document.getElementById('tabPost').classList.toggle('active', t==='post');
+    document.getElementById('tabAds').classList.toggle('active',  t==='ads');
   }
 
-  /* Dropzones */
+  /* ── Custom dropdown ── */
+  function toggleDrop(dropId, trigger) {
+    const drop = document.getElementById(dropId);
+    const isOpen = drop.classList.contains('open');
+    closeAllDrops();
+    if (!isOpen) {
+      drop.classList.add('open');
+      trigger.classList.add('open');
+    }
+  }
+
+  function closeAllDrops() {
+    document.querySelectorAll('.cs-dropdown.open').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.cs-trigger.open').forEach(t => t.classList.remove('open'));
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.custom-select')) closeAllDrops();
+  });
+
+  function pickOption(selectId, dropId, el) {
+    const val   = el.dataset.value;
+    const label = el.textContent.trim();
+    const wrap  = document.getElementById(selectId);
+    const trigger = wrap.querySelector('.cs-trigger');
+    const hiddenInput = wrap.querySelector('input[type=hidden]');
+    // Update trigger icon — update innerHTML to keep .cs-icon class intact
+    const csIcon = trigger.querySelector('.cs-icon');
+    const optIcon = el.querySelector('.opt-icon');
+    if (csIcon && optIcon) {
+      csIcon.innerHTML = optIcon.innerHTML;
+      csIcon.style.cssText = optIcon.style.cssText;
+    }
+    const labelSpan = trigger.querySelector('.cs-label');
+    labelSpan.textContent = label;
+    labelSpan.classList.remove('cs-placeholder');
+
+    hiddenInput.value = val;
+
+    // Mark selected
+    wrap.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+
+    closeAllDrops();
+
+    // Show "Other" text input if needed
+    if (selectId === 'postPlatformSelect') {
+      document.getElementById('postOtherWrap').classList.toggle('show', val === 'Other');
+      if (val === 'Other') setTimeout(() => document.getElementById('postOtherText').focus(), 50);
+    }
+    if (selectId === 'adsPlatformSelect') {
+      document.getElementById('adsOtherWrap').classList.toggle('show', val === 'Other');
+      if (val === 'Other') setTimeout(() => document.getElementById('adsOtherText').focus(), 50);
+    }
+  }
+
+  /* ── Dropzones ── */
   const postFiles = [], adsFiles = [];
 
-  function dz(dzId, inputId, previewId, store) {
+  function initDZ(dzId, inputId, previewId, store) {
     const el = document.getElementById(dzId);
     const inp = document.getElementById(inputId);
     el.addEventListener('click', () => inp.click());
-    inp.addEventListener('change', e => load(e.target.files, previewId, store));
+    inp.addEventListener('change', e => loadFiles(e.target.files, previewId, store));
     el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('over'); });
     el.addEventListener('dragleave', () => el.classList.remove('over'));
-    el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); load(e.dataTransfer.files, previewId, store); });
+    el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); loadFiles(e.dataTransfer.files, previewId, store); });
   }
 
-  dz('postDropzone','postFileInput','postPreview', postFiles);
-  dz('adsDropzone', 'adsFileInput', 'adsPreview',  adsFiles);
+  initDZ('postDropzone','postFileInput','postPreview', postFiles);
+  initDZ('adsDropzone', 'adsFileInput', 'adsPreview',  adsFiles);
 
-  function load(files, previewId, store) {
+  function loadFiles(files, previewId, store) {
     store.length = 0;
     Array.from(files).filter(f => f.type.startsWith('image/')).forEach(f => store.push(f));
     const w = document.getElementById(previewId);
     w.innerHTML = '';
     store.slice(0, 5).forEach(file => {
       const r = new FileReader();
-      r.onload = e => {
-        const img = document.createElement('img');
-        img.src = e.target.result; img.className = 'preview-thumb';
-        w.appendChild(img);
-      };
+      r.onload = e => { const img = document.createElement('img'); img.src = e.target.result; img.className = 'preview-thumb'; w.appendChild(img); };
       r.readAsDataURL(file);
     });
     if (store.length > 5) {
-      const m = document.createElement('div');
-      m.className = 'preview-more'; m.textContent = '+' + (store.length - 5);
-      w.appendChild(m);
+      const m = document.createElement('div'); m.className = 'preview-more'; m.textContent = '+' + (store.length - 5); w.appendChild(m);
     }
     if (store.length) {
-      const b = document.createElement('div');
-      b.className = 'file-badge';
-      b.innerHTML = `<i class="fas fa-check" style="font-size:10px"></i> ${store.length} image${store.length > 1 ? 's' : ''} ready`;
+      const b = document.createElement('div'); b.className = 'file-badge';
+      b.innerHTML = `<i class="fas fa-check" style="font-size:10px"></i> ${store.length} image${store.length>1?'s':''} ready`;
       w.appendChild(b);
     }
   }
 
-  /* Collage builder */
-  async function collage(files) {
+  /* ── Collage ── */
+  async function buildCollage(files) {
     const W = 1400, gap = 40, cols = Math.min(files.length, 2);
     const imgs = await Promise.all(files.map(f => new Promise(res => {
-      const i = new Image();
-      i.onload = () => res({ i, w: W, h: W / (i.width / i.height) });
-      i.src = URL.createObjectURL(f);
+      const i = new Image(); i.onload = () => res({ i, w: W, h: W / (i.width / i.height) }); i.src = URL.createObjectURL(f);
     })));
     const rows = Math.ceil(imgs.length / cols);
-    const rh = Array.from({length: rows}, (_, r) => Math.max(...imgs.slice(r*cols, r*cols+cols).map(x => x.h)));
+    const rh = Array.from({length:rows}, (_,r) => Math.max(...imgs.slice(r*cols, r*cols+cols).map(x=>x.h)));
     const cv = document.createElement('canvas');
-    cv.width  = W * cols + gap * (cols - 1);
-    cv.height = rh.reduce((a,b) => a+b, 0) + gap * (rows - 1);
+    cv.width = W*cols + gap*(cols-1);
+    cv.height = rh.reduce((a,b)=>a+b,0) + gap*(rows-1);
     const ctx = cv.getContext('2d');
     ctx.fillStyle = '#fff'; ctx.fillRect(0,0,cv.width,cv.height);
     let y = 0;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const im = imgs[r*cols+c]; if (!im) continue;
-        ctx.drawImage(im.i, c*(W+gap), y+(rh[r]-im.h)/2, im.w, im.h);
-      }
-      y += rh[r] + gap;
+    for (let r=0; r<rows; r++) {
+      for (let c=0; c<cols; c++) { const im=imgs[r*cols+c]; if(!im) continue; ctx.drawImage(im.i, c*(W+gap), y+(rh[r]-im.h)/2, im.w, im.h); }
+      y += rh[r]+gap;
     }
     return new Promise(res => cv.toBlob(res, 'image/png', 1.0));
   }
 
+  /* ── Submit: Post ── */
   async function handlePost() {
-    if (!postFiles.length) return toast('error', 'Add at least one screenshot');
+    if (!postFiles.length) return showToast('error','Add at least one screenshot');
     const btn = document.getElementById('postSubmitBtn');
+    let channel = document.getElementById('postChannel').value;
+    if (channel === 'Other') {
+      channel = document.getElementById('postOtherText').value.trim() || 'Other';
+    }
     setBtn(btn, true, 'Building collage…');
-    const blob = await collage(postFiles);
+    const blob = await buildCollage(postFiles);
     const fd = new FormData();
-    fd.append('screenshot', new File([blob], 'collage.png', {type:'image/png'}));
+    fd.append('screenshot', new File([blob],'collage.png',{type:'image/png'}));
     fd.append('type',        document.querySelector('input[name="postType"]:checked').value);
-    fd.append('channel',     document.getElementById('postChannel').value);
+    fd.append('channel',     channel);
     fd.append('record_type', 'post_performance');
-    await send(fd, btn, '<i class="fas fa-layer-group"></i> Create Collage &amp; Send');
+    await sendWebhook(fd, btn, '<i class="fas fa-layer-group"></i> Create Collage &amp; Send');
   }
 
+  /* ── Submit: Ads ── */
   async function handleAds() {
     const name = document.getElementById('campaignName').value.trim();
-    if (!name)            return toast('error', 'Enter a campaign name');
-    if (!adsFiles.length) return toast('error', 'Add a payment screenshot');
+    if (!name)            return showToast('error','Enter a campaign name');
+    if (!adsFiles.length) return showToast('error','Add a payment screenshot');
     const btn = document.getElementById('adsSubmitBtn');
+    let channel = document.getElementById('adsChannel').value;
+    if (channel === 'Other') {
+      channel = document.getElementById('adsOtherText').value.trim() || 'Other';
+    }
+    const currency = document.getElementById('adsCurrency').value;
+    const amount   = document.getElementById('adsAmount').value;
     setBtn(btn, true, 'Uploading…');
-    const blob = await collage(adsFiles);
+    const blob = await buildCollage(adsFiles);
     const fd = new FormData();
-    fd.append('screenshot',    new File([blob], 'receipt.png', {type:'image/png'}));
+    fd.append('screenshot',    new File([blob],'receipt.png',{type:'image/png'}));
     fd.append('campaign_name', name);
-    fd.append('channel',       document.getElementById('adsChannel').value);
-    fd.append('amount_spent',  document.getElementById('adsAmount').value);
+    fd.append('channel',       channel);
+    fd.append('currency',      currency);
+    fd.append('amount_spent',  amount);
     fd.append('record_type',   'ads_spend');
-    await send(fd, btn, '<i class="fas fa-paper-plane"></i> Record Ad Spend &amp; Send');
+    await sendWebhook(fd, btn, '<i class="fas fa-paper-plane"></i> Record Ad Spend &amp; Send');
   }
 
-  async function send(fd, btn, label) {
+  async function sendWebhook(fd, btn, resetHTML) {
     try {
       const res = await fetch(WEBHOOK, {method:'POST', body:fd});
       if (res.ok) {
-        toast('success', 'Sent successfully');
+        showToast('success','Sent successfully');
         postFiles.length = 0; adsFiles.length = 0;
-        ['postPreview','adsPreview'].forEach(id => document.getElementById(id).innerHTML = '');
-        ['campaignName','adsAmount','postChannel','adsChannel'].forEach(id => document.getElementById(id).value = '');
-      } else toast('error', `Error ${res.status}`);
-    } catch { toast('error', 'Network error'); }
-    setBtn(btn, false, label);
+        ['postPreview','adsPreview'].forEach(id => document.getElementById(id).innerHTML='');
+        ['campaignName','adsAmount'].forEach(id => document.getElementById(id).value='');
+        ['postOtherText','adsOtherText'].forEach(id => document.getElementById(id).value='');
+        ['postOtherWrap','adsOtherWrap'].forEach(id => document.getElementById(id).classList.remove('show'));
+        // Reset dropdowns
+        ['postPlatformSelect','adsPlatformSelect'].forEach(id => {
+          const w = document.getElementById(id);
+          const trigger = w.querySelector('.cs-trigger');
+          trigger.querySelector('.cs-icon').innerHTML = '<i class="fas fa-layer-group"></i>';
+          const ls = trigger.querySelector('.cs-label'); ls.textContent = 'Select platform…'; ls.classList.add('cs-placeholder');
+          w.querySelector('input[type=hidden]').value = '';
+          w.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
+        });
+      } else showToast('error',`Error ${res.status}`);
+    } catch { showToast('error','Network error'); }
+    setBtn(btn, false, resetHTML);
   }
 
   function setBtn(btn, on, label) {
@@ -757,14 +845,12 @@
     btn.innerHTML = on ? `<i class="fas fa-spinner fa-spin"></i> ${label}` : label;
   }
 
-  function toast(type, msg) {
+  function showToast(type, msg) {
     const el = document.getElementById('toast');
     el.className = `toast ${type}`;
     document.getElementById('toastText').textContent = msg;
-    void el.offsetWidth;
-    el.classList.add('show');
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.classList.remove('show'), 3600);
+    void el.offsetWidth; el.classList.add('show');
+    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3600);
   }
 </script>
 </body>
