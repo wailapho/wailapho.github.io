@@ -11,19 +11,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     :root {
-      --bg:        #0f0d0d;
-      --burg:      #801747;
-      --gold:      #BEAD85;
-      --grey:      #F2F2F2;
-      --glass:     rgba(255,255,255,0.042);
-      --glass2:    rgba(255,255,255,0.07);
-      --gb:        rgba(255,255,255,0.09);
-      --ghi:       rgba(255,255,255,0.11);
-      --text:      #F2F2F2;
-      --sub:       rgba(242,242,242,0.55);
-      --muted:     rgba(242,242,242,0.28);
-      --burg-dim:  rgba(128,23,71,0.16);
-      --gold-dim:  rgba(190,173,133,0.14);
+      --bg: #0f0d0d;
+      --burg: #801747;
+      --gold: #BEAD85;
+      --grey: #F2F2F2;
+      --glass: rgba(255,255,255,0.042);
+      --glass2: rgba(255,255,255,0.07);
+      --gb: rgba(255,255,255,0.09);
+      --ghi: rgba(255,255,255,0.11);
+      --text: #F2F2F2;
+      --sub: rgba(242,242,242,0.55);
+      --muted: rgba(242,242,242,0.28);
+      --burg-dim: rgba(128,23,71,0.16);
+      --gold-dim: rgba(190,173,133,0.14);
       --burg-glow: rgba(128,23,71,0.35);
     }
     *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
@@ -33,20 +33,18 @@
       min-height:100dvh; -webkit-font-smoothing:antialiased; overflow-x:hidden;
     }
     .orbs { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
-    .orb  { position:absolute; border-radius:50%; filter:blur(100px); }
-    .o1   { width:500px;height:500px;top:-180px;right:-160px;background:radial-gradient(circle at 40% 40%,rgba(128,23,71,0.45),transparent 70%); }
-    .o2   { width:400px;height:400px;bottom:0;left:-100px;background:radial-gradient(circle at 60% 60%,rgba(190,173,133,0.32),transparent 70%); }
-    .o3   { width:220px;height:220px;top:55%;left:55%;background:radial-gradient(circle,rgba(128,23,71,0.12),transparent 70%); }
-
+    .orb { position:absolute; border-radius:50%; filter:blur(100px); }
+    .o1 { width:500px;height:500px;top:-180px;right:-160px;background:radial-gradient(circle at 40% 40%,rgba(128,23,71,0.45),transparent 70%); }
+    .o2 { width:400px;height:400px;bottom:0;left:-100px;background:radial-gradient(circle at 60% 60%,rgba(190,173,133,0.32),transparent 70%); }
+    .o3 { width:220px;height:220px;top:55%;left:55%;background:radial-gradient(circle,rgba(128,23,71,0.12),transparent 70%); }
     .page { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:0 24px 60px; }
-
     /* NAV */
     .topnav {
       display:flex; align-items:center; justify-content:space-between;
       padding:24px 0 28px; border-bottom:1px solid rgba(255,255,255,0.06); margin-bottom:28px;
     }
     .nav-brand { display:flex; align-items:center; gap:12px; }
-    .nav-icon  { width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;overflow:hidden; }
+    .nav-icon { width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;overflow:hidden; }
     .nav-icon img { width:22px;height:22px;object-fit:contain; }
     .nav-title { font-family:'Instrument Serif',serif; font-size:18px; font-weight:400; color:var(--text); letter-spacing:-0.2px; }
     .nav-title em { font-style:italic; color:var(--gold); }
@@ -59,7 +57,6 @@
     .refresh-btn:hover { color:var(--text); }
     .refresh-btn.spinning i { animation:spin 1s linear infinite; }
     .last-updated { font-size:12px; color:var(--muted); }
-
     /* PLATFORM TABS */
     .platform-tabs { display:flex; gap:6px; margin-bottom:24px; flex-wrap:wrap; }
     .ptab {
@@ -72,10 +69,9 @@
     .ptab:hover { color:var(--sub); }
     .ptab i { font-size:14px; }
     .ptab.act-xhs { background:var(--burg-dim);border-color:rgba(128,23,71,0.45);color:#d47099; }
-    .ptab.act-ig  { background:rgba(228,64,95,0.1);border-color:rgba(228,64,95,0.38);color:#e4405f; }
-    .ptab.tbc     { opacity:0.38; cursor:default; pointer-events:none; }
-    .tbc-badge    { font-size:10px;background:rgba(255,255,255,0.08);border-radius:4px;padding:1px 5px;color:var(--muted); }
-
+    .ptab.act-ig { background:rgba(228,64,95,0.1);border-color:rgba(228,64,95,0.38);color:#e4405f; }
+    .ptab.tbc { opacity:0.38; cursor:default; pointer-events:none; }
+    .tbc-badge { font-size:10px;background:rgba(255,255,255,0.08);border-radius:4px;padding:1px 5px;color:var(--muted); }
     /* STATS */
     .stats-row { display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px; }
     .stat-card {
@@ -88,7 +84,6 @@
     .stat-value.gold { color:var(--gold); }
     .stat-value.burg { color:#c45a82; }
     .stat-sub { font-size:11px;color:var(--muted);margin-top:4px; }
-
     /* TABLE */
     .table-card {
       background:var(--glass);border:1px solid var(--gb);border-radius:20px;overflow:hidden;
@@ -97,10 +92,9 @@
       animation:fadeUp .4s .1s ease both;
     }
     .table-header { display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.06); }
-    .table-title  { font-size:14px;font-weight:600;color:var(--text); }
-    .table-count  { font-size:12px;color:var(--muted);background:rgba(255,255,255,0.05);border:1px solid var(--gb);border-radius:100px;padding:2px 10px; }
-    .table-wrap   { overflow-x:auto;-webkit-overflow-scrolling:touch; }
-
+    .table-title { font-size:14px;font-weight:600;color:var(--text); }
+    .table-count { font-size:12px;color:var(--muted);background:rgba(255,255,255,0.05);border:1px solid var(--gb);border-radius:100px;padding:2px 10px; }
+    .table-wrap { overflow-x:auto;-webkit-overflow-scrolling:touch; }
     table { width:100%;border-collapse:collapse;font-size:13px;min-width:900px; }
     thead th {
       padding:11px 14px;text-align:left;font-size:10px;font-weight:600;
@@ -117,18 +111,16 @@
     tbody tr:last-child { border-bottom:none; }
     tbody td { padding:11px 14px;color:var(--sub);vertical-align:middle; }
     .td-title { font-weight:500;color:var(--text);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-    .td-date  { white-space:nowrap;font-size:12px; }
-    .td-num   { font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap; }
-    .td-hi    { color:var(--gold);font-weight:500; }
-    .td-pct   { font-size:12px; }
+    .td-date { white-space:nowrap;font-size:12px; }
+    .td-num { font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap; }
+    .td-hi { color:var(--gold);font-weight:500; }
+    .td-pct { font-size:12px; }
     .thumb-cell { width:44px;height:44px;border-radius:8px;object-fit:cover;display:block;border:1px solid var(--gb);background:rgba(255,255,255,0.04); }
-    .no-thumb   { width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px; }
-    .snip       { max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11.5px;color:var(--muted); }
-
+    .no-thumb { width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px; }
+    .snip { max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11.5px;color:var(--muted); }
     /* STATE */
     .state-box { padding:60px 20px;text-align:center;color:var(--muted);font-size:14px; }
     .state-box i { font-size:26px;margin-bottom:10px;display:block; }
-
     /* DRAWER */
     .overlay { position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;opacity:0;pointer-events:none;transition:opacity .22s; }
     .overlay.open { opacity:1;pointer-events:all; }
@@ -151,28 +143,23 @@
     }
     .d-close:hover { background:rgba(255,255,255,0.1);color:var(--text); }
     .drawer-body { flex:1;overflow-y:auto;padding:20px;-webkit-overflow-scrolling:touch; }
-
     .d-post-title { font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;color:var(--text);line-height:1.35;margin-bottom:16px; }
-
     .d-img-wrap { border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.03);border:1px solid var(--gb);margin-bottom:18px;position:relative;min-height:80px; }
-    .d-img      { width:100%;display:block;object-fit:contain;max-height:340px; }
+    .d-img { width:100%;display:block;object-fit:contain;max-height:340px; }
     .d-img-loading { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;gap:8px; }
     .d-img-loading i { animation:spin 1s linear infinite; }
-    .d-img-err  { padding:28px;text-align:center;color:var(--muted);font-size:13px; }
+    .d-img-err { padding:28px;text-align:center;color:var(--muted);font-size:13px; }
     .d-img-err i { font-size:22px;margin-bottom:8px;display:block; }
-    .d-link     { display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--gold);text-decoration:none; }
+    .d-link { display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--gold);text-decoration:none; }
     .d-link:hover { text-decoration:underline; }
-
     .metrics-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px; }
     .mp { background:rgba(255,255,255,0.04);border:1px solid var(--gb);border-radius:10px;padding:12px 14px; }
     .mp-label { font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px; }
-    .mp-val   { font-family:'Instrument Serif',serif;font-size:22px;color:var(--text); }
+    .mp-val { font-family:'Instrument Serif',serif;font-size:22px;color:var(--text); }
     .mp-val.gold { color:var(--gold); }
-
     .overall-box { background:rgba(128,23,71,0.08);border:1px solid rgba(128,23,71,0.2);border-radius:14px;padding:16px; }
     .overall-heading { font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#c45a82;margin-bottom:10px;display:flex;align-items:center;gap:6px; }
     .overall-text { font-size:13.5px;color:var(--sub);line-height:1.65;white-space:pre-wrap; }
-
     /* SETUP BANNER */
     .setup-banner {
       background:rgba(190,173,133,0.08);border:1px solid rgba(190,173,133,0.22);
@@ -180,10 +167,8 @@
     }
     .setup-banner strong { color:var(--gold); }
     code { background:rgba(255,255,255,0.07);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:12px;color:var(--grey); }
-
     @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes spin   { to{transform:rotate(360deg)} }
-
+    @keyframes spin { to{transform:rotate(360deg)} }
     @media(max-width:640px){
       .page{padding:0 14px 40px}
       .topnav{padding:16px 0 18px;margin-bottom:18px}
@@ -195,9 +180,7 @@
 </head>
 <body>
 <div class="orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
-
 <div class="page">
-
   <nav class="topnav">
     <div class="nav-brand">
       <div class="nav-icon"><img src="https://wailapho.github.io/acker/img/favicon.ico" alt=""></div>
@@ -212,9 +195,8 @@
   </nav>
 
   <div class="setup-banner" id="setupBanner">
-    <strong>One-time setup needed:</strong> Open this file and fill in the <code>GID</code> values at the top of the script for each sheet tab.
-    Find them by opening your Google Sheet → click a tab → look at the URL for <code>gid=XXXXXXX</code>.<br>
-    <strong>Base URL</strong> is already set. You only need to add the <code>gid</code> numbers per tab.
+    <strong>Setup complete!</strong> Data is now loading from your Google Sheet.<br>
+    Make sure your sheet tabs are published to the web ("Anyone with the link can view").
   </div>
 
   <div class="platform-tabs">
@@ -245,7 +227,6 @@
       <div class="state-box"><i class="fas fa-circle-notch" style="animation:spin 1.2s linear infinite"></i>Loading…</div>
     </div>
   </div>
-
 </div>
 
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
@@ -259,96 +240,82 @@
 
 <script>
 /* ═══════════════════════════════════════════════
-   CONFIGURATION
-   Fill in the gid for each Google Sheet tab.
-   Find it: open sheet → click tab → URL shows gid=XXXXXXX
+   CONFIGURATION - FIXED & UPDATED
    ═══════════════════════════════════════════════ */
-const BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCDqW1D_7yP0eP3M9l0_tlfuspKeuHBHMWXfUPX0PGJtSLMQ42oKGBZQyTW7CPj6s4AghLS3HYn7b4/pub';
+const BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCDqW1D_7yP0eP3M9l0_tlfuspKeuHBHMWXfUPX0PGJtSLMQ42oKGBZQyTW7CPj6s4AghLS3HYn7b4/export?format=csv';
 
 const SHEET_GIDS = {
-  ig:  null,   // ← paste Instagram tab gid here,  e.g. 0
-  xhs: null,   // ← paste Xiaohongshu tab gid here, e.g. 123456789
+  ig: 1018723004,   // Instagram tab
+  xhs: 0,           // Xiaohongshu / Rednote tab
 };
 
-/* ═══════════════════════════════════════════════
-   EXACT COLUMN DEFINITIONS
-   (matches your Google Sheet headers precisely)
-   ═══════════════════════════════════════════════ */
+/* Column definitions */
 const COLS = {
   ig: [
-    { key:'post_title',               label:'Post Title',          type:'title'   },
-    { key:'post_date',                label:'Post Date',            type:'date'    },
-    { key:'reach',                    label:'Reach',                type:'num'     },
-    { key:'Impressions',              label:'Impressions',          type:'num-hi'  },
-    { key:'Likes',                    label:'Likes',                type:'num'     },
-    { key:'Comments',                 label:'Comments',             type:'num'     },
-    { key:'Saves',                    label:'Saves',                type:'num'     },
-    { key:'Shares',                   label:'Shares',               type:'num'     },
-    { key:'profile_visits',           label:'Profile Visits',       type:'num'     },
-    { key:'followers_reached_pct',    label:'Followers Reach %',   type:'pct'     },
-    { key:'non_followers_reached_pct',label:'Non-Followers %',     type:'pct'     },
-    { key:'engagement_rate',          label:'Engagement Rate',      type:'pct'     },
-    { key:'upload-date',              label:'Upload Date',          type:'date'    },
+    { key:'post_title', label:'Post Title', type:'title' },
+    { key:'post_date', label:'Post Date', type:'date' },
+    { key:'reach', label:'Reach', type:'num' },
+    { key:'Impressions', label:'Impressions', type:'num-hi' },
+    { key:'Likes', label:'Likes', type:'num' },
+    { key:'Comments', label:'Comments', type:'num' },
+    { key:'Saves', label:'Saves', type:'num' },
+    { key:'Shares', label:'Shares', type:'num' },
+    { key:'profile_visits', label:'Profile Visits', type:'num' },
+    { key:'followers_reached_pct', label:'Followers Reach %', type:'pct' },
+    { key:'non_followers_reached_pct',label:'Non-Followers %', type:'pct' },
+    { key:'engagement_rate', label:'Engagement Rate', type:'pct' },
+    { key:'upload-date', label:'Upload Date', type:'date' },
   ],
   xhs: [
-    { key:'post_title',              label:'Post Title',            type:'title'   },
-    { key:'post_published_date',     label:'Published',             type:'date'    },
-    { key:'data_updated_at',         label:'Data Updated',          type:'date'    },
-    { key:'impressions',             label:'Impressions',           type:'num-hi'  },
-    { key:'views',                   label:'Views',                 type:'num'     },
-    { key:'likes',                   label:'Likes',                 type:'num'     },
-    { key:'comments',                label:'Comments',              type:'num'     },
-    { key:'saves',                   label:'Saves',                 type:'num'     },
-    { key:'shares',                  label:'Shares',                type:'num'     },
-    { key:'cover_click_rate',        label:'Cover Click Rate',      type:'pct'     },
-    { key:'avg_watch_time_seconds',  label:'Avg Watch (s)',         type:'num'     },
-    { key:'new_followers',           label:'New Followers',         type:'num'     },
-    { key:'upload-date',             label:'Upload Date',           type:'date'    },
+    { key:'post_title', label:'Post Title', type:'title' },
+    { key:'post_published_date', label:'Published', type:'date' },
+    { key:'data_updated_at', label:'Data Updated', type:'date' },
+    { key:'impressions', label:'Impressions', type:'num-hi' },
+    { key:'views', label:'Views', type:'num' },
+    { key:'likes', label:'Likes', type:'num' },
+    { key:'comments', label:'Comments', type:'num' },
+    { key:'saves', label:'Saves', type:'num' },
+    { key:'shares', label:'Shares', type:'num' },
+    { key:'cover_click_rate', label:'Cover Click Rate', type:'pct' },
+    { key:'avg_watch_time_seconds', label:'Avg Watch (s)', type:'num' },
+    { key:'new_followers', label:'New Followers', type:'num' },
+    { key:'upload-date', label:'Upload Date', type:'date' },
   ],
 };
 
 const STAT_CONFIG = {
   ig: {
-    impr:   { key:'Impressions' },
-    likes:  { key:'Likes' },
+    impr: { key:'Impressions' },
+    likes: { key:'Likes' },
     metric4:{ key:'engagement_rate', label:'Avg Engagement', sub:'rate', format: v => (parseFloat(v)*100).toFixed(2)+'%' },
   },
   xhs: {
-    impr:   { key:'impressions' },
-    likes:  { key:'likes' },
+    impr: { key:'impressions' },
+    likes: { key:'likes' },
     metric4:{ key:'avg_watch_time_seconds', label:'Avg Watch Time', sub:'seconds', format: v => parseFloat(v).toFixed(1) },
   },
 };
 
 const PLATFORM_META = {
-  ig:  { label:'Instagram',      icon:'fab fa-instagram', color:'#e4405f', tabCls:'act-ig'  },
-  xhs: { label:'小红书 Rednote', icon:'fas fa-bookmark',  color:'#ff3c50', tabCls:'act-xhs' },
+  ig: { label:'Instagram', icon:'fab fa-instagram', color:'#e4405f', tabCls:'act-ig' },
+  xhs: { label:'小红书 Rednote', icon:'fas fa-bookmark', color:'#ff3c50', tabCls:'act-xhs' },
 };
 
-/* ═══════════════════════════════════════════════
-   STATE
-   ═══════════════════════════════════════════════ */
-let current   = 'xhs';
-let data      = { ig:[], xhs:[] };
-let sortKey   = null;
-let sortAsc   = false;
+/* State */
+let current = 'xhs';
+let data = { ig:[], xhs:[] };
+let sortKey = null;
+let sortAsc = false;
 
-/* ═══════════════════════════════════════════════
-   INIT
-   ═══════════════════════════════════════════════ */
+/* Init */
 document.addEventListener('DOMContentLoaded', () => {
-  // Hide setup banner if all gids set
-  if (Object.values(SHEET_GIDS).every(g => g !== null)) {
-    document.getElementById('setupBanner').style.display = 'none';
-  }
+  document.getElementById('setupBanner').style.display = 'none';
   switchPlatform('xhs');
   loadAll();
   setInterval(loadAll, 5 * 60 * 1000);
 });
 
-/* ═══════════════════════════════════════════════
-   LOAD
-   ═══════════════════════════════════════════════ */
+/* Load Data */
 async function loadAll() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
@@ -361,38 +328,41 @@ async function loadAll() {
 
 function csvUrl(platform) {
   const gid = SHEET_GIDS[platform];
-  if (gid !== null && gid !== undefined) {
-    return `${BASE_URL}?gid=${gid}&single=true&output=csv`;
-  }
-  // Fallback: no gid = load default sheet (may not be right tab)
-  return `${BASE_URL}?output=csv`;
+  return `${BASE_URL}&gid=${gid}`;
 }
 
 function loadSheet(platform) {
   return new Promise(resolve => {
     Papa.parse(csvUrl(platform), {
-      download: true, header: true, skipEmptyLines: true,
-      complete: res => { data[platform] = res.data || []; resolve(); },
-      error:    ()  => { resolve(); },
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: res => {
+        // Filter out empty rows
+        data[platform] = res.data.filter(row => row.post_title && row.post_title.trim() !== '');
+        resolve();
+      },
+      error: () => {
+        console.error(`Failed to load ${platform} data`);
+        resolve();
+      },
     });
   });
 }
 
-/* ═══════════════════════════════════════════════
-   SWITCH PLATFORM
-   ═══════════════════════════════════════════════ */
+/* Platform Switch */
 function switchPlatform(p) {
-  current = p; sortKey = null; sortAsc = false;
+  current = p;
+  sortKey = null;
+  sortAsc = false;
   Object.keys(PLATFORM_META).forEach(k => {
     const btn = document.getElementById('tab-'+k);
-    btn.className = 'ptab' + (k===p ? ' '+PLATFORM_META[k].tabCls : '');
+    if (btn) btn.className = 'ptab' + (k===p ? ' '+PLATFORM_META[k].tabCls : '');
   });
   renderCurrent();
 }
 
-/* ═══════════════════════════════════════════════
-   RENDER
-   ═══════════════════════════════════════════════ */
+/* Render */
 function renderCurrent() {
   renderStats(current, data[current]);
   renderTable(current, data[current]);
@@ -400,71 +370,61 @@ function renderCurrent() {
 
 function renderStats(p, rows) {
   const cfg = STAT_CONFIG[p];
-  const n   = rows.length;
-  document.getElementById('s-posts').textContent  = n;
-  document.getElementById('s-impr').textContent   = fmt(sumCol(rows, cfg.impr.key));
-  document.getElementById('s-likes').textContent  = fmt(sumCol(rows, cfg.likes.key));
+  const n = rows.length;
+  document.getElementById('s-posts').textContent = n;
+  document.getElementById('s-impr').textContent = fmt(sumCol(rows, cfg.impr.key));
+  document.getElementById('s-likes').textContent = fmt(sumCol(rows, cfg.likes.key));
 
   const m4 = cfg.metric4;
-  document.getElementById('s-label4').textContent  = m4.label;
-  document.getElementById('s-sub4').textContent    = m4.sub;
+  document.getElementById('s-label4').textContent = m4.label;
+  document.getElementById('s-sub4').textContent = m4.sub;
   const avgVal = avgCol(rows, m4.key);
   document.getElementById('s-metric4').textContent = avgVal > 0 ? m4.format(avgVal) : '—';
 }
 
 function renderTable(p, rawRows) {
-  const wrap  = document.getElementById('tableWrap');
+  const wrap = document.getElementById('tableWrap');
   const title = document.getElementById('tableTitle');
   const count = document.getElementById('tableCount');
-  const meta  = PLATFORM_META[p];
-  const cols  = COLS[p];
+  const meta = PLATFORM_META[p];
+  const cols = COLS[p];
 
   title.textContent = meta.label + ' Posts';
 
   if (!rawRows || rawRows.length === 0) {
-    const gid = SHEET_GIDS[p];
-    const msg = gid === null
-      ? `No GID set for ${meta.label}. Add the gid to SHEET_GIDS in the script.`
-      : `No data yet. Make sure the sheet tab is published.`;
-    wrap.innerHTML = `<div class="state-box"><i class="fas fa-table"></i>${msg}</div>`;
+    wrap.innerHTML = `<div class="state-box"><i class="fas fa-table"></i>No data found. Check that the sheet is published.</div>`;
     count.textContent = '0 posts';
     return;
   }
 
-  // Sort
   let rows = [...rawRows];
   if (sortKey) {
     rows.sort((a, b) => {
       const av = parseFloat(a[sortKey]) || a[sortKey] || '';
       const bv = parseFloat(b[sortKey]) || b[sortKey] || '';
-      if (av < bv) return sortAsc ?  1 : -1;
-      if (av > bv) return sortAsc ? -1 :  1;
+      if (av < bv) return sortAsc ? 1 : -1;
+      if (av > bv) return sortAsc ? -1 : 1;
       return 0;
     });
   }
 
   count.textContent = rows.length + ' post' + (rows.length !== 1 ? 's' : '');
 
-  // Header
   let html = '<table><thead><tr>';
   html += '<th style="width:50px">Image</th>';
   html += '<th>Overview</th>';
   cols.forEach(c => {
     const sorted = sortKey === c.key;
-    const arrow  = sorted ? (sortAsc ? 'fa-arrow-up':'fa-arrow-down') : 'fa-sort';
+    const arrow = sorted ? (sortAsc ? 'fa-arrow-up':'fa-arrow-down') : 'fa-sort';
     html += `<th class="${sorted?'sorted':''}" onclick="doSort('${c.key}')">
                ${c.label} <i class="fas ${arrow} sort-icon"></i></th>`;
   });
   html += '</tr></thead><tbody>';
 
-  // Rows
   rows.forEach((row, idx) => {
     const imgThumb = driveThumb(row['upload-img'] || '');
-    const snip     = (row['Overall'] || '').substring(0, 90);
-
+    const snip = (row['Overall'] || '').substring(0, 90);
     html += `<tr onclick="openDrawer(${rawRows.indexOf(row)}, '${p}')">`;
-
-    // Thumbnail
     html += '<td>';
     if (imgThumb) {
       html += `<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy"
@@ -474,17 +434,14 @@ function renderTable(p, rawRows) {
       html += `<div class="no-thumb"><i class="fas fa-image"></i></div>`;
     }
     html += '</td>';
-
-    // Overview snippet
     html += `<td><div class="snip">${esc(snip)}${snip.length>=90?'…':''}</div></td>`;
 
-    // Data columns
     cols.forEach(c => {
-      let val  = row[c.key] ?? '—';
-      let cls  = 'td-num';
-      if (c.type === 'title')  { cls = 'td-title'; }
-      else if (c.type === 'date') { cls = 'td-date'; }
-      else if (c.type === 'num-hi') { cls = 'td-num td-hi'; }
+      let val = row[c.key] ?? '—';
+      let cls = 'td-num';
+      if (c.type === 'title') cls = 'td-title';
+      else if (c.type === 'date') cls = 'td-date';
+      else if (c.type === 'num-hi') cls = 'td-num td-hi';
       else if (c.type === 'pct') {
         cls = 'td-num td-pct';
         if (val !== '—' && val !== '' && !isNaN(parseFloat(val))) {
@@ -493,7 +450,6 @@ function renderTable(p, rawRows) {
       }
       html += `<td class="${cls}">${esc(String(val))}</td>`;
     });
-
     html += '</tr>';
   });
 
@@ -501,32 +457,26 @@ function renderTable(p, rawRows) {
   wrap.innerHTML = html;
 }
 
-/* ═══════════════════════════════════════════════
-   SORT
-   ═══════════════════════════════════════════════ */
 function doSort(key) {
   if (sortKey === key) sortAsc = !sortAsc;
   else { sortKey = key; sortAsc = false; }
   renderTable(current, data[current]);
 }
 
-/* ═══════════════════════════════════════════════
-   DRAWER
-   ═══════════════════════════════════════════════ */
+/* Drawer */
 function openDrawer(rowIdx, platform) {
-  const row  = data[platform][rowIdx];
+  const row = data[platform][rowIdx];
   const meta = PLATFORM_META[platform];
   const cols = COLS[platform];
 
   document.getElementById('drawerTag').innerHTML =
     `<i class="${meta.icon}" style="color:${meta.color}"></i> ${meta.label}`;
 
-  const title   = row['post_title'] || 'Untitled';
-  const imgRaw  = row['upload-img'] || '';
-  const imgUrl  = driveThumb(imgRaw, 'w800');
+  const title = row['post_title'] || 'Untitled';
+  const imgRaw = row['upload-img'] || '';
+  const imgUrl = driveThumb(imgRaw, 'w800');
   const overall = row['Overall'] || '';
 
-  // Image block
   let imgHtml = '';
   if (imgUrl) {
     imgHtml = `
@@ -540,7 +490,6 @@ function openDrawer(rowIdx, platform) {
     imgHtml = `<div class="d-img-wrap"><div class="d-img-err"><i class="fas fa-image"></i>No image attached</div></div>`;
   }
 
-  // Metrics — all cols for this platform
   let metricsHtml = '<div class="metrics-grid">';
   cols.forEach(c => {
     let val = row[c.key] ?? '—';
@@ -556,19 +505,18 @@ function openDrawer(rowIdx, platform) {
   });
   metricsHtml += '</div>';
 
-  // Overall
   const overallHtml = overall ? `
     <div class="overall-box">
       <div class="overall-heading"><i class="fas fa-brain"></i> AI Overall Analysis</div>
       <div class="overall-text">${esc(overall)}</div>
     </div>` : '';
 
-  const linkHtml = imgRaw
-    ? `<div style="text-align:center;margin-top:14px">
-         <a class="d-link" href="${esc(imgRaw)}" target="_blank" rel="noopener">
-           <i class="fas fa-arrow-up-right-from-square"></i> Open image in Drive
-         </a>
-       </div>` : '';
+  const linkHtml = imgRaw ? `
+    <div style="text-align:center;margin-top:14px">
+      <a class="d-link" href="${esc(imgRaw)}" target="_blank" rel="noopener">
+        <i class="fas fa-arrow-up-right-from-square"></i> Open image in Drive
+      </a>
+    </div>` : '';
 
   document.getElementById('drawerBody').innerHTML = `
     <div class="d-post-title">${esc(title)}</div>
@@ -599,11 +547,10 @@ function closeDrawer() {
   document.getElementById('drawer').classList.remove('open');
   document.body.style.overflow = '';
 }
+
 document.addEventListener('keydown', e => { if (e.key==='Escape') closeDrawer(); });
 
-/* ═══════════════════════════════════════════════
-   UTILS
-   ═══════════════════════════════════════════════ */
+/* Utils */
 function driveThumb(url, sz='w200') {
   if (!url) return '';
   const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
@@ -611,17 +558,23 @@ function driveThumb(url, sz='w200') {
   const id = m1?.[1] || m2?.[1] || '';
   return id ? `https://drive.google.com/thumbnail?id=${id}&sz=${sz}` : '';
 }
-function sumCol(rows, key) { return rows.reduce((a,r)=>a+(parseFloat(r[key])||0),0); }
-function avgCol(rows, key) {
-  const vals = rows.map(r=>parseFloat(r[key])).filter(v=>!isNaN(v));
-  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+
+function sumCol(rows, key) {
+  return rows.reduce((a,r) => a + (parseFloat(r[key]) || 0), 0);
 }
+
+function avgCol(rows, key) {
+  const vals = rows.map(r => parseFloat(r[key])).filter(v => !isNaN(v));
+  return vals.length ? vals.reduce((a,b) => a + b, 0) / vals.length : 0;
+}
+
 function fmt(n) {
   if (!n) return '0';
-  if (n>=1000000) return (n/1000000).toFixed(1)+'M';
-  if (n>=1000)    return (n/1000).toFixed(1)+'K';
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K';
   return Math.round(n).toLocaleString();
 }
+
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
                   .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
