@@ -384,7 +384,16 @@
     .toast.success .toast-dot { background: #22c55e; }
     .toast.error   .toast-dot { background: var(--burg); }
 
-    @keyframes up {
+    /* date input */
+    input[type="date"].input {
+      color-scheme: dark;
+    }
+    input[type="date"].input::-webkit-calendar-picker-indicator {
+      filter: invert(0.6);
+      cursor: pointer;
+    }
+
+        @keyframes up {
       from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
@@ -535,6 +544,11 @@
         <div id="postPreview" class="preview-strip"></div>
       </div>
 
+      <div class="field">
+        <label class="field-label">Date</label>
+        <input class="input" type="date" id="postDate">
+      </div>
+
       <hr class="divider">
       <button class="submit-btn" id="postSubmitBtn" onclick="handlePost()">
         <i class="fas fa-layer-group"></i> Create Collage &amp; Send
@@ -618,6 +632,11 @@
         <div id="adsPreview" class="preview-strip"></div>
       </div>
 
+      <div class="field">
+        <label class="field-label">Date</label>
+        <input class="input" type="date" id="adsDate">
+      </div>
+
       <hr class="divider">
       <button class="submit-btn" id="adsSubmitBtn" onclick="handleAds()">
         <i class="fas fa-paper-plane"></i> Record Ad Spend &amp; Send
@@ -651,7 +670,14 @@
 </div>
 
 <script>
-  const WEBHOOK = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";
+  /* ── Set today's date on load ── */
+  (function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('postDate').value = today;
+    document.getElementById('adsDate').value  = today;
+  })();
+
+    const WEBHOOK = "https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on";
 
   /* ── Tab switch (no animation delay) ── */
   function switchTab(t) {
@@ -778,17 +804,17 @@
   async function handlePost() {
     if (!postFiles.length) return showToast('error','Add at least one screenshot');
     const btn = document.getElementById('postSubmitBtn');
-    let channel = document.getElementById('postChannel').value;
-    if (channel === 'Other') {
-      channel = document.getElementById('postOtherText').value.trim() || 'Other';
-    }
+    const channel = document.getElementById('postChannel').value;
+    const channelCustom = channel === 'Other' ? document.getElementById('postOtherText').value.trim() : '';
     setBtn(btn, true, 'Building collage…');
     const blob = await buildCollage(postFiles);
     const fd = new FormData();
-    fd.append('screenshot', new File([blob],'collage.png',{type:'image/png'}));
-    fd.append('type',        document.querySelector('input[name="postType"]:checked').value);
-    fd.append('channel',     channel);
-    fd.append('record_type', 'post_performance');
+    fd.append('screenshot',     new File([blob],'collage.png',{type:'image/png'}));
+    fd.append('type',           document.querySelector('input[name="postType"]:checked').value);
+    fd.append('channel',        channel);
+    if (channelCustom) fd.append('channel_custom', channelCustom);
+    fd.append('record_type',    'post_performance');
+    fd.append('date',           document.getElementById('postDate').value);
     await sendWebhook(fd, btn, '<i class="fas fa-layer-group"></i> Create Collage &amp; Send');
   }
 
@@ -798,10 +824,8 @@
     if (!name)            return showToast('error','Enter a campaign name');
     if (!adsFiles.length) return showToast('error','Add a payment screenshot');
     const btn = document.getElementById('adsSubmitBtn');
-    let channel = document.getElementById('adsChannel').value;
-    if (channel === 'Other') {
-      channel = document.getElementById('adsOtherText').value.trim() || 'Other';
-    }
+    const channel = document.getElementById('adsChannel').value;
+    const channelCustom = channel === 'Other' ? document.getElementById('adsOtherText').value.trim() : '';
     const currency = document.getElementById('adsCurrency').value;
     const amount   = document.getElementById('adsAmount').value;
     setBtn(btn, true, 'Uploading…');
@@ -810,9 +834,11 @@
     fd.append('screenshot',    new File([blob],'receipt.png',{type:'image/png'}));
     fd.append('campaign_name', name);
     fd.append('channel',       channel);
+    if (channelCustom) fd.append('channel_custom', channelCustom);
     fd.append('currency',      currency);
     fd.append('amount_spent',  amount);
     fd.append('record_type',   'ads_spend');
+    fd.append('date',          document.getElementById('adsDate').value);
     await sendWebhook(fd, btn, '<i class="fas fa-paper-plane"></i> Record Ad Spend &amp; Send');
   }
 
