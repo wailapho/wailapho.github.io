@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>Acker — Performance Dashboard</title>
   <link rel="icon" href="https://wailapho.github.io/acker/img/favicon.ico"/>
-  <link rel="icon" type="image/x-icon" href="https://wailapho.github.io/acker/img/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
@@ -307,7 +306,7 @@ const COLS = {
     { key:'followers_reached_pct',     label:'Followers %',         type:'pct-dec'  },
     { key:'non_followers_reached_pct', label:'Non-Followers %',     type:'pct-dec'  },
     { key:'engagement_rate',           label:'Engagement Rate',     type:'pct-dec'  },
-    { key:'upload-date',               label:'Upload Date',         type:'date'     },
+    { key:'Overall',                    label:'Overview',            type:'snip'     },
   ],
   // Xiaohongshu — exact headers from sheet
   xhs: [
@@ -321,7 +320,7 @@ const COLS = {
     { key:'cover_click_rate',        label:'Cover Click %',         type:'pct-raw'  },
     { key:'avg_watch_time_seconds',  label:'Avg Watch (s)',         type:'num'      },
     { key:'new_followers',           label:'New Followers',         type:'num'      },
-    { key:'upload-date',             label:'Upload Date',           type:'date'     },
+    { key:'Overall',                  label:'Overview',             type:'snip'     },
   ],
 };
 
@@ -469,7 +468,7 @@ function renderTable(p, rawRows) {
   // Header
   let html = '<table><thead><tr>';
   html += '<th style="width:50px">Image</th>';
-  html += '<th>Overview</th>';
+  html += '<th>Upload Date</th>';
   cols.forEach(c => {
     const sorted = sortKey === c.key;
     const arrow  = sorted ? (sortAsc ? 'fa-arrow-up':'fa-arrow-down') : 'fa-sort';
@@ -496,8 +495,9 @@ function renderTable(p, rawRows) {
     }
     html += '</td>';
 
-    // Overview snippet
-    html += `<td><div class="snip">${esc(snip)}${snip.length>=90?'…':''}</div></td>`;
+    // Upload Date in fixed column
+    const uploadDate = row['upload-date'] || '—';
+    html += `<td class="td-date" style="white-space:nowrap;font-size:12px">${esc(uploadDate)}</td>`;
 
     // Data columns
     cols.forEach(c => {
@@ -506,6 +506,12 @@ function renderTable(p, rawRows) {
       if (c.type === 'title')  { cls = 'td-title'; }
       else if (c.type === 'date') { cls = 'td-date'; }
       else if (c.type === 'num-hi') { cls = 'td-num td-hi'; }
+      else if (c.type === 'snip') {
+        cls = '';
+        val = String(val).substring(0, 80) + (String(val).length > 80 ? '…' : '');
+        html += `<td><div class="snip">${esc(val)}</div></td>`;
+        return;
+      }
       else if (c.type === 'pct-dec') {
         cls = 'td-num td-pct';
         const n = parseFloat(val);
