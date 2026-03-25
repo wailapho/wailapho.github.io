@@ -99,26 +99,27 @@
     .table-header { display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.06); }
     .table-title  { font-size:14px;font-weight:600;color:var(--text); }
     .table-count  { font-size:12px;color:var(--muted);background:rgba(255,255,255,0.05);border:1px solid var(--gb);border-radius:100px;padding:2px 10px; }
-    .table-outer  { overflow: hidden; }
+    /* ── Scroll track sits above the table ── */
     .scroll-track {
-      overflow-x: auto; overflow-y: hidden;
+      overflow-x: auto;
+      overflow-y: hidden;
+      /* give it enough height to show the scrollbar thumb */
+      padding-bottom: 6px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-    .scroll-track-inner { height: 1px; }
-    .table-wrap   { overflow-x:auto;-webkit-overflow-scrolling:touch; }
+    .scroll-track-inner { height: 1px; display: block; }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-    /* ── Custom scrollbar — both on mirror and table ── */
-    .scroll-track::-webkit-scrollbar,
-    .table-wrap::-webkit-scrollbar  { height: 5px; }
-    .scroll-track::-webkit-scrollbar-track,
-    .table-wrap::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
-    .scroll-track::-webkit-scrollbar-thumb,
-    .table-wrap::-webkit-scrollbar-thumb { background: linear-gradient(90deg, var(--burg), var(--gold)); border-radius: 4px; }
-    .scroll-track::-webkit-scrollbar-thumb:hover,
-    .table-wrap::-webkit-scrollbar-thumb:hover { background: linear-gradient(90deg, #a01d5a, #d4c99a); }
-    .scroll-track { scrollbar-width: thin; scrollbar-color: var(--burg) rgba(255,255,255,0.03); }
-    .table-wrap   { scrollbar-width: none; } /* hide bottom, only show top */
+    /* Brand-styled scrollbar — on the TOP track */
+    .scroll-track::-webkit-scrollbar         { height: 6px; }
+    .scroll-track::-webkit-scrollbar-track   { background: rgba(255,255,255,0.04); border-radius: 3px; }
+    .scroll-track::-webkit-scrollbar-thumb   { background: linear-gradient(90deg, var(--burg), var(--gold)); border-radius: 3px; }
+    .scroll-track::-webkit-scrollbar-thumb:hover { background: linear-gradient(90deg, #a01d5a, #d4c99a); }
+    .scroll-track { scrollbar-width: thin; scrollbar-color: var(--burg) rgba(255,255,255,0.04); }
+
+    /* Hide the bottom scrollbar on the actual table */
     .table-wrap::-webkit-scrollbar { display: none; }
+    .table-wrap { scrollbar-width: none; }
 
     table { width:100%;border-collapse:collapse;font-size:13px;min-width:900px; }
     thead th {
@@ -256,14 +257,13 @@
       <span class="table-title" id="tableTitle">Posts</span>
       <span class="table-count" id="tableCount">— posts</span>
     </div>
-    <div class="table-outer">
-      <div class="scroll-track" id="scrollTrack"><div class="scroll-track-inner" id="scrollTrackInner"></div></div>
-      <div class="table-wrap" id="tableWrap">
+    <div class="scroll-track" id="scrollTrack"><span class="scroll-track-inner" id="scrollTrackInner"></span></div>
+    <div class="table-wrap" id="tableWrap">
       <div class="state-box"><i class="fas fa-circle-notch" style="animation:spin 1.2s linear infinite"></i>Loading…</div>
     </div>
-  </div>
+  </div><!-- /table-card -->
 
-</div>
+</div><!-- /page -->
 
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
@@ -656,6 +656,39 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
                   .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+
+/* ── Mirror scroll track sync ── */
+function initScrollSync() {
+  const wrap  = document.getElementById('tableWrap');
+  const track = document.getElementById('scrollTrack');
+  const inner = document.getElementById('scrollTrackInner');
+  if (!wrap || !track || !inner) return;
+
+  // Set inner width to match table's full scroll width
+  const table = wrap.querySelector('table');
+  if (table) inner.style.width = table.scrollWidth + 'px';
+  else inner.style.width = '1px';
+
+  // Two-way sync without loops
+  let busy = false;
+  track.addEventListener('scroll', () => {
+    if (busy) return; busy = true;
+    wrap.scrollLeft = track.scrollLeft;
+    requestAnimationFrame(() => { busy = false; });
+  });
+  wrap.addEventListener('scroll', () => {
+    if (busy) return; busy = true;
+    track.scrollLeft = wrap.scrollLeft;
+    requestAnimationFrame(() => { busy = false; });
+  });
+}
+
+// Patch renderTable to call initScrollSync after every render
+const _origRender = renderTable;
+renderTable = function(...args) {
+  _origRender.apply(this, args);
+  requestAnimationFrame(initScrollSync);
+};
 </script>
 </body>
 </html>
