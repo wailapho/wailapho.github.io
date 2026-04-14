@@ -427,18 +427,11 @@
     .gp-btn-undo:hover   { background:rgba(255,255,255,0.1); color:var(--text); }
 
     /* Group legend strip (inside table header) */
-    .grp-legend { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-    .grp-legend-item {
-      display:flex; align-items:center; gap:5px; cursor:pointer;
-      font-size:11px; color:var(--muted); padding:3px 7px;
-      border-radius:6px; background:rgba(255,255,255,0.03);
-      border:1px solid rgba(255,255,255,0.06);
-      transition:background 0.1s;
-    }
-    .grp-legend-item:hover { background:rgba(255,255,255,0.07); color:var(--sub); }
-    .grp-legend-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-    .grp-legend-clear { font-size:11px; color:var(--muted); cursor:pointer; margin-left:4px; }
-    .grp-legend-clear:hover { color:var(--red,#f43f5e); }
+    .grp-legend { display:flex; align-items:center; gap:6px; }
+    .grp-swatch-btn { transition:transform 0.15s; }
+    .grp-swatch-btn:hover { transform:scale(1.4); }
+    .grp-legend-clear { font-size:11px; color:var(--muted); cursor:pointer; }
+    .grp-legend-clear:hover { color:#f43f5e; }
 
     @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
     @keyframes spin   { to{transform:rotate(360deg)} }
@@ -1249,13 +1242,21 @@ const GRP_COLORS = [
 
 // Character-level edit distance similarity (works well for Chinese)
 function strSim(a, b) {
-  const clean = s => [...(s||'').replace(/[\s\u3000，。！？、.,!?「」【】《》～~()（）""''\-_]/g,'')];
+  // Normalize: remove ALL whitespace, punctuation, emoji variation selectors
+  const clean = s => [...(s||'')
+    .replace(/\s+/g,'')                          // all whitespace
+    .replace(/[\u3000\uFEFF\u200B]/g,'')       // CJK space, BOM, zero-width
+    .replace(/[，。！？、.,!?「」【】《》～~()（）""''\-_…]/g,'') // punctuation
+    .replace(/[\uFE0E\uFE0F]/g,'')              // emoji variation selectors
+  ];
   const ca = clean(a), cb = clean(b);
   if (!ca.length && !cb.length) return 1;
   if (!ca.length || !cb.length) return 0;
+  // Exact match after cleaning = 1.0 always
+  if (ca.join('') === cb.join('')) return 1.0;
   const m = ca.length, n = cb.length;
   // Quick reject: length ratio too different
-  if (Math.abs(m-n)/Math.max(m,n) > 0.45) return 0;
+  if (Math.abs(m-n)/Math.max(m,n) > 0.5) return 0;
   // Edit distance DP
   const dp = [];
   for (let i=0;i<=m;i++) { dp[i]=[]; for(let j=0;j<=n;j++) dp[i][j]=i===0?j:j===0?i:0; }
@@ -1266,8 +1267,9 @@ function strSim(a, b) {
 
 // Cluster all rows by title similarity into groups
 // Returns: { "post_title": { gid: Number, members: [title,...] } }
-function computeGroupMap(rows, threshold=0.72) {
-  const titles = [...new Set(rows.map(r=>r['post_title']||'').filter(Boolean))];
+function computeGroupMap(rows, threshold=0.65) {
+  // Keep ALL titles (no dedup) so identical-string titles always cluster
+  const titles = rows.map(r=>r['post_title']||'').filter(Boolean);
   const n = titles.length;
   const groupOf = new Array(n).fill(-1);
   let gid = 0;
@@ -1337,35 +1339,46 @@ function badgeHtml(title, gmap) {
   return `<span class="grp-dot ${cls}" style="--gc:${color}" title="${tip}" onclick="showGrpPopover(event,${JSON.stringify(title)})"></span>`;
 }
 
-// Render the legend strip
+// Render the legend strip — compact summary, not per-group pills
 function renderGroupLegend(gmap) {
-  const legendEl  = document.getElementById('grpLegend');
-  const clearBtn  = document.getElementById('grpClearBtn');
+  const legendEl = document.getElementById('grpLegend');
+  const clearBtn = document.getElementById('grpClearBtn');
   if (!legendEl) return;
 
-  // Collect unique groups that have 2+ members (not separated)
+  // Count unique groups with 2+ members
   const groups = {};
   Object.entries(gmap).forEach(([t,g]) => {
     if (!g.separated && g.members && g.members.length > 1) {
       if (!groups[g.gid]) groups[g.gid] = { gid:g.gid, members:g.members, confirmed:g.confirmed };
     }
   });
+  const groupList = Object.values(groups);
+  const totalGrouped = groupList.reduce((s,g)=>s+g.members.length, 0);
 
-  const keys = Object.keys(groups);
-  if (!keys.length) { legendEl.style.display='none'; clearBtn.style.display='none'; return; }
+  if (!groupList.length) {
+    legendEl.style.display='none'; clearBtn.style.display='none'; return;
+  }
 
-  legendEl.style.display = 'flex';
-  legendEl.innerHTML = keys.map(gid => {
-    const g = groups[gid];
+  // Compact color swatches strip — click any swatch to select that group
+  const swatches = groupList.map(g => {
     const color = GRP_COLORS[g.gid % GRP_COLORS.length];
-    const cls = g.confirmed ? 'confirmed' : 'auto';
-    return `<span class="grp-legend-item" onclick="selectGroupByGid(${g.gid})" title="Select all in this group to compare">
-      <span class="grp-legend-dot ${cls}" style="background:${color};${cls==='auto'?'border:2px dashed '+color+';background:transparent':'box-shadow:0 0 5px '+color}"></span>
-      Group ${parseInt(gid)+1} <span style="opacity:0.5;font-size:10px">(${g.members.length})</span>
+    const confirmed = g.confirmed;
+    return `<span class="grp-swatch-btn" onclick="selectGroupByGid(${g.gid})"
+      title="Group ${g.gid+1} · ${g.members.length} posts — click to select all"
+      style="width:11px;height:11px;border-radius:50%;flex-shrink:0;cursor:pointer;display:inline-block;
+             ${confirmed ? 'background:'+color+';box-shadow:0 0 6px '+color : 'background:transparent;border:2px dashed '+color}">
     </span>`;
   }).join('');
 
-  // Show reset button if any manual overrides exist
+  legendEl.style.display = 'flex';
+  legendEl.style.alignItems = 'center';
+  legendEl.style.gap = '6px';
+  legendEl.innerHTML = `
+    <span style="font-size:11px;color:var(--muted)">${groupList.length} group${groupList.length>1?'s':''}</span>
+    <span style="display:flex;gap:4px;align-items:center">${swatches}</span>
+  `;
+
+  // Reset button
   const ls = loadGrpLS();
   const hasOverrides = Object.keys(ls.confirmed||{}).length + Object.keys(ls.separated||{}).length > 0;
   clearBtn.style.display = hasOverrides ? 'inline' : 'none';
