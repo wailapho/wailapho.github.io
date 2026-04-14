@@ -566,20 +566,51 @@ function addToQueue(kind) {
   if (kind === 'post') {
     const files = [...postFiles];
     if (!files.length) return showToast('error', 'Add at least one screenshot');
-    const channel      = document.getElementById('postChannel').value;
+    const channel       = document.getElementById('postChannel').value;
     const channelCustom = channel === 'Other' ? document.getElementById('postOtherText').value.trim() : '';
-    const recordType   = document.querySelector('input[name="postType"]:checked').value;
-    const leadCampaign = document.getElementById('leadCampaignName').value.trim();
-    const date         = document.getElementById('postDate').value;
-    const displayLabel = (recordType === 'leads' && leadCampaign) ? leadCampaign : (channel || 'Post');
+    const recordType    = document.querySelector('input[name="postType"]:checked').value;
+    const leadCampaign  = document.getElementById('leadCampaignName').value.trim();
+    const date          = document.getElementById('postDate').value;
+
+    // ── NEW LEAD: each image = one separate lead item (no collage) ──
+    if (recordType === 'leads') {
+      const total = files.length;
+      files.forEach((file, idx) => {
+        const label = leadCampaign
+          ? (total > 1 ? `${leadCampaign} (${idx+1}/${total})` : leadCampaign)
+          : `Lead ${idx+1}`;
+        queue.push({
+          id: ++idCounter, kind: 'post',
+          label,
+          channel, channelCustom, recordType, leadCampaign, date,
+          files: [file],          // single image — no collage
+          singleFile: true,       // flag: skip collage, send file directly
+          thumbUrls: [URL.createObjectURL(file)],
+          status: 'pending',
+          meta: [
+            channel || 'No platform',
+            'New Lead',
+            total > 1 ? `Image ${idx+1} of ${total}` : '1 image',
+            date,
+          ],
+        });
+      });
+      resetPostForm();
+      const n = files.length;
+      renderQueue();
+      showToast('info', `${n} lead${n>1?'s':''} added to queue`);
+      return; // skip the single-item push below
+    }
+
+    // ── PERFORMANCE: collage all images as one item ──
     item = {
       id: ++idCounter, kind: 'post',
-      label: displayLabel,
-      channel, channelCustom, recordType, leadCampaign, date,
+      label: channel || 'Post',
+      channel, channelCustom, recordType, leadCampaign: '', date,
       files, thumbUrls: [], status: 'pending',
       meta: [
         channel || 'No platform',
-        recordType === 'leads' ? 'New Lead' : 'Performance',
+        'Performance',
         `${files.length} image${files.length>1?'s':''}`,
         date,
       ],
@@ -761,8 +792,14 @@ async function sendQueue() {
     renderQueue();
 
     try {
-      const blob = await buildCollage(item.files);
-      const fd   = buildFormData(item, blob);
+      // Single-file leads skip collage — send image directly
+      let blob;
+      if (item.singleFile) {
+        blob = item.files[0];
+      } else {
+        blob = await buildCollage(item.files);
+      }
+      const fd = buildFormData(item, blob);
       const res  = await fetch(WEBHOOK, { method: 'POST', body: fd });
 
       if (res.ok) {
@@ -803,8 +840,15 @@ async function sendQueue() {
 
 function buildFormData(item, blob) {
   const fd = new FormData();
-  const filename = item.kind === 'post' ? 'collage.png' : 'receipt.png';
-  fd.append('screenshot', new File([blob], filename, { type: 'image/png' }));
+  // singleFile leads: preserve original filename & mime type
+  let screenshotFile;
+  if (item.singleFile && blob instanceof File) {
+    screenshotFile = blob;
+  } else {
+    const filename = item.kind === 'post' ? 'collage.png' : 'receipt.png';
+    screenshotFile = new File([blob], filename, { type: 'image/png' });
+  }
+  fd.append('screenshot', screenshotFile);
 
   if (item.kind === 'post') {
     fd.append('type',        item.recordType);
