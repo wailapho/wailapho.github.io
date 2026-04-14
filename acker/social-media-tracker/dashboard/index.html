@@ -347,6 +347,99 @@
     .cm-snap-pill.last  { border-color:rgba(190,173,133,0.4); color:var(--gold); background:rgba(190,173,133,0.08); }
     .cm-snap-num { font-size:10px; background:rgba(255,255,255,0.1); border-radius:4px; padding:1px 5px; }
 
+
+    /* ── Post group badges ── */
+    .title-with-badge { display:flex; align-items:center; gap:7px; min-width:0; }
+    .title-span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+
+    .grp-dot {
+      width:11px; height:11px; border-radius:50%; flex-shrink:0;
+      cursor:pointer; display:inline-block; position:relative;
+      transition:transform 0.15s, box-shadow 0.15s;
+    }
+    .grp-dot:hover { transform:scale(1.35); }
+
+    /* Auto-detected: hollow ring */
+    .grp-dot.auto {
+      background:transparent;
+      border:2px dashed var(--gc,#888);
+      box-shadow:none;
+    }
+    /* Confirmed: filled + glow */
+    .grp-dot.confirmed {
+      background:var(--gc,#888);
+      border:none;
+      box-shadow:0 0 7px var(--gc,#888);
+    }
+    /* Separated: grey, no action */
+    .grp-dot.solo {
+      background:rgba(255,255,255,0.1);
+      border:none;
+      cursor:default;
+    }
+    .grp-dot.solo:hover { transform:none; }
+
+    /* Group popover */
+    .grp-popover {
+      position:fixed; z-index:500;
+      background:rgba(18,14,14,0.99);
+      border:1px solid rgba(255,255,255,0.13);
+      border-radius:14px; padding:14px 16px; width:248px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.7);
+      backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+      display:none; pointer-events:all;
+    }
+    .grp-popover.show { display:block; }
+
+    .gp-top {
+      display:flex; align-items:center; gap:8px;
+      font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:10px;
+    }
+    .gp-swatch { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .gp-status { margin-left:auto; font-size:10px; border-radius:4px; padding:1px 6px; }
+    .gp-status.auto { background:rgba(190,173,133,0.15); color:var(--gold); }
+    .gp-status.confirmed { background:rgba(34,197,94,0.12); color:#22c55e; }
+
+    .gp-similar { margin-bottom:11px; }
+    .gp-similar-label { font-size:10px; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.06em; }
+    .gp-similar-item {
+      font-size:12px; color:var(--sub); padding:3px 0;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .gp-similar-item:last-child { border-bottom:none; }
+
+    .gp-actions { display:flex; flex-direction:column; gap:5px; }
+    .gp-btn {
+      display:flex; align-items:center; gap:7px; width:100%;
+      border:none; border-radius:8px; padding:9px 11px;
+      font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:500;
+      cursor:pointer; text-align:left; transition:background 0.1s;
+    }
+    .gp-btn-confirm { background:rgba(34,197,94,0.10); color:#22c55e; }
+    .gp-btn-confirm:hover { background:rgba(34,197,94,0.18); }
+    .gp-btn-diff   { background:rgba(244,63,94,0.08); color:#f43f5e; }
+    .gp-btn-diff:hover   { background:rgba(244,63,94,0.16); }
+    .gp-btn-select { background:rgba(128,23,71,0.12); color:#d47099; }
+    .gp-btn-select:hover { background:rgba(128,23,71,0.2); }
+    .gp-btn-undo   { background:rgba(255,255,255,0.05); color:var(--sub); }
+    .gp-btn-undo:hover   { background:rgba(255,255,255,0.1); color:var(--text); }
+
+    /* Group legend strip (inside table header) */
+    .grp-legend { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .grp-legend-item {
+      display:flex; align-items:center; gap:5px; cursor:pointer;
+      font-size:11px; color:var(--muted); padding:3px 7px;
+      border-radius:6px; background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.06);
+      transition:background 0.1s;
+    }
+    .grp-legend-item:hover { background:rgba(255,255,255,0.07); color:var(--sub); }
+    .grp-legend-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+    .grp-legend-clear { font-size:11px; color:var(--muted); cursor:pointer; margin-left:4px; }
+    .grp-legend-clear:hover { color:var(--red,#f43f5e); }
+
     @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
     @keyframes spin   { to{transform:rotate(360deg)} }
 
@@ -401,7 +494,11 @@
   <div class="table-card">
     <div class="table-header">
       <span class="table-title" id="tableTitle">Posts</span>
-      <span class="table-count" id="tableCount">— posts</span>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="table-count" id="tableCount">— posts</span>
+        <div class="grp-legend" id="grpLegend" style="display:none"></div>
+        <span class="grp-legend-clear" id="grpClearBtn" style="display:none" onclick="clearAllGroupOverrides()" title="Reset all manual group changes">↺ Reset groups</span>
+      </div>
     </div>
     <div class="scroll-track" id="scrollTrack"><span class="scroll-track-inner" id="scrollTrackInner"></span></div>
     <div class="table-wrap" id="tableWrap">
@@ -442,6 +539,9 @@
   <div class="cm-body" id="cmBody"></div>
 </div>
 
+<!-- Group badge popover -->
+<div class="grp-popover" id="grpPopover"></div>
+
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <div class="drawer-top">
@@ -460,8 +560,9 @@
 const BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCDqW1D_7yP0eP3M9l0_tlfuspKeuHBHMWXfUPX0PGJtSLMQ42oKGBZQyTW7CPj6s4AghLS3HYn7b4/pub';
 
 const SHEET_GIDS = {
-  ig:  0,            // Instagram tab
-  xhs: 1293904964,   // Xiaohongshu tab
+  ig:          0,            // Instagram tab
+  xhs:         1293904964,   // Xiaohongshu posts tab
+  xhs_account: 1560506691,   // Xiaohongshu-account stats tab
 };
 
 /* ═══════════════════════════════════════════════
@@ -525,7 +626,7 @@ const PLATFORM_META = {
    STATE
    ═══════════════════════════════════════════════ */
 let current   = 'xhs';
-let data      = { ig:[], xhs:[] };
+let data      = { ig:[], xhs:[], xhs_account:[] };
 let sortKey   = null;
 let sortAsc   = false;
 
@@ -545,7 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadAll() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
-  await Promise.all(['ig','xhs'].map(loadSheet));
+  await Promise.all(['ig','xhs','xhs_account'].map(loadSheet));
   btn.classList.remove('spinning');
   document.getElementById('lastUpdated').textContent =
     'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -597,7 +698,22 @@ function renderCurrent() {
 
 function renderStats(p, rows) {
   const cfg = STAT_CONFIG[p];
-  const n   = rows.length;
+
+  // Xiaohongshu: read stats from dedicated account tab (not posts, which has duplicates)
+  if (p === 'xhs' && data['xhs_account'] && data['xhs_account'].length > 0) {
+    const acc = data['xhs_account'][0]; // first data row
+    document.getElementById('s-posts').textContent   = acc['Total Posts']      || '—';
+    document.getElementById('s-impr').textContent    = fmt(parseFloat(acc['Total Impressions']) || 0);
+    document.getElementById('s-likes').textContent   = fmt(parseFloat(acc['Total Likes'])       || 0);
+    document.getElementById('s-label4').textContent  = 'Avg Watch Time';
+    document.getElementById('s-sub4').textContent    = 'seconds';
+    const w = parseFloat(acc['Avg Watch Time']);
+    document.getElementById('s-metric4').textContent = !isNaN(w) && w > 0 ? w.toFixed(1)+'s' : '—';
+    return;
+  }
+
+  // Fallback: calculate from posts data (may include duplicates)
+  const n = rows.length;
   document.getElementById('s-posts').textContent  = n;
   document.getElementById('s-impr').textContent   = fmt(sumCol(rows, cfg.impr.key));
   document.getElementById('s-likes').textContent  = fmt(sumCol(rows, cfg.likes.key));
