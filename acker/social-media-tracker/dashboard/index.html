@@ -758,6 +758,19 @@ function renderTable(p, rawRows) {
 
   count.textContent = rows.length + ' post' + (rows.length !== 1 ? 's' : '');
 
+  // Compute post groups (XHS only — IG has unique posts per row)
+  if (p === 'xhs') {
+    const autoMap = computeGroupMap(rawRows);
+    currentGroupMap = applyGrpOverrides(autoMap);
+    renderGroupLegend(currentGroupMap);
+  } else {
+    currentGroupMap = {};
+    const legendEl = document.getElementById('grpLegend');
+    if (legendEl) legendEl.style.display='none';
+    const cb = document.getElementById('grpClearBtn');
+    if (cb) cb.style.display='none';
+  }
+
   // Header
   let html = '<table><thead><tr>';
   html += '<th style="width:50px">Image</th>';
@@ -796,7 +809,14 @@ function renderTable(p, rawRows) {
     cols.forEach(c => {
       let val  = row[c.key] ?? '—';
       let cls  = 'td-num';
-      if (c.type === 'title')  { cls = 'td-title'; }
+      if (c.type === 'title') {
+        if (p === 'xhs') {
+          const badge = badgeHtml(String(val), currentGroupMap);
+          html += `<td class="td-title"><div class="title-with-badge">${badge}<span class="title-span">${esc(String(val))}</span></div></td>`;
+          return;
+        }
+        cls = 'td-title';
+      }
       else if (c.type === 'date') { cls = 'td-date'; }
       else if (c.type === 'num-hi') { cls = 'td-num td-hi'; }
       else if (c.type === 'snip') {
@@ -1214,6 +1234,261 @@ function closeCompare() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeDrawer(); closeCompare(); }
 });
+
+/* ════════════════════════════════════════════════
+   POST GROUP MATCHING — Option C
+   Auto-detect similar titles + manual overrides
+════════════════════════════════════════════════ */
+
+const GRP_COLORS = [
+  '#c45a82','#BEAD85','#60a5fa','#34d399',
+  '#fb923c','#a78bfa','#f472b6','#2dd4bf',
+  '#fbbf24','#4ade80'
+];
+
+// Character-level edit distance similarity (works well for Chinese)
+function strSim(a, b) {
+  const clean = s => [...(s||'').replace(/[\s\u3000，。！？、.,!?「」【】《》～~()（）""''\-_]/g,'')];
+  const ca = clean(a), cb = clean(b);
+  if (!ca.length && !cb.length) return 1;
+  if (!ca.length || !cb.length) return 0;
+  const m = ca.length, n = cb.length;
+  // Quick reject: length ratio too different
+  if (Math.abs(m-n)/Math.max(m,n) > 0.45) return 0;
+  // Edit distance DP
+  const dp = [];
+  for (let i=0;i<=m;i++) { dp[i]=[]; for(let j=0;j<=n;j++) dp[i][j]=i===0?j:j===0?i:0; }
+  for (let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    dp[i][j]=ca[i-1]===cb[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return 1-dp[m][n]/Math.max(m,n);
+}
+
+// Cluster all rows by title similarity into groups
+// Returns: { "post_title": { gid: Number, members: [title,...] } }
+function computeGroupMap(rows, threshold=0.72) {
+  const titles = [...new Set(rows.map(r=>r['post_title']||'').filter(Boolean))];
+  const n = titles.length;
+  const groupOf = new Array(n).fill(-1);
+  let gid = 0;
+
+  for (let i=0;i<n;i++) {
+    for (let j=i+1;j<n;j++) {
+      if (strSim(titles[i], titles[j]) >= threshold) {
+        const gi=groupOf[i], gj=groupOf[j];
+        if (gi===-1&&gj===-1) { groupOf[i]=gid; groupOf[j]=gid; gid++; }
+        else if (gi===-1) groupOf[i]=gj;
+        else if (gj===-1) groupOf[j]=gi;
+        else if (gi!==gj) {
+          // Merge: remap higher id to lower
+          const lo=Math.min(gi,gj), hi=Math.max(gi,gj);
+          for(let k=0;k<n;k++) if(groupOf[k]===hi) groupOf[k]=lo;
+        }
+      }
+    }
+  }
+
+  // Build members lists
+  const memberMap = {};
+  groupOf.forEach((g,i) => { if(g>=0) { memberMap[g]=memberMap[g]||[]; memberMap[g].push(titles[i]); } });
+
+  // Build title → group entry
+  const result = {};
+  titles.forEach((t,i) => {
+    if (groupOf[i]>=0) result[t] = { gid:groupOf[i], members:memberMap[groupOf[i]]||[], auto:true };
+  });
+  return result;
+}
+
+// LocalStorage for overrides
+const GRP_LS = 'acker_grp_v1';
+function loadGrpLS() { try { return JSON.parse(localStorage.getItem(GRP_LS)||'{}'); } catch { return {}; } }
+function saveGrpLS(o) { try { localStorage.setItem(GRP_LS, JSON.stringify(o)); } catch {} }
+
+function applyGrpOverrides(autoMap) {
+  const { confirmed={}, separated={} } = loadGrpLS();
+  const result = {};
+  // Copy auto map
+  Object.entries(autoMap).forEach(([t,v]) => result[t]={...v});
+  // Apply separations
+  Object.keys(separated).forEach(t => { if(result[t]) result[t]={...result[t], separated:true, confirmed:false}; });
+  // Apply confirmations
+  Object.keys(confirmed).forEach(t => {
+    if(result[t]) result[t]={...result[t], confirmed:true, separated:false};
+    else result[t]={gid:confirmed[t].gid, members:confirmed[t].members||[], auto:false, confirmed:true};
+  });
+  return result;
+}
+
+let currentGroupMap = {};
+let gpActiveTitle = '';
+
+// Build badge HTML for a title cell
+function badgeHtml(title, gmap) {
+  const g = gmap[title];
+  if (!g || g.separated) {
+    return `<span class="grp-dot solo" title="No similar posts detected"></span>`;
+  }
+  const color = GRP_COLORS[g.gid % GRP_COLORS.length];
+  const cls   = g.confirmed ? 'confirmed' : 'auto';
+  const tip   = g.confirmed
+    ? `Confirmed: same post (Group ${g.gid+1})`
+    : `Auto-detected similar title — click to confirm or reject`;
+  return `<span class="grp-dot ${cls}" style="--gc:${color}" title="${tip}" onclick="showGrpPopover(event,${JSON.stringify(title)})"></span>`;
+}
+
+// Render the legend strip
+function renderGroupLegend(gmap) {
+  const legendEl  = document.getElementById('grpLegend');
+  const clearBtn  = document.getElementById('grpClearBtn');
+  if (!legendEl) return;
+
+  // Collect unique groups that have 2+ members (not separated)
+  const groups = {};
+  Object.entries(gmap).forEach(([t,g]) => {
+    if (!g.separated && g.members && g.members.length > 1) {
+      if (!groups[g.gid]) groups[g.gid] = { gid:g.gid, members:g.members, confirmed:g.confirmed };
+    }
+  });
+
+  const keys = Object.keys(groups);
+  if (!keys.length) { legendEl.style.display='none'; clearBtn.style.display='none'; return; }
+
+  legendEl.style.display = 'flex';
+  legendEl.innerHTML = keys.map(gid => {
+    const g = groups[gid];
+    const color = GRP_COLORS[g.gid % GRP_COLORS.length];
+    const cls = g.confirmed ? 'confirmed' : 'auto';
+    return `<span class="grp-legend-item" onclick="selectGroupByGid(${g.gid})" title="Select all in this group to compare">
+      <span class="grp-legend-dot ${cls}" style="background:${color};${cls==='auto'?'border:2px dashed '+color+';background:transparent':'box-shadow:0 0 5px '+color}"></span>
+      Group ${parseInt(gid)+1} <span style="opacity:0.5;font-size:10px">(${g.members.length})</span>
+    </span>`;
+  }).join('');
+
+  // Show reset button if any manual overrides exist
+  const ls = loadGrpLS();
+  const hasOverrides = Object.keys(ls.confirmed||{}).length + Object.keys(ls.separated||{}).length > 0;
+  clearBtn.style.display = hasOverrides ? 'inline' : 'none';
+}
+
+// Show the popover next to a badge
+function showGrpPopover(e, title) {
+  e.stopPropagation();
+  gpActiveTitle = title;
+  const g   = currentGroupMap[title];
+  const pop = document.getElementById('grpPopover');
+  if (!g) { pop.classList.remove('show'); return; }
+
+  const color   = GRP_COLORS[g.gid % GRP_COLORS.length];
+  const similar = (g.members||[]).filter(t=>t!==title&&!currentGroupMap[t]?.separated);
+  const isSep   = g.separated;
+  const isCon   = g.confirmed;
+
+  let html = `<div class="gp-top">
+    <span class="gp-swatch" style="background:${color}"></span>
+    Group ${g.gid+1}
+    <span class="gp-status ${isCon?'confirmed':'auto'}">${isCon?'✓ Confirmed':'Auto'}</span>
+  </div>`;
+
+  if (similar.length) {
+    html += `<div class="gp-similar">
+      <div class="gp-similar-label">Similar post${similar.length>1?'s':''} detected</div>
+      ${similar.slice(0,3).map(t=>`<div class="gp-similar-item">${esc(t.substring(0,32))}${t.length>32?'…':''}</div>`).join('')}
+      ${similar.length>3?`<div class="gp-similar-item" style="color:var(--muted)">+${similar.length-3} more</div>`:''}
+    </div>`;
+  }
+
+  html += `<div class="gp-actions">`;
+  if (!isCon && !isSep) {
+    html += `<button class="gp-btn gp-btn-select" onclick="selectGroupByGid(${g.gid});closeGrpPopover()"><i class="fas fa-check-square" style="font-size:11px"></i> Select all for compare</button>`;
+    html += `<button class="gp-btn gp-btn-confirm" onclick="gpConfirm()"><i class="fas fa-check" style="font-size:11px"></i> Confirm same post</button>`;
+    html += `<button class="gp-btn gp-btn-diff" onclick="gpMarkDiff()"><i class="fas fa-xmark" style="font-size:11px"></i> Different post</button>`;
+  } else if (isCon) {
+    html += `<button class="gp-btn gp-btn-select" onclick="selectGroupByGid(${g.gid});closeGrpPopover()"><i class="fas fa-check-square" style="font-size:11px"></i> Select all for compare</button>`;
+    html += `<button class="gp-btn gp-btn-diff" onclick="gpMarkDiff()"><i class="fas fa-xmark" style="font-size:11px"></i> Different post</button>`;
+    html += `<button class="gp-btn gp-btn-undo" onclick="gpUndo()"><i class="fas fa-rotate-left" style="font-size:11px"></i> Reset to auto</button>`;
+  } else if (isSep) {
+    html += `<button class="gp-btn gp-btn-confirm" onclick="gpConfirm()"><i class="fas fa-check" style="font-size:11px"></i> Actually same post</button>`;
+    html += `<button class="gp-btn gp-btn-undo" onclick="gpUndo()"><i class="fas fa-rotate-left" style="font-size:11px"></i> Reset to auto</button>`;
+  }
+  html += `</div>`;
+
+  pop.innerHTML = html;
+
+  // Smart positioning
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pw=252, ph=220;
+  let left = rect.right + 10;
+  let top  = rect.top  - 10;
+  if (left + pw > window.innerWidth - 12) left = rect.left - pw - 10;
+  if (top  + ph > window.innerHeight - 12) top = window.innerHeight - ph - 12;
+  pop.style.left = Math.max(8, left) + 'px';
+  pop.style.top  = Math.max(8, top)  + 'px';
+  pop.classList.add('show');
+}
+
+function closeGrpPopover() { document.getElementById('grpPopover').classList.remove('show'); }
+
+function gpConfirm() {
+  if (!gpActiveTitle) return;
+  const g = currentGroupMap[gpActiveTitle];
+  if (!g) return;
+  const o = loadGrpLS();
+  if (!o.confirmed) o.confirmed={};
+  if (!o.separated) o.separated={};
+  o.confirmed[gpActiveTitle] = { gid:g.gid, members:g.members };
+  delete o.separated[gpActiveTitle];
+  saveGrpLS(o);
+  closeGrpPopover();
+  renderCurrent();
+}
+
+function gpMarkDiff() {
+  if (!gpActiveTitle) return;
+  const o = loadGrpLS();
+  if (!o.separated) o.separated={};
+  if (!o.confirmed) o.confirmed={};
+  o.separated[gpActiveTitle] = true;
+  delete o.confirmed[gpActiveTitle];
+  saveGrpLS(o);
+  closeGrpPopover();
+  renderCurrent();
+}
+
+function gpUndo() {
+  if (!gpActiveTitle) return;
+  const o = loadGrpLS();
+  if (o.confirmed) delete o.confirmed[gpActiveTitle];
+  if (o.separated) delete o.separated[gpActiveTitle];
+  saveGrpLS(o);
+  closeGrpPopover();
+  renderCurrent();
+}
+
+function clearAllGroupOverrides() {
+  saveGrpLS({});
+  renderCurrent();
+}
+
+// Select all rows in a group (for compare)
+function selectGroupByGid(gid) {
+  const rows = data[current];
+  rows.forEach((row, idx) => {
+    const t = row['post_title']||'';
+    const g = currentGroupMap[t];
+    if (g && g.gid === gid && !g.separated) {
+      selectedIndices.add(idx);
+      const cb = document.querySelector(`.row-cb[data-idx="${idx}"]`);
+      if (cb) { cb.checked=true; cb.closest('tr').classList.add('row-selected'); }
+    }
+  });
+  renderCompareBar();
+}
+
+// Close popover on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.grp-popover') && !e.target.closest('.grp-dot')) closeGrpPopover();
+});
+
 </script>
 </body>
 </html>
