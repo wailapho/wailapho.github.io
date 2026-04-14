@@ -201,6 +201,152 @@
     .setup-banner strong { color:var(--gold); }
     code { background:rgba(255,255,255,0.07);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:12px;color:var(--grey); }
 
+
+    /* ── Checkbox column ── */
+    .cb-cell { width:36px; text-align:center; padding:11px 8px; }
+    .row-cb {
+      appearance:none; -webkit-appearance:none;
+      width:16px; height:16px; border-radius:4px;
+      border:1.5px solid rgba(255,255,255,0.2);
+      background:rgba(255,255,255,0.04);
+      cursor:pointer; flex-shrink:0;
+      display:inline-flex; align-items:center; justify-content:center;
+      position:relative; transition:border-color 0.15s, background 0.15s;
+    }
+    .row-cb:checked {
+      background:var(--burg);
+      border-color:var(--burg);
+    }
+    .row-cb:checked::after {
+      content:'';
+      position:absolute;
+      width:9px; height:5px;
+      border-left:2px solid #fff; border-bottom:2px solid #fff;
+      transform:rotate(-45deg) translate(0px, -1px);
+    }
+    tbody tr.row-selected { background:rgba(128,23,71,0.08); }
+    tbody tr.row-selected:hover { background:rgba(128,23,71,0.12); }
+
+    /* ── Compare bar ── */
+    .compare-bar {
+      position:fixed; bottom:0; left:0; right:0;
+      background:rgba(14,11,11,0.96);
+      backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
+      border-top:1px solid rgba(128,23,71,0.3);
+      padding:14px 24px; padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));
+      display:flex; align-items:center; justify-content:space-between;
+      z-index:100;
+      transform:translateY(100%);
+      transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .compare-bar.visible { transform:translateY(0); }
+    .compare-bar::before {
+      content:''; position:absolute; top:-1px; left:15%; right:15%; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(128,23,71,0.6) 50%, transparent);
+    }
+    .compare-bar-left { font-size:13px; color:var(--sub); }
+    .compare-bar-left strong { color:var(--text); font-weight:600; }
+    .compare-bar-right { display:flex; gap:8px; }
+    .compare-btn {
+      display:flex; align-items:center; gap:7px;
+      background:var(--burg); color:#F2F2F2;
+      border:none; border-radius:10px; padding:10px 18px;
+      font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:600;
+      cursor:pointer;
+      box-shadow:0 4px 16px rgba(128,23,71,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .compare-btn:hover { opacity:0.9; }
+    .clear-sel-btn {
+      display:flex; align-items:center; gap:6px;
+      background:rgba(255,255,255,0.06); color:var(--sub);
+      border:1px solid var(--gb); border-radius:10px; padding:10px 14px;
+      font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;
+    }
+    .clear-sel-btn:hover { color:var(--text); }
+
+    /* ── Compare modal ── */
+    .compare-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.7);
+      z-index:300; opacity:0; pointer-events:none; transition:opacity 0.22s;
+    }
+    .compare-overlay.open { opacity:1; pointer-events:all; }
+
+    .compare-modal {
+      position:fixed; top:50%; left:50%;
+      transform:translate(-50%, -50%) scale(0.95);
+      width:min(680px, calc(100vw - 32px));
+      max-height:calc(100dvh - 40px);
+      background:rgba(18,14,14,0.99);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:22px;
+      backdrop-filter:blur(40px); -webkit-backdrop-filter:blur(40px);
+      box-shadow:0 24px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+      z-index:301;
+      opacity:0; pointer-events:none;
+      transition:all 0.26s cubic-bezier(0.34,1.2,0.64,1);
+      display:flex; flex-direction:column; overflow:hidden;
+    }
+    .compare-modal.open { opacity:1; pointer-events:all; transform:translate(-50%,-50%) scale(1); }
+
+    .cm-head {
+      padding:20px 22px 16px; border-bottom:1px solid rgba(255,255,255,0.06);
+      flex-shrink:0;
+    }
+    .cm-head-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .cm-title-label { font-size:10.5px; font-weight:600; letter-spacing:0.09em; text-transform:uppercase; color:#c45a82; }
+    .cm-close {
+      width:28px; height:28px; border-radius:7px;
+      background:rgba(255,255,255,0.06); border:1px solid var(--gb);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; color:var(--sub); font-size:12px;
+    }
+    .cm-close:hover { color:var(--text); background:rgba(255,255,255,0.1); }
+    .cm-post-name { font-family:'Instrument Serif',serif; font-size:19px; font-weight:400; color:var(--text); line-height:1.3; }
+    .cm-dates { font-size:12px; color:var(--muted); margin-top:6px; display:flex; align-items:center; gap:8px; }
+    .cm-date-pill {
+      background:rgba(255,255,255,0.05); border:1px solid var(--gb);
+      border-radius:6px; padding:3px 9px; font-size:12px; color:var(--sub);
+    }
+    .cm-date-arrow { color:var(--muted); font-size:10px; }
+    .cm-days { color:var(--gold); font-size:12px; }
+
+    .cm-body { overflow-y:auto; padding:16px 22px 22px; flex:1; }
+
+    /* Metric comparison rows */
+    .cm-table { width:100%; border-collapse:collapse; }
+    .cm-table thead th {
+      font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;
+      color:var(--muted); padding:8px 12px; text-align:right;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .cm-table thead th:first-child { text-align:left; }
+    .cm-table tbody tr { border-bottom:1px solid rgba(255,255,255,0.04); }
+    .cm-table tbody tr:last-child { border-bottom:none; }
+    .cm-table tbody td { padding:11px 12px; font-size:13.5px; color:var(--sub); text-align:right; vertical-align:middle; }
+    .cm-table tbody td:first-child { text-align:left; color:var(--muted); font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; }
+
+    .cm-val { font-family:'Instrument Serif',serif; font-size:18px; color:var(--text); }
+    .cm-val.hi { color:var(--gold); }
+
+    .cm-delta {
+      display:inline-flex; align-items:center; gap:4px;
+      border-radius:6px; padding:3px 8px; font-size:12px; font-weight:600;
+    }
+    .cm-delta.up   { background:rgba(34,197,94,0.12); color:#22c55e; }
+    .cm-delta.down { background:rgba(244,63,94,0.10); color:#f43f5e; }
+    .cm-delta.flat { background:rgba(255,255,255,0.05); color:var(--muted); }
+
+    /* Multi-snapshot timeline */
+    .cm-timeline { display:flex; gap:6px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+    .cm-snap-pill {
+      background:rgba(255,255,255,0.04); border:1px solid var(--gb);
+      border-radius:8px; padding:5px 11px; font-size:12px; color:var(--sub);
+      display:flex; align-items:center; gap:5px;
+    }
+    .cm-snap-pill.first { border-color:rgba(128,23,71,0.4); color:#d47099; background:rgba(128,23,71,0.08); }
+    .cm-snap-pill.last  { border-color:rgba(190,173,133,0.4); color:var(--gold); background:rgba(190,173,133,0.08); }
+    .cm-snap-num { font-size:10px; background:rgba(255,255,255,0.1); border-radius:4px; padding:1px 5px; }
+
     @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
     @keyframes spin   { to{transform:rotate(360deg)} }
 
@@ -264,6 +410,37 @@
   </div><!-- /table-card -->
 
 </div><!-- /page -->
+
+<!-- Compare bar -->
+<div class="compare-bar" id="compareBar">
+  <div class="compare-bar-left">
+    <strong id="compareCount">0</strong> snapshot<span id="compareCountS">s</span> selected
+  </div>
+  <div class="compare-bar-right">
+    <button class="clear-sel-btn" onclick="clearSelection()">
+      <i class="fas fa-xmark"></i> Clear
+    </button>
+    <button class="compare-btn" onclick="openCompare()">
+      <i class="fas fa-chart-line"></i> Compare Growth
+    </button>
+  </div>
+</div>
+
+<!-- Compare modal overlay -->
+<div class="compare-overlay" id="compareOverlay" onclick="closeCompare()"></div>
+
+<!-- Compare modal -->
+<div class="compare-modal" id="compareModal">
+  <div class="cm-head">
+    <div class="cm-head-top">
+      <div class="cm-title-label"><i class="fas fa-arrow-trend-up" style="margin-right:5px"></i>Performance Growth</div>
+      <div class="cm-close" onclick="closeCompare()"><i class="fas fa-xmark"></i></div>
+    </div>
+    <div class="cm-post-name" id="cmPostName">—</div>
+    <div class="cm-dates" id="cmDates"></div>
+  </div>
+  <div class="cm-body" id="cmBody"></div>
+</div>
 
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
@@ -696,6 +873,231 @@ renderTable = function(...args) {
   _origRender.apply(this, args);
   requestAnimationFrame(initScrollSync);
 };
+
+/* ════════════════════════════════════════════════
+   SELECTION & COMPARE
+════════════════════════════════════════════════ */
+let selectedIndices = new Set(); // indices into data[current]
+
+/* Override renderTable to inject checkboxes */
+const _baseRender = renderTable;
+renderTable = function(p, rawRows) {
+  _baseRender.apply(this, arguments);
+  // After table is built, inject checkbox column
+  injectCheckboxes(p, rawRows);
+  requestAnimationFrame(initScrollSync);
+};
+
+function injectCheckboxes(p, rawRows) {
+  const table = document.querySelector('#tableWrap table');
+  if (!table) return;
+
+  // Add header checkbox cell
+  const headerRow = table.querySelector('thead tr');
+  if (headerRow && !headerRow.querySelector('.cb-head')) {
+    const th = document.createElement('th');
+    th.className = 'cb-cell cb-head';
+    th.style.cssText = 'width:36px;cursor:default';
+    th.title = 'Select rows to compare performance growth';
+    th.innerHTML = '<i class="fas fa-code-compare" style="font-size:11px;color:var(--muted);opacity:0.6"></i>';
+    headerRow.insertBefore(th, headerRow.firstChild);
+  }
+
+  // Add checkbox to each body row
+  const bodyRows = table.querySelectorAll('tbody tr');
+  bodyRows.forEach((tr, visualIdx) => {
+    if (tr.querySelector('.cb-cell')) return;
+    // Find real data index from onclick
+    const onclick = tr.getAttribute('onclick') || '';
+    const match = onclick.match(/openDrawer\((\d+)/);
+    const dataIdx = match ? parseInt(match[1]) : visualIdx;
+
+    const td = document.createElement('td');
+    td.className = 'cb-cell';
+    td.innerHTML = `<input type="checkbox" class="row-cb" data-idx="${dataIdx}" ${selectedIndices.has(dataIdx)?'checked':''} onclick="toggleSelect(event, ${dataIdx})">`;
+    tr.insertBefore(td, tr.firstChild);
+
+    if (selectedIndices.has(dataIdx)) tr.classList.add('row-selected');
+  });
+}
+
+function toggleSelect(e, idx) {
+  e.stopPropagation(); // don't open drawer
+  if (selectedIndices.has(idx)) {
+    selectedIndices.delete(idx);
+  } else {
+    selectedIndices.add(idx);
+  }
+  // Update row highlight
+  const cb = document.querySelector(`.row-cb[data-idx="${idx}"]`);
+  if (cb) cb.closest('tr').classList.toggle('row-selected', selectedIndices.has(idx));
+  renderCompareBar();
+}
+
+function renderCompareBar() {
+  const n   = selectedIndices.size;
+  const bar = document.getElementById('compareBar');
+  document.getElementById('compareCount').textContent = n;
+  document.getElementById('compareCountS').textContent = n === 1 ? '' : 's';
+  bar.classList.toggle('visible', n >= 2);
+}
+
+function clearSelection() {
+  selectedIndices.clear();
+  document.querySelectorAll('.row-cb').forEach(cb => {
+    cb.checked = false;
+    cb.closest('tr').classList.remove('row-selected');
+  });
+  renderCompareBar();
+}
+
+/* ── Build and open the compare modal ── */
+function openCompare() {
+  if (selectedIndices.size < 2) return;
+
+  const rows = Array.from(selectedIndices)
+    .map(i => data[current][i])
+    .filter(Boolean);
+
+  // Sort by upload-date ascending (oldest first)
+  rows.sort((a, b) => {
+    const da = a['upload-date'] || a['post_date'] || a['post_published_date'] || '';
+    const db = b['upload-date'] || b['post_date'] || b['post_published_date'] || '';
+    return da.localeCompare(db);
+  });
+
+  const first = rows[0], last = rows[rows.length - 1];
+  const dateA = first['upload-date'] || '—';
+  const dateB = last['upload-date']  || '—';
+
+  // Days between
+  let daysText = '';
+  if (dateA !== '—' && dateB !== '—' && dateA !== dateB) {
+    const diff = Math.round((new Date(dateB) - new Date(dateA)) / 86400000);
+    if (diff > 0) daysText = `${diff} day${diff !== 1 ? 's' : ''} later`;
+  }
+
+  // Post name
+  const postName = first['post_title'] || 'Untitled Post';
+  document.getElementById('cmPostName').textContent = postName;
+
+  // Dates header
+  const datesEl = document.getElementById('cmDates');
+  if (rows.length === 2) {
+    datesEl.innerHTML = `
+      <span class="cm-date-pill">${esc(dateA)}</span>
+      <span class="cm-date-arrow">→</span>
+      <span class="cm-date-pill">${esc(dateB)}</span>
+      ${daysText ? `<span class="cm-days">(${daysText})</span>` : ''}
+    `;
+  } else {
+    datesEl.innerHTML = `<span class="cm-days">${rows.length} snapshots selected</span>`;
+  }
+
+  // Metrics to compare
+  const numericCols = (COLS[current] || []).filter(c =>
+    ['num','num-hi','pct-dec','pct-raw'].includes(c.type)
+  );
+
+  // Timeline pills (if more than 2)
+  let timelineHtml = '';
+  if (rows.length > 2) {
+    timelineHtml = '<div class="cm-timeline">';
+    rows.forEach((r, i) => {
+      const cls = i === 0 ? 'first' : (i === rows.length-1 ? 'last' : '');
+      const d = r['upload-date'] || '—';
+      timelineHtml += `<div class="cm-snap-pill ${cls}"><span class="cm-snap-num">${i+1}</span>${esc(d)}</div>`;
+      if (i < rows.length - 1) timelineHtml += `<i class="fas fa-arrow-right" style="font-size:9px;color:var(--muted)"></i>`;
+    });
+    timelineHtml += '</div>';
+  }
+
+  // Build metric rows
+  let tableRows = '';
+  numericCols.forEach(col => {
+    const vA = parseFloat(first[col.key]);
+    const vB = parseFloat(last[col.key]);
+    if (isNaN(vA) && isNaN(vB)) return;
+
+    const fmtVal = (v, type) => {
+      if (isNaN(v) || v === '') return '—';
+      if (type === 'pct-dec') return (v * 100).toFixed(1) + '%';
+      if (type === 'pct-raw') return v.toFixed(1) + '%';
+      if (v >= 1000000) return (v/1000000).toFixed(1)+'M';
+      if (v >= 1000)    return (v/1000).toFixed(1)+'K';
+      return Math.round(v).toLocaleString();
+    };
+
+    const dispA  = fmtVal(vA, col.type);
+    const dispB  = fmtVal(vB, col.type);
+    const isHi   = col.type === 'num-hi';
+
+    // Delta
+    let deltaHtml = '<span class="cm-delta flat">—</span>';
+    if (!isNaN(vA) && !isNaN(vB) && vA !== vB) {
+      const absDiff  = vB - vA;
+      const pctDiff  = vA !== 0 ? ((absDiff / Math.abs(vA)) * 100) : null;
+      const isUp     = absDiff > 0;
+      const cls      = isUp ? 'up' : 'down';
+      const arrow    = isUp ? '↑' : '↓';
+      const sign     = isUp ? '+' : '';
+      const absFmt   = fmtVal(Math.abs(absDiff), col.type);
+      const pctStr   = pctDiff !== null ? ` (${sign}${pctDiff.toFixed(0)}%)` : '';
+      deltaHtml = `<span class="cm-delta ${cls}">${arrow} ${sign}${absFmt}${pctStr}</span>`;
+    } else if (!isNaN(vA) && !isNaN(vB) && vA === vB) {
+      deltaHtml = '<span class="cm-delta flat">No change</span>';
+    }
+
+    tableRows += `
+      <tr>
+        <td>${esc(col.label)}</td>
+        <td><span class="cm-val">${dispA}</span></td>
+        <td><span class="cm-val ${isHi?'hi':''}">${dispB}</span></td>
+        <td>${deltaHtml}</td>
+      </tr>`;
+  });
+
+  // Also show upload dates as a row
+  const dateRow = `
+    <tr>
+      <td>Upload Date</td>
+      <td><span style="font-size:13px;color:var(--sub)">${esc(dateA)}</span></td>
+      <td><span style="font-size:13px;color:var(--sub)">${esc(dateB)}</span></td>
+      <td></td>
+    </tr>`;
+
+  document.getElementById('cmBody').innerHTML = `
+    ${timelineHtml}
+    <table class="cm-table">
+      <thead>
+        <tr>
+          <th style="text-align:left">Metric</th>
+          <th>${rows.length > 2 ? 'First' : esc(dateA)}</th>
+          <th>${rows.length > 2 ? 'Latest' : esc(dateB)}</th>
+          <th style="text-align:right">Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${dateRow}
+        ${tableRows}
+      </tbody>
+    </table>
+  `;
+
+  document.getElementById('compareOverlay').classList.add('open');
+  document.getElementById('compareModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCompare() {
+  document.getElementById('compareOverlay').classList.remove('open');
+  document.getElementById('compareModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeDrawer(); closeCompare(); }
+});
 </script>
 </body>
 </html>
