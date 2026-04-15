@@ -52,6 +52,7 @@
     .ptab.act-xhs{background:var(--burg-dim);border-color:rgba(128,23,71,0.45);color:#d47099}
     .ptab.act-ig{background:rgba(228,64,95,0.1);border-color:rgba(228,64,95,0.38);color:#e4405f}
     .ptab.act-leads{background:rgba(190,173,133,0.12);border-color:rgba(190,173,133,0.4);color:var(--gold)}
+    .ptab.act-leads-meta{background:rgba(96,165,250,0.10);border-color:rgba(96,165,250,0.35);color:#60a5fa}
     .ptab.tbc{opacity:0.38;cursor:default;pointer-events:none}
     .tbc-badge{font-size:10px;background:rgba(255,255,255,0.08);border-radius:4px;padding:1px 5px;color:var(--muted)}
 
@@ -261,6 +262,7 @@
     <button class="ptab" id="tab-xhs" onclick="switchPlatform('xhs')"><i class="fas fa-bookmark" style="color:#ff3c50"></i> 小红书 Rednote</button>
     <button class="ptab" id="tab-ig"  onclick="switchPlatform('ig')"><i class="fab fa-instagram" style="color:#e4405f"></i> Instagram</button>
     <button class="ptab" id="tab-leads_rednote" onclick="switchPlatform('leads_rednote')"><i class="fas fa-user-plus" style="color:#BEAD85"></i> Leads · Rednote</button>
+    <button class="ptab" id="tab-leads" onclick="switchPlatform('leads')"><i class="fas fa-user-plus" style="color:#60a5fa"></i> Leads · Meta</button>
     <button class="ptab tbc"><i class="fab fa-facebook-f" style="color:#1877f2"></i> Facebook<span class="tbc-badge">TBC</span></button>
     <button class="ptab tbc"><i class="fab fa-tiktok"></i> Douyin<span class="tbc-badge">TBC</span></button>
     <button class="ptab tbc"><i class="fas fa-ellipsis"></i> Other<span class="tbc-badge">TBC</span></button>
@@ -336,7 +338,8 @@ const SHEET_GIDS = {
   ig:            0,            // Instagram
   xhs:           1293904964,   // Xiaohongshu posts
   xhs_account:   1560506691,   // Xiaohongshu account stats
-  leads_rednote: null,         // ← paste leads-from-rednote gid here
+  leads:         976166037,    // leads (Meta/general)
+  leads_rednote: 1005058307,   // leads-from-rednote
 };
 
 /* ══════════════════════════════════════════════════
@@ -385,16 +388,17 @@ const STAT_CONFIG = {
 };
 
 const PLATFORM_META = {
-  ig:            { label:'Instagram',        icon:'fab fa-instagram', color:'#e4405f', tabCls:'act-ig'    },
-  xhs:           { label:'小红书 Rednote',   icon:'fas fa-bookmark',  color:'#ff3c50', tabCls:'act-xhs'   },
-  leads_rednote: { label:'Leads · Rednote',  icon:'fas fa-user-plus', color:'#BEAD85', tabCls:'act-leads' },
+  ig:            { label:'Instagram',       icon:'fab fa-instagram', color:'#e4405f', tabCls:'act-ig'         },
+  xhs:           { label:'小红书 Rednote',  icon:'fas fa-bookmark',  color:'#ff3c50', tabCls:'act-xhs'        },
+  leads_rednote: { label:'Leads · Rednote', icon:'fas fa-user-plus', color:'#BEAD85', tabCls:'act-leads'      },
+  leads:         { label:'Leads · Meta',    icon:'fas fa-user-plus', color:'#60a5fa', tabCls:'act-leads-meta' },
 };
 
 /* ══════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════ */
 let current  = 'xhs';
-let data     = { ig:[], xhs:[], xhs_account:[], leads_rednote:[] };
+let data     = { ig:[], xhs:[], xhs_account:[], leads:[], leads_rednote:[] };
 let sortKey  = 'impressions';
 let sortAsc  = false;
 let selectedIndices = new Set();
@@ -460,7 +464,8 @@ function switchPlatform(p) {
    RENDER ROUTER
 ══════════════════════════════════════════════════ */
 function renderCurrent() {
-  if (current === 'leads_rednote') { renderLeads(); return; }
+  if (current === 'leads_rednote') { renderLeads('leads_rednote'); return; }
+  if (current === 'leads')         { renderLeads('leads');         return; }
   renderStats(current, data[current]);
   renderPostTable(current, data[current]);
 }
@@ -601,9 +606,12 @@ function doSort(key) {
 /* ══════════════════════════════════════════════════
    LEADS TABLE
 ══════════════════════════════════════════════════ */
-function renderLeads() {
-  const rows = data['leads_rednote'] || [];
-  document.getElementById('tableTitle').textContent = 'Leads · Rednote';
+function renderLeads(platform) {
+  platform = platform || 'leads_rednote';
+  const rows = data[platform] || [];
+  const isRednote = platform === 'leads_rednote';
+  const meta = PLATFORM_META[platform];
+  document.getElementById('tableTitle').textContent = meta.label;
   document.getElementById('grpLegend').style.display = 'none';
   document.getElementById('grpClearBtn').style.display = 'none';
   currentGroupMap = {};
@@ -621,7 +629,7 @@ function renderLeads() {
 
   const wrap = document.getElementById('tableWrap');
   if (!rows.length) {
-    const gid = SHEET_GIDS['leads_rednote'];
+    const gid = SHEET_GIDS[platform];
     wrap.innerHTML = `<div class="state-box"><i class="fas fa-user-plus"></i>${gid===null?'Paste the leads_rednote GID in the script.':'No leads yet.'}</div>`;
     document.getElementById('tableCount').textContent = '0 leads';
     updateScrollTrack(); return;
@@ -630,21 +638,43 @@ function renderLeads() {
   const sorted = [...rows].sort((a,b)=>(b['date']||'').localeCompare(a['date']||''));
   document.getElementById('tableCount').textContent = sorted.length + ' lead' + (sorted.length!==1?'s':'');
 
-  let html = `<table><thead><tr>
-    <th style="width:50px;cursor:default">Image</th>
-    <th>Campaign</th><th>Date</th><th>Account Name</th>
-    <th style="text-align:center">Qualified</th>
-  </tr></thead><tbody>`;
+  let html = isRednote
+    ? `<table><thead><tr>
+        <th style="width:50px;cursor:default">Image</th>
+        <th>Campaign</th><th>Date</th><th>Account Name</th>
+        <th style="text-align:center">Qualified</th>
+      </tr></thead><tbody>`
+    : `<table><thead><tr>
+        <th style="width:50px;cursor:default">Image</th>
+        <th>Campaign</th><th>Date</th><th>Name</th>
+        <th>Email</th><th>Phone</th>
+      </tr></thead><tbody>`;
 
   sorted.forEach((row, idx) => {
     const imgThumb = driveThumb(row['image-url']||'');
-    html += `<tr onclick="openLeadDrawer(${rows.indexOf(row)})">
-      <td>${imgThumb?`<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`:`<div class="no-thumb"><i class="fas fa-image"></i></div>`}</td>
-      <td class="td-title">${esc(row['lead_campaign_name']||'—')}</td>
-      <td class="td-date">${esc(row['date']||'—')}</td>
-      <td style="color:var(--text);font-size:13.5px">${esc(row['Account name']||row['chat_display_name']||'—')}</td>
-      <td style="text-align:center">${qualBadge(isQualified(row['Is qualified lead']))}</td>
-    </tr>`;
+    const rowIdx = rows.indexOf(row);
+    const thumbHtml = imgThumb
+      ? `<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`
+      : `<div class="no-thumb"><i class="fas fa-image"></i></div>`;
+    if (isRednote) {
+      html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
+        <td>${thumbHtml}</td>
+        <td class="td-title">${esc(row['lead_campaign_name']||'—')}</td>
+        <td class="td-date">${esc(row['date']||'—')}</td>
+        <td style="color:var(--text);font-size:13.5px">${esc(row['Account name']||'—')}</td>
+        <td style="text-align:center">${qualBadge(isQualified(row['Is qualified lead']))}</td>
+      </tr>`;
+    } else {
+      const name = [row['first_name'],row['last_name']].filter(Boolean).join(' ') || row['chat_display_name'] || '—';
+      html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
+        <td>${thumbHtml}</td>
+        <td class="td-title">${esc(row['lead_campaign_name']||'—')}</td>
+        <td class="td-date">${esc(row['date']||'—')}</td>
+        <td style="color:var(--text);font-size:13.5px">${esc(name)}</td>
+        <td style="font-size:12px;color:var(--sub)">${esc(row['email']||'—')}</td>
+        <td style="font-size:12px;color:var(--sub)">${esc(row['phone_number']||'—')}</td>
+      </tr>`;
+    };
   });
 
   html += '</tbody></table>';
@@ -668,14 +698,18 @@ function qualBadge(state) {
 function openLeadDrawer(idx) {
   const row = data['leads_rednote'][idx]; if (!row) return;
   const imgRaw = row['image-url']||'', imgUrl = driveThumb(imgRaw,'w800');
-  document.getElementById('drawerTag').innerHTML = `<i class="fas fa-user-plus" style="color:var(--gold)"></i> Lead · Rednote`;
-  const account = row['Account name']||row['chat_display_name']||'—';
+  document.getElementById('drawerTag').innerHTML = `<i class="fas fa-user-plus" style="color:${meta.color}"></i> ${meta.label}`;
+  const account = row['Account name'] || [row['first_name'],row['last_name']].filter(Boolean).join(' ') || row['chat_display_name'] || '—';
   let imgHtml = imgUrl
     ? `<div class="d-img-wrap"><div class="d-img-loading" id="dil"><i class="fas fa-circle-notch"></i> Loading…</div><img class="d-img" src="${imgUrl}" alt="" style="display:none" onload="document.getElementById('dil').style.display='none';this.style.display='block'" onerror="imgErr('${esc(imgRaw)}')"></div>`
     : `<div class="d-img-wrap"><div class="d-img-err"><i class="fas fa-image"></i>No screenshot</div></div>`;
-  const fields=[{label:'Campaign',val:row['lead_campaign_name']},{label:'Date',val:row['date']},{label:'Account',val:account},{label:'Has Reply',val:row['Has reply after']},{label:'Reply Text',val:row['Reply text']},{label:'Reply Time',val:row['Reply time']},{label:'Notes',val:row['Notes']}].filter(f=>f.val);
+  const isRednote2 = platform === 'leads_rednote';
+  const fields = isRednote2
+    ? [{label:'Campaign',val:row['lead_campaign_name']},{label:'Date',val:row['date']},{label:'Account',val:account},{label:'Has Reply',val:row['Has reply after']},{label:'Reply Text',val:row['Reply text']},{label:'Reply Time',val:row['Reply time']},{label:'Notes',val:row['Notes']}].filter(f=>f.val)
+    : [{label:'Campaign',val:row['lead_campaign_name']},{label:'Date',val:row['date']},{label:'Name',val:account},{label:'Email',val:row['email']},{label:'Phone',val:row['phone_number']},{label:'Channel',val:row['channel']}].filter(f=>f.val);
   const metricsHtml=`<div class="metrics-grid">${fields.map(f=>`<div class="mp"><div class="mp-label">${esc(f.label)}</div><div style="font-size:14px;color:var(--text);margin-top:2px">${esc(String(f.val))}</div></div>`).join('')}</div>`;
-  document.getElementById('drawerBody').innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div class="d-post-title" style="margin-bottom:0;flex:1">${esc(account)}</div>${qualBadge(isQualified(row['Is qualified lead']))}</div>${imgHtml}${metricsHtml}${imgRaw?`<div style="text-align:center;margin-top:14px"><a class="d-link" href="${esc(imgRaw)}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Open in Drive</a></div>`:''}`;
+  const qualSection = isRednote2 ? qualBadge(isQualified(row['Is qualified lead'])) : '';
+  document.getElementById('drawerBody').innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div class="d-post-title" style="margin-bottom:0;flex:1">${esc(account)}</div>${qualSection}</div>${imgHtml}${metricsHtml}${imgRaw?`<div style="text-align:center;margin-top:14px"><a class="d-link" href="${esc(imgRaw)}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Open in Drive</a></div>`:''}`;
   document.getElementById('overlay').classList.add('open');
   document.getElementById('drawer').classList.add('open');
   document.body.style.overflow='hidden';
