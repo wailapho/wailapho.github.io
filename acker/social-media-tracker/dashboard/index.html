@@ -625,7 +625,23 @@ function renderPostTable(p, rawRows) {
     });
   }
 
-  count.textContent = rows.length + ' post' + (rows.length!==1?'s':'');
+  // Unique post count: grouped posts count as 1
+  if (p === 'xhs') {
+    const countedGroups = new Set();
+    let uniquePosts = 0;
+    rows.forEach(row => {
+      const t = row['post_title']||'';
+      const g = currentGroupMap[t];
+      if (g && !g.separated) {
+        if (!countedGroups.has(g.gid)) { countedGroups.add(g.gid); uniquePosts++; }
+      } else {
+        uniquePosts++;
+      }
+    });
+    count.textContent = uniquePosts + ' post' + (uniquePosts!==1?'s':'') + (uniquePosts !== rows.length ? ` (${rows.length} snapshots)` : '');
+  } else {
+    count.textContent = rows.length + ' post' + (rows.length!==1?'s':'');
+  }
 
   // Header
   let html = '<table><thead><tr>';
@@ -760,7 +776,7 @@ function renderLeadsTable(sorted, platform) {
 
   sorted.forEach((row, idx) => {
     const imgThumb = driveThumb(row['image-url']||'');
-    const rowIdx = rows.indexOf(row);
+    const rowIdx = sorted.indexOf(row);
     const thumbHtml = imgThumb
       ? `<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`
       : `<div class="no-thumb"><i class="fas fa-image"></i></div>`;
@@ -978,7 +994,7 @@ function renderGroupLegend(gmap){
   if(!groupList.length){legendEl.style.display='none';clearBtn.style.display='none';return;}
   const swatches=groupList.map(g=>{const color=GRP_COLORS[g.gid%GRP_COLORS.length],confirmed=g.confirmed;return`<span class="grp-swatch-btn" onclick="selectGroupByGid(${g.gid})" title="Group ${g.gid+1} · ${g.members.length} posts" style="width:11px;height:11px;border-radius:50%;display:inline-block;${confirmed?'background:'+color+';box-shadow:0 0 6px '+color:'background:transparent;border:2px dashed '+color}"></span>`;}).join('');
   legendEl.style.display='flex';legendEl.style.alignItems='center';legendEl.style.gap='6px';
-  legendEl.innerHTML=`<span style="font-size:11px;color:var(--muted)">${groupList.length} group${groupList.length>1?'s':''}</span><span style="display:flex;gap:4px;align-items:center">${swatches}</span>`;
+  legendEl.innerHTML=`<span style="display:flex;gap:4px;align-items:center" title="Click a dot to select all snapshots of that post">${swatches}</span>`;
   const ls=loadGrpLS(),hasOverrides=Object.keys(ls.confirmed||{}).length+Object.keys(ls.separated||{}).length>0;
   clearBtn.style.display=hasOverrides?'inline':'none';
 }
@@ -1008,7 +1024,24 @@ function gpConfirm(){if(!gpActiveTitle)return;const g=currentGroupMap[gpActiveTi
 function gpMarkDiff(){if(!gpActiveTitle)return;const o=loadGrpLS();if(!o.separated)o.separated={};if(!o.confirmed)o.confirmed={};o.separated[gpActiveTitle]=true;delete o.confirmed[gpActiveTitle];saveGrpLS(o);closeGrpPopover();renderCurrent();}
 function gpUndo(){if(!gpActiveTitle)return;const o=loadGrpLS();if(o.confirmed)delete o.confirmed[gpActiveTitle];if(o.separated)delete o.separated[gpActiveTitle];saveGrpLS(o);closeGrpPopover();renderCurrent();}
 function clearAllGroupOverrides(){saveGrpLS({});renderCurrent();}
-function selectGroupByGid(gid){data[current].forEach((row,idx)=>{const t=row['post_title']||'',g=currentGroupMap[t];if(g&&g.gid===gid&&!g.separated){selectedIndices.add(idx);const cb=document.querySelector(`.row-cb[onclick*="${idx}"]`);if(cb){cb.checked=true;cb.closest('tr').classList.add('row-selected');}}});const n=selectedIndices.size;document.getElementById('compareCount').textContent=n;document.getElementById('compareBar').classList.toggle('visible',n>=2);}
+function selectGroupByGid(gid){
+  // Clear previous selection first
+  selectedIndices.clear();
+  document.querySelectorAll('.row-cb').forEach(cb=>{cb.checked=false;if(cb.closest('tr'))cb.closest('tr').classList.remove('row-selected');});
+  data[current].forEach((row,idx)=>{
+    const t=row['post_title']||'',g=currentGroupMap[t];
+    if(g&&g.gid===gid&&!g.separated){
+      selectedIndices.add(idx);
+      // Re-render checkboxes since DOM may not match yet
+    }
+  });
+  // Re-render table to show checkboxes checked, then auto-open compare
+  renderPostTable(current, data[current]);
+  const n=selectedIndices.size;
+  document.getElementById('compareCount').textContent=n;
+  document.getElementById('compareBar').classList.toggle('visible',n>=2);
+  if(n>=2) setTimeout(()=>openCompare(),150);
+}
 document.addEventListener('click',e=>{if(!e.target.closest('.grp-popover')&&!e.target.closest('.grp-dot'))closeGrpPopover();});
 
 /* ══════════════════════════════════════════════════
