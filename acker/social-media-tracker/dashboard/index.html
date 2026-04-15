@@ -278,20 +278,6 @@
   </style>
 </head>
 <body>
-<!-- Password gate -->
-<div id="pwGate" style="position:fixed;inset:0;background:rgba(15,13,13,0.98);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(20px)">
-  <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:22px;padding:36px 32px;width:min(360px,90vw);box-shadow:0 24px 80px rgba(0,0,0,0.7);text-align:center">
-    <div style="width:44px;height:44px;border-radius:50%;background:rgba(128,23,71,0.2);border:1px solid rgba(128,23,71,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:18px;color:#d47099"><i class="fas fa-lock"></i></div>
-    <div style="font-family:'Instrument Serif',serif;font-size:22px;color:#F2F2F2;margin-bottom:6px">Acker Dashboard</div>
-    <div style="font-size:12px;color:rgba(242,242,242,0.35);margin-bottom:24px">Enter password to continue</div>
-    <input id="pwInput" type="password" placeholder="Password" autocomplete="current-password"
-      style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F2F2F2;border-radius:11px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:10px;box-sizing:border-box"
-      onkeydown="if(event.key==='Enter')checkPw()">
-    <div id="pwErr" style="font-size:12px;color:#f43f5e;margin-bottom:10px;display:none">Incorrect password</div>
-    <button onclick="checkPw()" style="width:100%;background:#801747;color:#F2F2F2;border:none;border-radius:11px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(128,23,71,0.4)">Enter</button>
-  </div>
-</div>
-
 <div class="orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
 <div class="page">
 
@@ -399,21 +385,6 @@
 </div>
 
 <script>
-/* Password gate */
-function checkPw() {
-  const val = document.getElementById('pwInput').value;
-  if (val === 'aw2026') {
-    document.getElementById('pwGate').style.display = 'none';
-    loadAll();
-  } else {
-    document.getElementById('pwErr').style.display = 'block';
-    document.getElementById('pwInput').value = '';
-    document.getElementById('pwInput').focus();
-  }
-}
-// Prevent loading data until password entered
-let _authenticated = false;
-
 /* ══════════════════════════════════════════════════
    CONFIGURATION
 ══════════════════════════════════════════════════ */
@@ -495,20 +466,9 @@ let gpActiveTitle   = '';
 ══════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   switchPlatform('xhs');
-  // Don't loadAll until password is entered — checkPw() triggers it
-  // Auto-refresh set up after auth
-  document.getElementById('pwInput').focus();
+  loadAll();
+  setInterval(loadAll, 5 * 60 * 1000);
 });
-// Called after auth
-const _origLoadAll = loadAll;
-async function loadAll() {
-  await _origLoadAll();
-  // Set up auto-refresh on first successful load
-  if (!_authenticated) {
-    _authenticated = true;
-    setInterval(_origLoadAll, 5 * 60 * 1000);
-  }
-}
 
 /* ══════════════════════════════════════════════════
    LOAD
@@ -542,10 +502,18 @@ function loadSheet(p) {
    SWITCH PLATFORM
 ══════════════════════════════════════════════════ */
 function switchPlatform(p) {
+  // Leads tabs require password
+  if ((p === 'leads' || p === 'leads_rednote') && !leadsUnlocked) {
+    requireLeadsPw(p);
+    return;
+  }
+  _switchToLeads(p);
+}
+
+function _switchToLeads(p) {
   current = p;
   selectedIndices.clear();
   document.getElementById('compareBar').classList.remove('visible');
-  // Hide leads toolbar on non-leads tabs
   if (p !== 'leads' && p !== 'leads_rednote') {
     const tb = document.getElementById('leadsToolbar');
     if (tb) tb.classList.remove('show');
@@ -553,11 +521,26 @@ function switchPlatform(p) {
   if (p === 'xhs')  { sortKey = 'impressions';  sortAsc = false; }
   else if (p === 'ig') { sortKey = 'Impressions'; sortAsc = false; }
   else               { sortKey = null;            sortAsc = false; }
-  // Update tab styles — only keys that have a DOM element
   Object.keys(PLATFORM_META).forEach(k => {
     const btn = document.getElementById('tab-'+k);
     if (btn) btn.className = 'ptab' + (k===p ? ' '+PLATFORM_META[k].tabCls : '');
   });
+  // Reload sheet data for this tab then render
+  loadSheetAndRender(p);
+}
+
+async function loadSheetAndRender(p) {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  // Determine which sheets to reload for this tab
+  const sheetsToLoad = [];
+  if (p === 'xhs') { sheetsToLoad.push('xhs', 'xhs_account'); }
+  else if (p === 'ig') { sheetsToLoad.push('ig'); }
+  else if (p === 'leads') { sheetsToLoad.push('leads'); }
+  else if (p === 'leads_rednote') { sheetsToLoad.push('leads_rednote'); }
+  await Promise.all(sheetsToLoad.filter(s => SHEET_GIDS[s] !== null && SHEET_GIDS[s] !== undefined).map(loadSheet));
+  btn.classList.remove('spinning');
+  document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
   renderCurrent();
 }
 
@@ -1199,6 +1182,57 @@ document.addEventListener('keydown', e => {
     closeDrawer(); closeCompare();
   }
 });
+
+/* ══ Per-tab password for leads ══ */
+let leadsUnlocked = false;
+let _pendingLeadsTab = null;
+
+function requireLeadsPw(platform) {
+  _pendingLeadsTab = platform;
+  document.getElementById('leadsPwErr').textContent = '';
+  document.getElementById('leadsPwInput').value = '';
+  const overlay = document.getElementById('leadsPwOverlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('leadsPwInput').focus(), 50);
+}
+
+function checkLeadsPw() {
+  const val = document.getElementById('leadsPwInput').value;
+  if (val === 'aw2026') {
+    leadsUnlocked = true;
+    document.getElementById('leadsPwOverlay').style.display = 'none';
+    if (_pendingLeadsTab) {
+      _switchToLeads(_pendingLeadsTab);
+      _pendingLeadsTab = null;
+    }
+  } else {
+    document.getElementById('leadsPwErr').textContent = 'Incorrect password';
+    document.getElementById('leadsPwInput').value = '';
+    document.getElementById('leadsPwInput').focus();
+  }
+}
+
+function closeLeadsPw() {
+  document.getElementById('leadsPwOverlay').style.display = 'none';
+  _pendingLeadsTab = null;
+  _switchToLeads('xhs');
+}
 </script>
+
+<!-- Leads password modal -->
+<div id="leadsPwOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px)">
+  <div style="background:rgba(22,18,18,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:22px;padding:36px 32px;width:min(340px,88vw);box-shadow:0 24px 80px rgba(0,0,0,0.7);text-align:center">
+    <div style="width:44px;height:44px;border-radius:50%;background:rgba(128,23,71,0.2);border:1px solid rgba(128,23,71,0.35);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:18px;color:#d47099"><i class="fas fa-lock"></i></div>
+    <div style="font-family:'Instrument Serif',serif;font-size:20px;color:#F2F2F2;margin-bottom:4px">Leads Access</div>
+    <div style="font-size:12px;color:rgba(242,242,242,0.3);margin-bottom:22px">Enter password to view leads data</div>
+    <input id="leadsPwInput" type="password" placeholder="Password" autocomplete="current-password"
+      style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F2F2F2;border-radius:11px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:10px;box-sizing:border-box;color-scheme:dark"
+      onkeydown="if(event.key==='Enter')checkLeadsPw()">
+    <div id="leadsPwErr" style="font-size:12px;color:#f43f5e;margin-bottom:10px;min-height:16px"></div>
+    <button onclick="checkLeadsPw()" style="width:100%;background:#801747;color:#F2F2F2;border:none;border-radius:11px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(128,23,71,0.4)">Enter</button>
+    <button onclick="closeLeadsPw()" style="width:100%;background:transparent;color:rgba(242,242,242,0.3);border:none;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-top:4px">Cancel</button>
+  </div>
+</div>
+
 </body>
 </html>
