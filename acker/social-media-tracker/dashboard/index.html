@@ -278,6 +278,20 @@
   </style>
 </head>
 <body>
+<!-- Password gate -->
+<div id="pwGate" style="position:fixed;inset:0;background:rgba(15,13,13,0.98);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(20px)">
+  <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:22px;padding:36px 32px;width:min(360px,90vw);box-shadow:0 24px 80px rgba(0,0,0,0.7);text-align:center">
+    <div style="width:44px;height:44px;border-radius:50%;background:rgba(128,23,71,0.2);border:1px solid rgba(128,23,71,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:18px;color:#d47099"><i class="fas fa-lock"></i></div>
+    <div style="font-family:'Instrument Serif',serif;font-size:22px;color:#F2F2F2;margin-bottom:6px">Acker Dashboard</div>
+    <div style="font-size:12px;color:rgba(242,242,242,0.35);margin-bottom:24px">Enter password to continue</div>
+    <input id="pwInput" type="password" placeholder="Password" autocomplete="current-password"
+      style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F2F2F2;border-radius:11px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:10px;box-sizing:border-box"
+      onkeydown="if(event.key==='Enter')checkPw()">
+    <div id="pwErr" style="font-size:12px;color:#f43f5e;margin-bottom:10px;display:none">Incorrect password</div>
+    <button onclick="checkPw()" style="width:100%;background:#801747;color:#F2F2F2;border:none;border-radius:11px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(128,23,71,0.4)">Enter</button>
+  </div>
+</div>
+
 <div class="orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
 <div class="page">
 
@@ -294,7 +308,7 @@
 
   <div class="platform-tabs">
     <button class="ptab" id="tab-xhs" onclick="switchPlatform('xhs')"><i class="fas fa-bookmark" style="color:#ff3c50"></i> 小红书 Rednote</button>
-    <button class="ptab" id="tab-ig"  onclick="switchPlatform('ig')"><i class="fab fa-instagram" style="color:#e4405f"></i> Instagram</button>
+    <button class="ptab tbc"><i class="fab fa-instagram" style="color:#e4405f"></i> Instagram<span class="tbc-badge">TBC</span></button>
     <button class="ptab" id="tab-leads_rednote" onclick="switchPlatform('leads_rednote')"><i class="fas fa-user-plus" style="color:#BEAD85"></i> Leads · Rednote</button>
     <button class="ptab" id="tab-leads" onclick="switchPlatform('leads')"><i class="fas fa-user-plus" style="color:#60a5fa"></i> Leads</button>
     <button class="ptab tbc"><i class="fab fa-facebook-f" style="color:#1877f2"></i> Facebook<span class="tbc-badge">TBC</span></button>
@@ -385,6 +399,21 @@
 </div>
 
 <script>
+/* Password gate */
+function checkPw() {
+  const val = document.getElementById('pwInput').value;
+  if (val === 'aw2026') {
+    document.getElementById('pwGate').style.display = 'none';
+    loadAll();
+  } else {
+    document.getElementById('pwErr').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+// Prevent loading data until password entered
+let _authenticated = false;
+
 /* ══════════════════════════════════════════════════
    CONFIGURATION
 ══════════════════════════════════════════════════ */
@@ -466,9 +495,20 @@ let gpActiveTitle   = '';
 ══════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   switchPlatform('xhs');
-  loadAll();
-  setInterval(loadAll, 5 * 60 * 1000);
+  // Don't loadAll until password is entered — checkPw() triggers it
+  // Auto-refresh set up after auth
+  document.getElementById('pwInput').focus();
 });
+// Called after auth
+const _origLoadAll = loadAll;
+async function loadAll() {
+  await _origLoadAll();
+  // Set up auto-refresh on first successful load
+  if (!_authenticated) {
+    _authenticated = true;
+    setInterval(_origLoadAll, 5 * 60 * 1000);
+  }
+}
 
 /* ══════════════════════════════════════════════════
    LOAD
@@ -1033,7 +1073,7 @@ function sumCol(rows,key){return rows.reduce((a,r)=>a+(parseFloat(String(r[key]|
 function avgCol(rows,key){const vals=rows.map(r=>parseFloat(String(r[key]||'').replace(/,/g,''))).filter(v=>!isNaN(v));return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;}
 function fmt(n){if(!n)return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeCompare();}});
+// keydown handled in openImagePopup section
 
 /* ══════════════════════════════════════════════════
    LEADS FILTERS + EXPORT
@@ -1064,7 +1104,8 @@ function applyLeadsFilters() {
     rows = rows.filter(r => isQualified(r['Is qualified lead']) === qual);
   }
 
-  renderLeadsTable(rows, leadsFilterPlatform);
+  const sorted = [...rows].sort((a,b)=>(b['date']||'').localeCompare(a['date']||''));
+  renderLeadsTable(sorted, leadsFilterPlatform);
   document.getElementById('tableCount').textContent = rows.length + ' lead' + (rows.length!==1?'s':'') + (rows.length !== (data[leadsFilterPlatform]||[]).length ? ' (filtered)' : '');
 }
 
@@ -1128,6 +1169,36 @@ function exportLeadsCSV() {
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
+
+/* Image popup for rednote leads */
+function openImagePopup(imgRaw, imgUrl) {
+  let popup = document.getElementById('imgPopup');
+  if (!popup) {
+    popup = document.createElement('div');
+    popup.id = 'imgPopup';
+    popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out';
+    popup.onclick = () => popup.style.display = 'none';
+    document.body.appendChild(popup);
+  }
+  if (!imgUrl) {
+    popup.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:14px;text-align:center"><i class="fas fa-image" style="font-size:32px;display:block;margin-bottom:12px;opacity:0.3"></i>No image available</div>';
+  } else {
+    popup.innerHTML = `
+      <div style="position:relative;max-width:90vw;max-height:90vh" onclick="event.stopPropagation()">
+        <img src="${imgUrl}" style="max-width:100%;max-height:88vh;border-radius:12px;display:block;box-shadow:0 20px 60px rgba(0,0,0,0.8)" onerror="this.parentElement.innerHTML='<div style=\'color:rgba(255,255,255,0.4);font-size:14px;text-align:center;padding:40px\'><i class=\'fas fa-triangle-exclamation\' style=\'font-size:28px;display:block;margin-bottom:12px\'></i>Image unavailable</div>'">
+        ${imgRaw ? `<a href="${imgRaw}" target="_blank" rel="noopener" style="position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.5);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:5px" onclick="event.stopPropagation()"><i class="fas fa-arrow-up-right-from-square"></i> Open in Drive</a>` : ''}
+      </div>
+      <div style="position:absolute;top:16px;right:16px;width:32px;height:32px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:rgba(255,255,255,0.7)" onclick="document.getElementById('imgPopup').style.display='none'"><i class="fas fa-xmark"></i></div>`;
+  }
+  popup.style.display = 'flex';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const popup = document.getElementById('imgPopup');
+    if (popup) popup.style.display = 'none';
+    closeDrawer(); closeCompare();
+  }
+});
 </script>
 </body>
 </html>
