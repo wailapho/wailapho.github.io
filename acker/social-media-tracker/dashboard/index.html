@@ -238,6 +238,40 @@
     .overall-heading{font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#c45a82;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .overall-text{font-size:13.5px;color:var(--sub);line-height:1.65;white-space:pre-wrap}
 
+    /* Leads toolbar */
+    #leadsToolbar { display:none }
+    #leadsToolbar.show { display:flex !important }
+    .leads-filter-group { display:flex; align-items:center; }
+    .leads-date-input {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      color:var(--text); border-radius:8px; padding:7px 10px;
+      font-family:'DM Sans',sans-serif; font-size:12px; outline:none;
+      color-scheme:dark;
+    }
+    .leads-date-input:focus { border-color:rgba(190,173,133,0.4); }
+    .leads-select {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      color:var(--text); border-radius:8px; padding:7px 10px;
+      font-family:'DM Sans',sans-serif; font-size:12px; outline:none;
+      -webkit-appearance:none; appearance:none; cursor:pointer;
+    }
+    .leads-select option { background:#1a1414; }
+    .leads-clear-btn {
+      background:transparent; border:1px solid rgba(255,255,255,0.1);
+      color:var(--muted); border-radius:8px; padding:7px 11px;
+      font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer;
+      display:flex; align-items:center; gap:5px;
+    }
+    .leads-clear-btn:hover { color:var(--text); }
+    .leads-export-btn {
+      background:rgba(190,173,133,0.12); border:1px solid rgba(190,173,133,0.3);
+      color:var(--gold); border-radius:8px; padding:8px 14px;
+      font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
+      cursor:pointer; display:flex; align-items:center; gap:7px;
+      white-space:nowrap;
+    }
+    .leads-export-btn:hover { background:rgba(190,173,133,0.2); }
+
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     @keyframes spin{to{transform:rotate(360deg)}}
     @media(max-width:640px){.page{padding:0 14px 40px}.topnav{padding:16px 0 18px;margin-bottom:18px}.stats-row{grid-template-columns:1fr 1fr}.stat-value{font-size:22px}.drawer{width:100vw}}
@@ -262,7 +296,7 @@
     <button class="ptab" id="tab-xhs" onclick="switchPlatform('xhs')"><i class="fas fa-bookmark" style="color:#ff3c50"></i> 小红书 Rednote</button>
     <button class="ptab" id="tab-ig"  onclick="switchPlatform('ig')"><i class="fab fa-instagram" style="color:#e4405f"></i> Instagram</button>
     <button class="ptab" id="tab-leads_rednote" onclick="switchPlatform('leads_rednote')"><i class="fas fa-user-plus" style="color:#BEAD85"></i> Leads · Rednote</button>
-    <button class="ptab" id="tab-leads" onclick="switchPlatform('leads')"><i class="fas fa-user-plus" style="color:#60a5fa"></i> Leads · Meta</button>
+    <button class="ptab" id="tab-leads" onclick="switchPlatform('leads')"><i class="fas fa-user-plus" style="color:#60a5fa"></i> Leads</button>
     <button class="ptab tbc"><i class="fab fa-facebook-f" style="color:#1877f2"></i> Facebook<span class="tbc-badge">TBC</span></button>
     <button class="ptab tbc"><i class="fab fa-tiktok"></i> Douyin<span class="tbc-badge">TBC</span></button>
     <button class="ptab tbc"><i class="fas fa-ellipsis"></i> Other<span class="tbc-badge">TBC</span></button>
@@ -283,6 +317,28 @@
         <div class="grp-legend" id="grpLegend" style="display:none"></div>
         <span class="grp-legend-clear" id="grpClearBtn" style="display:none" onclick="clearAllGroupOverrides()">↺ Reset groups</span>
       </div>
+    </div>
+    <!-- Leads toolbar (shown only on leads tabs) -->
+    <div id="leadsToolbar" style="display:none;padding:12px 22px;border-bottom:1px solid rgba(255,255,255,0.06);display:none;gap:10px;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1">
+        <div class="leads-filter-group">
+          <label style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:6px">From</label>
+          <input type="date" id="filterDateFrom" class="leads-date-input" onchange="applyLeadsFilters()">
+        </div>
+        <div class="leads-filter-group">
+          <label style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:6px">To</label>
+          <input type="date" id="filterDateTo" class="leads-date-input" onchange="applyLeadsFilters()">
+        </div>
+        <div id="qualFilterWrap" style="display:none">
+          <select id="filterQual" class="leads-select" onchange="applyLeadsFilters()">
+            <option value="">All leads</option>
+            <option value="yes">Qualified only</option>
+            <option value="no">Not qualified only</option>
+          </select>
+        </div>
+        <button class="leads-clear-btn" onclick="clearLeadsFilters()"><i class="fas fa-xmark" style="font-size:10px"></i> Clear filters</button>
+      </div>
+      <button class="leads-export-btn" onclick="exportLeadsCSV()"><i class="fas fa-download" style="font-size:12px"></i> Export CSV</button>
     </div>
     <div class="scroll-track" id="scrollTrack"><span class="scroll-track-inner" id="scrollTrackInner"></span></div>
     <div class="table-wrap" id="tableWrap">
@@ -391,7 +447,7 @@ const PLATFORM_META = {
   ig:            { label:'Instagram',       icon:'fab fa-instagram', color:'#e4405f', tabCls:'act-ig'         },
   xhs:           { label:'小红书 Rednote',  icon:'fas fa-bookmark',  color:'#ff3c50', tabCls:'act-xhs'        },
   leads_rednote: { label:'Leads · Rednote', icon:'fas fa-user-plus', color:'#BEAD85', tabCls:'act-leads'      },
-  leads:         { label:'Leads · Meta',    icon:'fas fa-user-plus', color:'#60a5fa', tabCls:'act-leads-meta' },
+  leads:         { label:'Leads',    icon:'fas fa-user-plus', color:'#60a5fa', tabCls:'act-leads-meta' },
 };
 
 /* ══════════════════════════════════════════════════
@@ -449,6 +505,11 @@ function switchPlatform(p) {
   current = p;
   selectedIndices.clear();
   document.getElementById('compareBar').classList.remove('visible');
+  // Hide leads toolbar on non-leads tabs
+  if (p !== 'leads' && p !== 'leads_rednote') {
+    const tb = document.getElementById('leadsToolbar');
+    if (tb) tb.classList.remove('show');
+  }
   if (p === 'xhs')  { sortKey = 'impressions';  sortAsc = false; }
   else if (p === 'ig') { sortKey = 'Impressions'; sortAsc = false; }
   else               { sortKey = null;            sortAsc = false; }
@@ -612,6 +673,10 @@ function renderLeads(platform) {
   const isRednote = platform === 'leads_rednote';
   const meta = PLATFORM_META[platform];
   document.getElementById('tableTitle').textContent = meta.label;
+  // Show toolbar, show/hide qual filter
+  const tb = document.getElementById('leadsToolbar');
+  tb.classList.add('show');
+  document.getElementById('qualFilterWrap').style.display = isRednote ? 'block' : 'none';
   document.getElementById('grpLegend').style.display = 'none';
   document.getElementById('grpClearBtn').style.display = 'none';
   currentGroupMap = {};
@@ -621,13 +686,24 @@ function renderLeads(platform) {
   const notQual   = rows.filter(r => isQualified(r['Is qualified lead'])==='no').length;
   const pending   = total - qualified - notQual;
 
-  document.getElementById('statsRow').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Total Leads</div><div class="stat-value gold">${total}</div><div class="stat-sub">tracked</div></div>
-    <div class="stat-card"><div class="stat-label">Qualified</div><div class="stat-value green">${qualified}</div><div class="stat-sub">confirmed</div></div>
-    <div class="stat-card"><div class="stat-label">Not Qualified</div><div class="stat-value red">${notQual}</div><div class="stat-sub">rejected</div></div>
-    <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value">${pending}</div><div class="stat-sub">not reviewed</div></div>`;
+  if (isRednote) {
+    // Rednote: Qualified / Not Qualified only (no pending card)
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Leads</div><div class="stat-value gold">${total}</div><div class="stat-sub">tracked</div></div>
+      <div class="stat-card"><div class="stat-label">Qualified</div><div class="stat-value green">${qualified}</div><div class="stat-sub">confirmed</div></div>
+      <div class="stat-card"><div class="stat-label">Not Qualified</div><div class="stat-value red">${notQual}</div><div class="stat-sub">rejected</div></div>`;
+  } else {
+    // Meta/general: channel breakdown
+    const channelCount = {};
+    rows.forEach(r => { const ch = r['channel'] || 'Unknown'; channelCount[ch] = (channelCount[ch]||0)+1; });
+    const channelCards = Object.entries(channelCount).sort((a,b)=>b[1]-a[1]).map(([ch,n])=>
+      `<div class="stat-card"><div class="stat-label">${esc(ch)}</div><div class="stat-value gold">${n}</div><div class="stat-sub">leads</div></div>`
+    ).join('');
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Leads</div><div class="stat-value gold">${total}</div><div class="stat-sub">tracked</div></div>
+      ${channelCards}`;
+  }
 
-  const wrap = document.getElementById('tableWrap');
   if (!rows.length) {
     const gid = SHEET_GIDS[platform];
     wrap.innerHTML = `<div class="state-box"><i class="fas fa-user-plus"></i>${gid===null?'Paste the leads_rednote GID in the script.':'No leads yet.'}</div>`;
@@ -635,8 +711,17 @@ function renderLeads(platform) {
     updateScrollTrack(); return;
   }
 
+  leadsFilterPlatform = platform;
   const sorted = [...rows].sort((a,b)=>(b['date']||'').localeCompare(a['date']||''));
   document.getElementById('tableCount').textContent = sorted.length + ' lead' + (sorted.length!==1?'s':'');
+  renderLeadsTable(sorted, platform);
+}
+
+/* Separate function so filters can re-render without recomputing stats */
+function renderLeadsTable(sorted, platform) {
+  platform = platform || leadsFilterPlatform;
+  const isRednote = platform === 'leads_rednote';
+  const wrap = document.getElementById('tableWrap');
 
   let html = isRednote
     ? `<table><thead><tr>
@@ -949,6 +1034,100 @@ function avgCol(rows,key){const vals=rows.map(r=>parseFloat(String(r[key]||'').r
 function fmt(n){if(!n)return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeCompare();}});
+
+/* ══════════════════════════════════════════════════
+   LEADS FILTERS + EXPORT
+══════════════════════════════════════════════════ */
+let leadsFilterPlatform = null;
+
+function applyLeadsFilters() {
+  if (!leadsFilterPlatform) return;
+  const fromVal = document.getElementById('filterDateFrom').value;
+  const toVal   = document.getElementById('filterDateTo').value;
+  const qual    = document.getElementById('filterQual').value;
+  const isRednote = leadsFilterPlatform === 'leads_rednote';
+  let rows = [...(data[leadsFilterPlatform] || [])];
+
+  // Date filter — parse dates flexibly
+  if (fromVal || toVal) {
+    rows = rows.filter(r => {
+      const d = parseDate(r['date']);
+      if (!d) return true; // can't parse → include
+      if (fromVal && d < fromVal) return false;
+      if (toVal   && d > toVal)   return false;
+      return true;
+    });
+  }
+
+  // Qualified filter (rednote only)
+  if (isRednote && qual) {
+    rows = rows.filter(r => isQualified(r['Is qualified lead']) === qual);
+  }
+
+  renderLeadsTable(rows, leadsFilterPlatform);
+  document.getElementById('tableCount').textContent = rows.length + ' lead' + (rows.length!==1?'s':'') + (rows.length !== (data[leadsFilterPlatform]||[]).length ? ' (filtered)' : '');
+}
+
+function clearLeadsFilters() {
+  document.getElementById('filterDateFrom').value = '';
+  document.getElementById('filterDateTo').value   = '';
+  document.getElementById('filterQual').value     = '';
+  applyLeadsFilters();
+}
+
+// Parse dates like "14/04/2026", "2026-04-14", "14-4-2026" → "YYYY-MM-DD" for comparison
+function parseDate(str) {
+  if (!str) return null;
+  str = String(str).trim();
+  // Already ISO
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  // DD/MM/YYYY or D/M/YYYY
+  const m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  return null;
+}
+
+function exportLeadsCSV() {
+  if (!leadsFilterPlatform) return;
+  const fromVal = document.getElementById('filterDateFrom').value;
+  const toVal   = document.getElementById('filterDateTo').value;
+  const qual    = document.getElementById('filterQual').value;
+  const isRednote = leadsFilterPlatform === 'leads_rednote';
+  let rows = [...(data[leadsFilterPlatform] || [])];
+
+  if (fromVal || toVal) {
+    rows = rows.filter(r => {
+      const d = parseDate(r['date']);
+      if (!d) return true;
+      if (fromVal && d < fromVal) return false;
+      if (toVal   && d > toVal)   return false;
+      return true;
+    });
+  }
+  if (isRednote && qual) {
+    rows = rows.filter(r => isQualified(r['Is qualified lead']) === qual);
+  }
+
+  if (!rows.length) { alert('No data to export.'); return; }
+
+  // Build CSV
+  const headers = Object.keys(rows[0]);
+  const csv = [
+    headers.join(','),
+    ...rows.map(r => headers.map(h => {
+      const v = String(r[h]||'').replace(/"/g,'""');
+      return v.includes(',') || v.includes('"') || v.includes('\n') ? `"${v}"` : v;
+    }).join(','))
+  ].join('\n');
+
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `acker-leads-${leadsFilterPlatform}-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>
