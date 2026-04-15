@@ -71,8 +71,31 @@
     }
     .ptab:hover { color:var(--sub); }
     .ptab i { font-size:14px; }
-    .ptab.act-xhs { background:var(--burg-dim);border-color:rgba(128,23,71,0.45);color:#d47099; }
-    .ptab.act-ig  { background:rgba(228,64,95,0.1);border-color:rgba(228,64,95,0.38);color:#e4405f; }
+    .ptab.act-xhs   { background:var(--burg-dim);border-color:rgba(128,23,71,0.45);color:#d47099; }
+    .ptab.act-ig    { background:rgba(228,64,95,0.1);border-color:rgba(228,64,95,0.38);color:#e4405f; }
+    .ptab.act-leads { background:rgba(190,173,133,0.12);border-color:rgba(190,173,133,0.4);color:var(--gold); }
+
+    /* Qualified lead badge */
+    .qual-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      border-radius:100px; padding:3px 10px; font-size:12px; font-weight:600;
+    }
+    .qual-badge.yes { background:rgba(34,197,94,0.12); color:#22c55e; border:1px solid rgba(34,197,94,0.25); }
+    .qual-badge.no  { background:rgba(244,63,94,0.10); color:#f43f5e; border:1px solid rgba(244,63,94,0.2); }
+    .qual-badge.unk { background:rgba(255,255,255,0.05); color:var(--muted); border:1px solid var(--gb); }
+    .qual-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .qual-badge.yes .qual-dot { background:#22c55e; box-shadow:0 0 6px #22c55e; }
+    .qual-badge.no  .qual-dot { background:#f43f5e; box-shadow:0 0 6px #f43f5e; }
+    .qual-badge.unk .qual-dot { background:var(--muted); }
+
+    /* Leads stat bar */
+    .leads-stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+    .lead-stat { display:flex; flex-direction:column; gap:3px; background:var(--glass); border:1px solid var(--gb); border-radius:14px; padding:14px 18px; flex:1; min-width:120px; }
+    .lead-stat-label { font-size:10px; font-weight:600; letter-spacing:0.09em; text-transform:uppercase; color:var(--muted); }
+    .lead-stat-val { font-family:'Instrument Serif',serif; font-size:26px; color:var(--text); }
+    .lead-stat-val.green { color:#22c55e; }
+    .lead-stat-val.red   { color:#f43f5e; }
+    .lead-stat-val.gold  { color:var(--gold); }
     .ptab.tbc     { opacity:0.38; cursor:default; pointer-events:none; }
     .tbc-badge    { font-size:10px;background:rgba(255,255,255,0.08);border-radius:4px;padding:1px 5px;color:var(--muted); }
 
@@ -144,6 +167,11 @@
     .thumb-cell { width:44px;height:44px;border-radius:8px;object-fit:cover;display:block;border:1px solid var(--gb);background:rgba(255,255,255,0.04); }
     .no-thumb   { width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px; }
     .snip       { max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11.5px;color:var(--muted); }
+    .td-text    { max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px; }
+    .ptab.act-leads { background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.38);color:#60a5fa; }
+    .ptab.act-lxhs  { background:rgba(255,60,80,0.1);border-color:rgba(255,60,80,0.38);color:#ff3c50; }
+    .bool-true  { display:inline-flex;align-items:center;gap:4px;color:#22c55e;font-size:12px;font-weight:600; }
+    .bool-false { display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:12px; }
 
     /* STATE */
     .state-box { padding:60px 20px;text-align:center;color:var(--muted);font-size:14px; }
@@ -472,9 +500,18 @@
     <button class="ptab" id="tab-ig" onclick="switchPlatform('ig')">
       <i class="fab fa-instagram" style="color:#e4405f"></i> Instagram
     </button>
+    <button class="ptab" id="tab-leads_rednote" onclick="switchPlatform('leads_rednote')">
+      <i class="fas fa-user-plus" style="color:#BEAD85"></i> Leads · Rednote
+    </button>
     <button class="ptab tbc"><i class="fab fa-facebook-f" style="color:#1877f2"></i> Facebook<span class="tbc-badge">TBC</span></button>
     <button class="ptab tbc"><i class="fab fa-tiktok"></i> Douyin<span class="tbc-badge">TBC</span></button>
     <button class="ptab tbc"><i class="fas fa-ellipsis"></i> Other<span class="tbc-badge">TBC</span></button>
+    <button class="ptab" id="tab-leads" onclick="switchPlatform('leads')">
+      <i class="fas fa-user-check" style="color:#60a5fa"></i> Leads
+    </button>
+    <button class="ptab" id="tab-leads_rednote" onclick="switchPlatform('leads_rednote')">
+      <i class="fas fa-bookmark" style="color:#ff3c50"></i> Rednote Leads
+    </button>
   </div>
 
   <div class="stats-row" id="statsRow">
@@ -553,9 +590,11 @@
 const BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCDqW1D_7yP0eP3M9l0_tlfuspKeuHBHMWXfUPX0PGJtSLMQ42oKGBZQyTW7CPj6s4AghLS3HYn7b4/pub';
 
 const SHEET_GIDS = {
-  ig:          0,            // Instagram tab
-  xhs:         1293904964,   // Xiaohongshu posts tab
-  xhs_account: 1560506691,   // Xiaohongshu-account stats tab
+  ig:              0,            // Instagram tab
+  xhs:             1293904964,   // Xiaohongshu posts tab
+  xhs_account:     1560506691,   // Xiaohongshu-account stats tab
+  leads:           null,         // ← paste leads tab gid here
+  leads_rednote:   null,         // ← paste leads-from-rednote tab gid here
 };
 
 /* ═══════════════════════════════════════════════
@@ -593,6 +632,39 @@ const COLS = {
   ],
 };
 
+// Leads columns — exact Google Sheet headers
+const LEADS_COLS = {
+  leads: [
+    { key:'channel',           label:'Channel',        type:'title'  },
+    { key:'lead_campaign_name',label:'Campaign',        type:'text'   },
+    { key:'date',              label:'Date',            type:'date'   },
+    { key:'chat_display_name', label:'Name',            type:'title'  },
+    { key:'first_name',        label:'First Name',      type:'text'   },
+    { key:'last_name',         label:'Last Name',       type:'text'   },
+    { key:'email',             label:'Email',           type:'text'   },
+    { key:'phone_number',      label:'Phone',           type:'text'   },
+  ],
+  leads_rednote: [
+    { key:'channel',           label:'Channel',         type:'title'  },
+    { key:'lead_campaign_name',label:'Campaign',        type:'text'   },
+    { key:'date',              label:'Date',            type:'date'   },
+    { key:'Account name',      label:'Account',         type:'title'  },
+    { key:'Has reply aft',     label:'Has Reply',       type:'bool'   },
+    { key:'Reply text',        label:'Reply Text',      type:'text'   },
+    { key:'Reply time',        label:'Reply Time',      type:'text'   },
+    { key:'Is qualified lead', label:'Qualified Lead',  type:'bool'   },
+    { key:'Notes',             label:'Notes',           type:'snip'   },
+  ],
+};
+
+/* Leads columns — display only */
+const LEADS_COLS = [
+  { key:'lead_campaign_name', label:'Campaign',      type:'title' },
+  { key:'date',               label:'Date',          type:'date'  },
+  { key:'Account name',       label:'Account Name',  type:'text'  },
+  { key:'Is qualified lead',  label:'Qualified',     type:'qual'  },
+];
+
 const STAT_CONFIG = {
   ig: {
     impr:   { key:'Impressions' },
@@ -609,15 +681,17 @@ const STAT_CONFIG = {
 };
 
 const PLATFORM_META = {
-  ig:  { label:'Instagram',      icon:'fab fa-instagram', color:'#e4405f', tabCls:'act-ig'  },
-  xhs: { label:'小红书 Rednote', icon:'fas fa-bookmark',  color:'#ff3c50', tabCls:'act-xhs' },
+  ig:            { label:'Instagram',        icon:'fab fa-instagram',  color:'#e4405f', tabCls:'act-ig'   },
+  xhs:           { label:'小红书 Rednote',   icon:'fas fa-bookmark',   color:'#ff3c50', tabCls:'act-xhs'  },
+  leads:         { label:'Leads',            icon:'fas fa-user-check', color:'#60a5fa', tabCls:'act-leads' },
+  leads_rednote: { label:'Rednote Leads',    icon:'fas fa-bookmark',   color:'#ff3c50', tabCls:'act-lxhs' },
 };
 
 /* ═══════════════════════════════════════════════
    STATE
    ═══════════════════════════════════════════════ */
 let current   = 'xhs';
-let data      = { ig:[], xhs:[], xhs_account:[] };
+let data      = { ig:[], xhs:[], xhs_account:[], leads:[], leads_rednote:[] };
 let sortKey   = null;
 let sortAsc   = false;
 
@@ -637,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadAll() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
-  await Promise.all(['ig','xhs','xhs_account'].map(loadSheet));
+  await Promise.all(['ig','xhs','xhs_account','leads','leads_rednote'].map(loadSheet));
   btn.classList.remove('spinning');
   document.getElementById('lastUpdated').textContent =
     'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -668,13 +742,14 @@ function loadSheet(platform) {
    ═══════════════════════════════════════════════ */
 function switchPlatform(p) {
   current = p;
-  // Auto-sort by impressions desc for XHS, else reset
-  if (p === 'xhs') { sortKey = 'impressions'; sortAsc = false; }
-  else if (p === 'ig') { sortKey = 'Impressions'; sortAsc = false; }
-  else { sortKey = null; sortAsc = false; }
+  if (p === 'xhs')           { sortKey = 'impressions'; sortAsc = false; }
+  else if (p === 'ig')       { sortKey = 'Impressions'; sortAsc = false; }
+  else if (p === 'leads')    { sortKey = 'date'; sortAsc = false; }
+  else if (p === 'leads_rednote') { sortKey = 'date'; sortAsc = false; }
+  else                       { sortKey = null; sortAsc = false; }
   Object.keys(PLATFORM_META).forEach(k => {
     const btn = document.getElementById('tab-'+k);
-    btn.className = 'ptab' + (k===p ? ' '+PLATFORM_META[k].tabCls : '');
+    if (btn) btn.className = 'ptab' + (k===p ? ' '+PLATFORM_META[k].tabCls : '');
   });
   renderCurrent();
 }
@@ -683,11 +758,46 @@ function switchPlatform(p) {
    RENDER
    ═══════════════════════════════════════════════ */
 function renderCurrent() {
+  if (current === 'leads_rednote') {
+    renderLeads(data['leads_rednote']);
+    return;
+  }
   renderStats(current, data[current]);
   renderTable(current, data[current]);
 }
 
 function renderStats(p, rows) {
+
+  // Leads tab stats
+  if (p === 'leads' || p === 'leads_rednote') {
+    const total = rows.length;
+    const qualified = rows.filter(r => {
+      const v = String(r['Is qualified lead']||'').toUpperCase();
+      return v === 'TRUE';
+    }).length;
+    const hasReply = rows.filter(r => {
+      const v = String(r['Has reply aft']||r['Has reply after']||'').toUpperCase();
+      return v === 'TRUE';
+    }).length;
+    const campaigns = [...new Set(rows.map(r=>r['lead_campaign_name']).filter(Boolean))].length;
+
+    document.getElementById('s-posts').textContent  = total;
+    document.getElementById('s-impr').textContent   = qualified || '—';
+    document.getElementById('s-likes').textContent  = p === 'leads_rednote' ? hasReply : campaigns;
+    document.getElementById('s-metric4').textContent = '—';
+
+    document.getElementById('s-posts').closest('.stat-card').querySelector('.stat-label').textContent  = 'Total Leads';
+    document.getElementById('s-posts').closest('.stat-card').querySelector('.stat-sub').textContent    = 'tracked';
+    document.getElementById('s-impr').closest('.stat-card').querySelector('.stat-label').textContent  = 'Qualified Leads';
+    document.getElementById('s-impr').closest('.stat-card').querySelector('.stat-sub').textContent    = 'confirmed';
+    document.getElementById('s-likes').closest('.stat-card').querySelector('.stat-label').textContent = p === 'leads_rednote' ? 'Has Reply' : 'Campaigns';
+    document.getElementById('s-likes').closest('.stat-card').querySelector('.stat-sub').textContent   = p === 'leads_rednote' ? 'replied' : 'distinct';
+    document.getElementById('s-label4').textContent = 'Conversion';
+    document.getElementById('s-sub4').textContent   = 'qualified %';
+    document.getElementById('s-metric4').textContent = total > 0 ? Math.round(qualified/total*100)+'%' : '—';
+    return;
+  }
+
   const cfg = STAT_CONFIG[p];
 
   // Xiaohongshu: read stats from dedicated account tab (not posts, which has duplicates)
@@ -724,7 +834,8 @@ function renderTable(p, rawRows) {
   const meta  = PLATFORM_META[p];
   const cols  = COLS[p];
 
-  title.textContent = meta.label + ' Posts';
+  const isLeads = (p === 'leads' || p === 'leads_rednote');
+  title.textContent = meta.label + (isLeads ? '' : ' Posts');
 
   if (!rawRows || rawRows.length === 0) {
     const gid = SHEET_GIDS[p];
@@ -733,6 +844,13 @@ function renderTable(p, rawRows) {
       : `No data yet. Make sure the sheet tab is published.`;
     wrap.innerHTML = `<div class="state-box"><i class="fas fa-table"></i>${msg}</div>`;
     count.textContent = '0 posts';
+    return;
+  }
+
+  // Leads: use LEADS_COLS, skip group logic
+  if (isLeads) {
+    renderLeadsTable(p, rows, wrap);
+    requestAnimationFrame(initScrollSync);
     return;
   }
 
@@ -841,6 +959,183 @@ function renderTable(p, rawRows) {
 
   html += '</tbody></table>';
   wrap.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════
+   LEADS RENDER
+   ═══════════════════════════════════════════════ */
+function renderLeads(rows) {
+  const statsRow = document.getElementById('statsRow');
+  const tableTitle = document.getElementById('tableTitle');
+  const tableCount = document.getElementById('tableCount');
+  const wrap  = document.getElementById('tableWrap');
+  const legend = document.getElementById('grpLegend');
+  const clearBtn = document.getElementById('grpClearBtn');
+
+  if (legend) legend.style.display = 'none';
+  if (clearBtn) clearBtn.style.display = 'none';
+  currentGroupMap = {};
+
+  // Stats summary bar
+  const total     = rows.length;
+  const qualified = rows.filter(r => isQualified(r['Is qualified lead']) === 'yes').length;
+  const notQual   = rows.filter(r => isQualified(r['Is qualified lead']) === 'no').length;
+  const pending   = total - qualified - notQual;
+
+  statsRow.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Leads</div>
+      <div class="stat-value gold">${total}</div>
+      <div class="stat-sub">tracked</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Qualified</div>
+      <div class="stat-value" style="color:#22c55e">${qualified}</div>
+      <div class="stat-sub">leads confirmed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Not Qualified</div>
+      <div class="stat-value" style="color:#f43f5e">${notQual}</div>
+      <div class="stat-sub">leads rejected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pending</div>
+      <div class="stat-value">${pending}</div>
+      <div class="stat-sub">not yet reviewed</div>
+    </div>`;
+
+  tableTitle.textContent = 'Leads · Rednote';
+
+  if (!rows || rows.length === 0) {
+    const gid = SHEET_GIDS['leads_rednote'];
+    wrap.innerHTML = `<div class="state-box"><i class="fas fa-user-plus"></i>${
+      gid === null
+        ? 'Add the leads_rednote GID to SHEET_GIDS in the script.'
+        : 'No leads yet. Make sure the sheet tab is published.'
+    }</div>`;
+    tableCount.textContent = '0 leads';
+    return;
+  }
+
+  // Sort by date desc by default
+  const sorted = [...rows].sort((a,b) => {
+    const da = a['date']||'', db = b['date']||'';
+    return db.localeCompare(da);
+  });
+
+  tableCount.textContent = sorted.length + ' lead' + (sorted.length !== 1 ? 's' : '');
+
+  // Table
+  let html = `<table><thead><tr>
+    <th style="width:50px">Image</th>
+    <th onclick="leadsSort('lead_campaign_name')">Campaign <i class="fas fa-sort sort-icon"></i></th>
+    <th onclick="leadsSort('date')">Date <i class="fas fa-sort sort-icon"></i></th>
+    <th>Account Name</th>
+    <th style="text-align:center" onclick="leadsSort('Is qualified lead')">Qualified <i class="fas fa-sort sort-icon"></i></th>
+  </tr></thead><tbody>`;
+
+  sorted.forEach((row, idx) => {
+    const imgThumb  = driveThumb(row['image-url'] || '');
+    const campaign  = row['lead_campaign_name'] || '—';
+    const date      = row['date'] || '—';
+    const account   = row['Account name'] || '—';
+    const qualState = isQualified(row['Is qualified lead']);
+    const qualHtml  = qualBadge(qualState);
+
+    html += `<tr onclick="openLeadDrawer(${idx})">
+      <td>${imgThumb
+        ? `<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`
+        : `<div class="no-thumb"><i class="fas fa-image"></i></div>`
+      }</td>
+      <td class="td-title">${esc(campaign)}</td>
+      <td class="td-date">${esc(date)}</td>
+      <td style="color:var(--text);font-size:13.5px">${esc(account)}</td>
+      <td style="text-align:center">${qualHtml}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+let leadsSortKey = 'date', leadsSortAsc = false;
+function leadsSort(key) {
+  if (leadsSortKey === key) leadsSortAsc = !leadsSortAsc;
+  else { leadsSortKey = key; leadsSortAsc = false; }
+  renderLeads(data['leads_rednote']);
+}
+
+function isQualified(val) {
+  if (!val && val !== 0) return 'unk';
+  const v = String(val).trim().toLowerCase();
+  if (['true','yes','1','qualified','✓'].includes(v)) return 'yes';
+  if (['false','no','0','not qualified','✗','x'].includes(v)) return 'no';
+  return 'unk';
+}
+
+function qualBadge(state) {
+  if (state === 'yes') return `<span class="qual-badge yes"><span class="qual-dot"></span>Qualified</span>`;
+  if (state === 'no')  return `<span class="qual-badge no"><span class="qual-dot"></span>Not Qualified</span>`;
+  return `<span class="qual-badge unk"><span class="qual-dot"></span>Pending</span>`;
+}
+
+function openLeadDrawer(idx) {
+  const row   = data['leads_rednote'][idx];
+  if (!row) return;
+  const imgRaw  = row['image-url'] || '';
+  const imgUrl  = driveThumb(imgRaw, 'w800');
+  const qualState = isQualified(row['Is qualified lead']);
+
+  document.getElementById('drawerTag').innerHTML =
+    `<i class="fas fa-user-plus" style="color:var(--gold)"></i> Lead · Rednote`;
+
+  const account = row['Account name'] || '—';
+  let imgHtml = '';
+  if (imgUrl) {
+    imgHtml = `<div class="d-img-wrap">
+      <div class="d-img-loading" id="dil"><i class="fas fa-circle-notch"></i> Loading…</div>
+      <img class="d-img" src="${imgUrl}" alt="" style="display:none"
+        onload="document.getElementById('dil').style.display='none';this.style.display='block'"
+        onerror="imgErr('${esc(imgRaw)}')">
+    </div>`;
+  } else {
+    imgHtml = `<div class="d-img-wrap"><div class="d-img-err"><i class="fas fa-image"></i>No screenshot</div></div>`;
+  }
+
+  const fields = [
+    { label:'Campaign',      val: row['lead_campaign_name'] },
+    { label:'Date',          val: row['date'] },
+    { label:'Account Name',  val: row['Account name'] },
+    { label:'Has Reply',     val: row['Has reply after'] },
+    { label:'Reply Text',    val: row['Reply text'] },
+    { label:'Reply Time',    val: row['Reply time'] },
+    { label:'Notes',         val: row['Notes'] },
+  ].filter(f => f.val);
+
+  const metricsHtml = `<div class="metrics-grid" style="margin-bottom:18px">
+    ${fields.map(f=>`<div class="mp">
+      <div class="mp-label">${esc(f.label)}</div>
+      <div style="font-size:14px;color:var(--text);margin-top:2px">${esc(String(f.val))}</div>
+    </div>`).join('')}
+  </div>`;
+
+  const linkHtml = imgRaw
+    ? `<div style="text-align:center;margin-top:14px"><a class="d-link" href="${esc(imgRaw)}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Open image in Drive</a></div>`
+    : '';
+
+  document.getElementById('drawerBody').innerHTML = `
+    <div style="margin-bottom:14px;display:flex;align-items:center;gap:12px">
+      <div class="d-post-title" style="margin-bottom:0;flex:1">${esc(account)}</div>
+      ${qualBadge(qualState)}
+    </div>
+    ${imgHtml}
+    ${metricsHtml}
+    ${linkHtml}
+  `;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 /* ═══════════════════════════════════════════════
@@ -1550,6 +1845,153 @@ function groupAwareSort(rows, gmap, sk, asc) {
     return 0;
   });
 }
+
+/* ════════════════════════════════════════════════
+   LEADS TABLE RENDERER
+════════════════════════════════════════════════ */
+function renderLeadsTable(p, rows, wrap) {
+  const cols = LEADS_COLS[p] || [];
+
+  if (!rows.length) {
+    const gid = SHEET_GIDS[p];
+    wrap.innerHTML = `<div class="state-box"><i class="fas fa-users"></i>${
+      gid === null ? 'Add the GID for this tab in SHEET_GIDS.' : 'No leads yet.'
+    }</div>`;
+    return;
+  }
+
+  // Sort by date desc
+  rows = [...rows].sort((a,b) => (b['date']||'').localeCompare(a['date']||''));
+
+  let html = '<table><thead><tr>';
+  html += '<th style="width:50px">Image</th>';
+  cols.forEach(col => {
+    html += `<th>${col.label}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  rows.forEach((row, idx) => {
+    const imgUrl = row['image-url'] || '';
+    const thumb  = driveThumb(imgUrl);
+    const isQ    = String(row['Is qualified lead']||'').toUpperCase() === 'TRUE';
+    const rowCls = isQ ? '' : '';
+
+    html += `<tr onclick="openLeadsDrawer(${idx},'${p}')" style="${isQ ? 'background:rgba(34,197,94,0.04)' : ''}">`;
+
+    // Thumbnail
+    html += '<td>';
+    if (thumb) {
+      html += `<img class="thumb-cell" src="${thumb}" alt="" loading="lazy"
+        onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+        <div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`;
+    } else {
+      html += `<div class="no-thumb"><i class="fas fa-user"></i></div>`;
+    }
+    html += '</td>';
+
+    cols.forEach(col => {
+      let val = row[col.key] ?? '—';
+      if (col.type === 'bool') {
+        const isTrue = String(val).toUpperCase() === 'TRUE';
+        html += `<td><span class="${isTrue?'bool-true':'bool-false'}">
+          <i class="fas ${isTrue?'fa-check':'fa-minus'}" style="font-size:10px"></i>
+          ${isTrue ? 'Yes' : 'No'}
+        </span></td>`;
+        return;
+      }
+      if (col.type === 'title') { html += `<td class="td-title">${esc(String(val))}</td>`; return; }
+      if (col.type === 'date')  { html += `<td class="td-date">${esc(String(val))}</td>`; return; }
+      if (col.type === 'snip') {
+        const s = String(val).substring(0,70);
+        html += `<td><div class="snip">${esc(s)}${s.length>=70?'…':''}</div></td>`; return;
+      }
+      html += `<td class="td-text">${esc(String(val))}</td>`;
+    });
+
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+/* ── Leads drawer ── */
+function openLeadsDrawer(idx, p) {
+  const rows = data[p] || [];
+  const row  = rows[idx];
+  if (!row) return;
+
+  const meta   = PLATFORM_META[p];
+  const imgRaw = row['image-url'] || '';
+  const imgUrl = driveThumb(imgRaw, 'w800');
+
+  document.getElementById('drawerTag').innerHTML =
+    `<i class="${meta.icon}" style="color:${meta.color}"></i> ${meta.label}`;
+
+  // Qualified badge
+  const isQ = String(row['Is qualified lead']||'').toUpperCase() === 'TRUE';
+  const qBadge = `<span style="display:inline-flex;align-items:center;gap:5px;
+    background:${isQ?'rgba(34,197,94,0.12)':'rgba(255,255,255,0.05)'};
+    border:1px solid ${isQ?'rgba(34,197,94,0.3)':'rgba(255,255,255,0.08)'};
+    color:${isQ?'#22c55e':'var(--muted)'}; border-radius:6px; padding:3px 10px;
+    font-size:11px; font-weight:600; margin-bottom:14px; display:inline-flex">
+    <i class="fas ${isQ?'fa-check':'fa-minus'}" style="font-size:10px"></i>
+    ${isQ ? 'Qualified Lead' : 'Not Qualified'}
+  </span>`;
+
+  // Build metric grid from all columns
+  const cols = LEADS_COLS[p] || [];
+  let metricsHtml = '<div class="metrics-grid">';
+  cols.forEach(col => {
+    let val = row[col.key] ?? '—';
+    if (col.type === 'bool') {
+      const isTrue = String(val).toUpperCase() === 'TRUE';
+      val = isTrue ? '✓ Yes' : '✗ No';
+    }
+    metricsHtml += `<div class="mp">
+      <div class="mp-label">${esc(col.label)}</div>
+      <div class="mp-val" style="font-size:16px">${esc(String(val))}</div>
+    </div>`;
+  });
+  metricsHtml += '</div>';
+
+  // Notes (Rednote leads)
+  const notes = row['Notes'] || '';
+  const notesHtml = notes ? `
+    <div class="overall-box" style="margin-top:14px">
+      <div class="overall-heading"><i class="fas fa-note-sticky"></i> Notes</div>
+      <div class="overall-text">${esc(notes)}</div>
+    </div>` : '';
+
+  // Image
+  let imgHtml = '';
+  if (imgUrl) {
+    imgHtml = `<div class="d-img-wrap">
+      <div class="d-img-loading" id="dil"><i class="fas fa-circle-notch"></i> Loading…</div>
+      <img class="d-img" src="${imgUrl}" alt="" style="display:none"
+        onload="document.getElementById('dil').style.display='none';this.style.display='block'"
+        onerror="imgErr('${esc(imgRaw)}')">
+    </div>`;
+  }
+
+  const name = row['chat_display_name'] || row['Account name'] || row['first_name'] || 'Lead';
+  document.getElementById('drawerBody').innerHTML = `
+    <div class="d-post-title">${esc(name)}</div>
+    ${qBadge}
+    ${imgHtml}
+    ${metricsHtml}
+    ${notesHtml}
+    ${imgRaw ? `<div style="text-align:center;margin-top:14px">
+      <a class="d-link" href="${esc(imgRaw)}" target="_blank" rel="noopener">
+        <i class="fas fa-arrow-up-right-from-square"></i> Open screenshot in Drive
+      </a></div>` : ''}
+  `;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
 </script>
 </body>
 </html>
