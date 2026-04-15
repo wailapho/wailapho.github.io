@@ -593,7 +593,6 @@ const SHEET_GIDS = {
   ig:              0,            // Instagram tab
   xhs:             1293904964,   // Xiaohongshu posts tab
   xhs_account:     1560506691,   // Xiaohongshu-account stats tab
-  leads:           null,         // ← paste leads tab gid here
   leads_rednote:   null,         // ← paste leads-from-rednote tab gid here
 };
 
@@ -691,7 +690,7 @@ const PLATFORM_META = {
    STATE
    ═══════════════════════════════════════════════ */
 let current   = 'xhs';
-let data      = { ig:[], xhs:[], xhs_account:[], leads:[], leads_rednote:[] };
+let data      = { ig:[], xhs:[], xhs_account:[], leads_rednote:[] };
 let sortKey   = null;
 let sortAsc   = false;
 
@@ -711,7 +710,11 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadAll() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
-  await Promise.all(['ig','xhs','xhs_account','leads','leads_rednote'].map(loadSheet));
+  // Only load sheets with a configured GID
+  const toLoad = ['ig','xhs','xhs_account','leads_rednote'].filter(p => {
+    const g = SHEET_GIDS[p]; return g !== null && g !== undefined;
+  });
+  await Promise.all(toLoad.map(loadSheet));
   btn.classList.remove('spinning');
   document.getElementById('lastUpdated').textContent =
     'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
