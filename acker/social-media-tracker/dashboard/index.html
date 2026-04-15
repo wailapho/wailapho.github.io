@@ -819,24 +819,16 @@ function qualBadge(state) {
   return `<span class="qual-badge unk"><span class="qual-dot"></span>Pending</span>`;
 }
 
-function openLeadDrawer(idx) {
-  const row = data['leads_rednote'][idx]; if (!row) return;
-  const imgRaw = row['image-url']||'', imgUrl = driveThumb(imgRaw,'w800');
-  document.getElementById('drawerTag').innerHTML = `<i class="fas fa-user-plus" style="color:${meta.color}"></i> ${meta.label}`;
-  const account = row['Account name'] || [row['first_name'],row['last_name']].filter(Boolean).join(' ') || row['chat_display_name'] || '—';
-  let imgHtml = imgUrl
-    ? `<div class="d-img-wrap"><div class="d-img-loading" id="dil"><i class="fas fa-circle-notch"></i> Loading…</div><img class="d-img" src="${imgUrl}" alt="" style="display:none" onload="document.getElementById('dil').style.display='none';this.style.display='block'" onerror="imgErr('${esc(imgRaw)}')"></div>`
-    : `<div class="d-img-wrap"><div class="d-img-err"><i class="fas fa-image"></i>No screenshot</div></div>`;
-  const isRednote2 = platform === 'leads_rednote';
-  const fields = isRednote2
-    ? [{label:'Campaign',val:row['lead_campaign_name']},{label:'Date',val:row['date']},{label:'Account',val:account},{label:'Has Reply',val:row['Has reply after']},{label:'Reply Text',val:row['Reply text']},{label:'Reply Time',val:row['Reply time']},{label:'Notes',val:row['Notes']}].filter(f=>f.val)
-    : [{label:'Campaign',val:row['lead_campaign_name']},{label:'Date',val:row['date']},{label:'Name',val:account},{label:'Email',val:row['email']},{label:'Phone',val:row['phone_number']},{label:'Channel',val:row['channel']}].filter(f=>f.val);
-  const metricsHtml=`<div class="metrics-grid">${fields.map(f=>`<div class="mp"><div class="mp-label">${esc(f.label)}</div><div style="font-size:14px;color:var(--text);margin-top:2px">${esc(String(f.val))}</div></div>`).join('')}</div>`;
-  const qualSection = isRednote2 ? qualBadge(isQualified(row['Is qualified lead'])) : '';
-  document.getElementById('drawerBody').innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div class="d-post-title" style="margin-bottom:0;flex:1">${esc(account)}</div>${qualSection}</div>${imgHtml}${metricsHtml}${imgRaw?`<div style="text-align:center;margin-top:14px"><a class="d-link" href="${esc(imgRaw)}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Open in Drive</a></div>`:''}`;
-  document.getElementById('overlay').classList.add('open');
-  document.getElementById('drawer').classList.add('open');
-  document.body.style.overflow='hidden';
+function openLeadDrawer(idx, platform) {
+  platform = platform || current;
+  const row = data[platform] ? data[platform][idx] : null;
+  if (!row) return;
+
+  const imgRaw = row['image-url'] || '';
+  const imgUrl = driveThumb(imgRaw, 'w800');
+
+  // Both leads tabs: show image popup
+  openImagePopup(imgRaw, imgUrl);
 }
 
 /* ══════════════════════════════════════════════════
