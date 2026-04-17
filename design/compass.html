@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Compass Offices – Flexible Serviced Offices</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,13 +16,16 @@
     --grey-light: #f4f4f4;
     --white: #ffffff;
     --card-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --font: 'Neue Haas Grotesk Display Pro', 'NeueHaasGroteskDisplayPro', 'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font);
     color: var(--black);
     background: var(--white);
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* ─── NAV ─── */
@@ -35,7 +37,7 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 48px; height: 64px;
   }
-  .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .nav-logo { font-family: var(--font); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
   .nav-logo span { color: var(--orange); }
   .nav-links { display: flex; gap: 32px; }
   .nav-links a { text-decoration: none; color: var(--grey-dark); font-size: 14px; font-weight: 500; }
@@ -44,7 +46,7 @@
     background: var(--orange); color: #fff;
     border: none; padding: 10px 22px; border-radius: 4px;
     font-size: 14px; font-weight: 600; cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font);
   }
   .nav-cta:hover { background: var(--orange-dark); }
 
@@ -81,7 +83,7 @@
   }
   .hero-search input {
     flex: 1; border: none; outline: none; padding: 14px 20px;
-    font-size: 14px; font-family: 'DM Sans', sans-serif; color: #333;
+    font-size: 14px; font-family: var(--font); color: #333;
   }
   .hero-search button {
     background: var(--orange); border: none; cursor: pointer;
@@ -93,7 +95,7 @@
   .section { padding: 80px 48px; }
   .section-bg { background: var(--grey-light); }
   .section-title {
-    font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700;
+    font-family: var(--font); font-size: 36px; font-weight: 700;
     margin-bottom: 40px;
   }
   .container { max-width: 1200px; margin: 0 auto; }
@@ -102,7 +104,7 @@
   .tab-nav { display: flex; gap: 4px; margin-bottom: 36px; flex-wrap: wrap; }
   .tab-btn {
     padding: 10px 22px; border: none; background: transparent;
-    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    font-family: var(--font); font-size: 14px; font-weight: 500;
     color: var(--grey-mid); cursor: pointer; border-bottom: 2px solid transparent;
     transition: all 0.2s;
   }
@@ -135,7 +137,7 @@
     background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
     display: flex; align-items: flex-end; padding: 20px;
   }
-  .loc-name { color: #fff; font-size: 22px; font-weight: 700; font-family: 'Playfair Display', serif; }
+  .loc-name { color: #fff; font-size: 22px; font-weight: 700; font-family: var(--font); }
 
   /* ──────────────────────────────────────────────────────────────── */
   /* ─── TESTIMONIALS ─── */
@@ -147,7 +149,8 @@
   }
   .testimonials-header {
     max-width: 1200px; margin: 0 auto;
-    display: flex; align-items: flex-end; justify-content: space-between;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
     margin-bottom: 52px;
   }
   .testimonials-header-left .eyebrow {
@@ -155,26 +158,18 @@
     text-transform: uppercase; color: var(--orange); margin-bottom: 12px;
   }
   .testimonials-header-left h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 40px; font-weight: 700; line-height: 1.15;
-    max-width: 480px;
+    font-family: var(--font);
+    font-size: 40px; font-weight: 300; line-height: 1.15;
+    max-width: 580px;
   }
   .testimonials-header-left h2 em { color: var(--orange); font-style: normal; }
+  .highlight-word { color: #ff6600; font-weight: 300; }
 
-  .testimonials-nav-btns { display: flex; gap: 12px; }
-  .t-nav-btn {
-    width: 48px; height: 48px; border-radius: 50%;
-    border: 2px solid #ddd; background: #fff;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 18px; color: #555;
-    transition: all 0.2s;
-  }
-  .t-nav-btn:hover { border-color: var(--orange); color: var(--orange); background: #fff9f5; }
-  .t-nav-btn:active { transform: scale(0.94); }
+
 
   /* Slider track */
   .testimonials-track-wrap { max-width: 1200px; margin: 0 auto; position: relative; }
-  .testimonials-track-outer { overflow: hidden; }
+  .testimonials-track-outer { overflow: hidden; padding: 12px 4px; margin: -12px -4px; }
   .testimonials-track {
     display: flex;
     gap: 24px;
@@ -195,28 +190,29 @@
     display: flex; flex-direction: column;
   }
   .t-card:hover {
-    box-shadow: 0 8px 32px rgba(255,102,0,0.12);
-    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(255,102,0,0.14);
+    border-color: #ffd4b8;
   }
 
   /* Big quote mark */
   .t-quote-icon {
-    font-family: 'Playfair Display', serif;
-    font-size: 96px;
-    line-height: 0.6;
-    color: var(--orange);
-    opacity: 0.15;
     position: absolute;
-    top: 24px; left: 26px;
+    top: 18px; left: 22px;
     user-select: none;
     pointer-events: none;
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    color: #ff6600;
+    opacity: 1;
+    font-family: var(--font);
   }
 
   .t-quote-text {
     font-size: 15px;
     line-height: 1.75;
     color: #444;
-    margin-top: 40px;
+    margin-top: 60px;
     margin-bottom: 28px;
     flex: 1;
     position: relative;
@@ -244,7 +240,8 @@
   }
   .t-info {}
   .t-name { font-weight: 700; font-size: 15px; color: var(--black); }
-  .t-role { font-size: 13px; color: var(--grey-mid); margin-top: 2px; }
+  .t-role { font-size: 13px; color: var(--grey-mid); margin-top: 2px; font-weight: 400; }
+  .t-company { font-size: 12px; color: var(--orange); margin-top: 4px; font-weight: 500; letter-spacing: 0.2px; }
 
   /* Progress dots */
   .t-dots {
@@ -293,7 +290,7 @@
     display: flex; align-items: center; justify-content: space-between;
     font-size: 12px; color: #555;
   }
-  .footer-brand { font-family: 'Playfair Display', serif; font-size: 18px; color: #fff; }
+  .footer-brand { font-family: var(--font); font-size: 18px; color: #fff; }
   .footer-brand span { color: var(--orange); }
 </style>
 </head>
@@ -418,12 +415,9 @@
   <div class="testimonials-header">
     <div class="testimonials-header-left">
       <p class="eyebrow">Client Voices</p>
-      <h2>Trusted by businesses<br>across <em>Asia-Pacific</em></h2>
+      <h2>Trusted by businesses<br>across <span class="highlight-word">Asia-Pacific</span></h2>
     </div>
-    <div class="testimonials-nav-btns">
-      <button class="t-nav-btn" id="tPrev" aria-label="Previous">&#8592;</button>
-      <button class="t-nav-btn" id="tNext" aria-label="Next">&#8594;</button>
-    </div>
+
   </div>
 
   <div class="testimonials-track-wrap">
@@ -432,156 +426,168 @@
 
         <!-- Card 1 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">Compass Offices gave us the flexibility to scale our team without the stress of a traditional lease. The service is exceptional and the location in Central is unbeatable for meeting clients.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">KY</div>
             <div class="t-info">
               <div class="t-name">Kenneth Yim</div>
-              <div class="t-role">Founder, KYT Advisors</div>
+              <div class="t-role">Founder</div>
+              <div class="t-company">KYT Advisors</div>
             </div>
           </div>
         </div>
 
         <!-- Card 2 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">Moving into Compass was the best decision we made when expanding to Hong Kong. The team handled everything — we simply walked in and started working on day one.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">SL</div>
             <div class="t-info">
               <div class="t-name">Sarah Lim</div>
-              <div class="t-role">Managing Director, Lim & Partners</div>
+              <div class="t-role">Managing Director</div>
+              <div class="t-company">Lim & Partners</div>
             </div>
           </div>
         </div>
 
         <!-- Card 3 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">The virtual office plan gave our Tokyo-based company a credible business address in Singapore instantly. Their call-handling service has been professional beyond expectations.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">HT</div>
             <div class="t-info">
               <div class="t-name">Hiroshi Tanaka</div>
-              <div class="t-role">CEO, Tanaka Global Trading</div>
+              <div class="t-role">Chief Executive Officer</div>
+              <div class="t-company">Tanaka Global Trading</div>
             </div>
           </div>
         </div>
 
         <!-- Card 4 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">We needed meeting rooms at short notice across three cities for a board roadshow. Compass coordinated everything seamlessly — every room was flawlessly prepared and on time.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">AC</div>
             <div class="t-info">
               <div class="t-name">Amanda Chen</div>
-              <div class="t-role">COO, Apex Capital Group</div>
+              <div class="t-role">Chief Operating Officer</div>
+              <div class="t-company">Apex Capital Group</div>
             </div>
           </div>
         </div>
 
         <!-- Card 5 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">As a freelance consultant, I needed a professional space that didn't feel like a coffee shop. The hot desk memberships at Compass are perfectly priced and the atmosphere is genuinely motivating.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">MW</div>
             <div class="t-info">
               <div class="t-name">Marcus Wong</div>
-              <div class="t-role">Independent Business Consultant</div>
+              <div class="t-role">Business Consultant</div>
+              <div class="t-company">Independent</div>
             </div>
           </div>
         </div>
 
         <!-- Card 6 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">When our Sydney office doubled in size in six months, Compass found us a larger suite in the same building within a week. That level of flexibility is simply impossible with conventional leases.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">JR</div>
             <div class="t-info">
               <div class="t-name">Jessica Reid</div>
-              <div class="t-role">Head of Operations, NovaTech Australia</div>
+              <div class="t-role">Head of Operations</div>
+              <div class="t-company">NovaTech Australia</div>
             </div>
           </div>
         </div>
 
         <!-- Card 7 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">The enterprise solution our team designed with Compass perfectly reflects our brand identity. Clients consistently comment on how impressive and professional our Manila office feels.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">DP</div>
             <div class="t-info">
               <div class="t-name">David Pangilinan</div>
-              <div class="t-role">Regional Director, Pacific Ventures</div>
+              <div class="t-role">Regional Director</div>
+              <div class="t-company">Pacific Ventures</div>
             </div>
           </div>
         </div>
 
         <!-- Card 8 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">The reception staff are outstanding — they greet our visitors by name and handle every request with a smile. It genuinely feels like having a five-star hotel team running your office.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">LN</div>
             <div class="t-info">
               <div class="t-name">Linda Nguyen</div>
-              <div class="t-role">Founder, Saigon Startup Lab</div>
+              <div class="t-role">Founder</div>
+              <div class="t-company">Saigon Startup Lab</div>
             </div>
           </div>
         </div>
 
         <!-- Card 9 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">We evaluated four coworking providers in Kuala Lumpur. Compass won on every dimension — location, amenities, support, and price. Two years on, we have no intention of moving.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">RA</div>
             <div class="t-info">
               <div class="t-name">Reza Aziz</div>
-              <div class="t-role">Partner, Aziz & Rashid Law</div>
+              <div class="t-role">Partner</div>
+              <div class="t-company">Aziz & Rashid Law</div>
             </div>
           </div>
         </div>
 
         <!-- Card 10 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">Setting up a regional hub in Melbourne with Compass took less than 48 hours from enquiry to move-in. Their team anticipated every need before we even had to ask.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">EK</div>
             <div class="t-info">
               <div class="t-name">Emma Kowalski</div>
-              <div class="t-role">VP APAC, Kowalski Investments</div>
+              <div class="t-role">VP, APAC</div>
+              <div class="t-company">Kowalski Investments</div>
             </div>
           </div>
         </div>
 
         <!-- Card 11 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">For our remote team, the ability to book day offices across nine cities with one membership is extraordinary. Compass truly understands how modern businesses operate.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">BM</div>
             <div class="t-info">
               <div class="t-name">Ben Morales</div>
-              <div class="t-role">CTO, DistWork Technologies</div>
+              <div class="t-role">Chief Technology Officer</div>
+              <div class="t-company">DistWork Technologies</div>
             </div>
           </div>
         </div>
 
         <!-- Card 12 -->
         <div class="t-card">
-          <div class="t-quote-icon">"</div>
+          <div class="t-quote-icon">&#8220;</div>
           <p class="t-quote-text">The high-speed internet and VLAN setup at Compass Osaka is enterprise-grade. As a financial services firm, reliability is everything — Compass has never let us down once.</p>
           <div class="t-person">
             <div class="t-avatar-placeholder">YS</div>
             <div class="t-info">
               <div class="t-name">Yuki Suzuki</div>
-              <div class="t-role">Director of IT, Suzuki Capital</div>
+              <div class="t-role">Director of IT</div>
+              <div class="t-company">Suzuki Capital</div>
             </div>
           </div>
         </div>
@@ -699,8 +705,8 @@
 (function () {
   const track = document.getElementById('tTrack');
   const dotsContainer = document.getElementById('tDots');
-  const prevBtn = document.getElementById('tPrev');
-  const nextBtn = document.getElementById('tNext');
+  const prevBtn = null;
+  const nextBtn = null;
 
   const cards = track.querySelectorAll('.t-card');
   const total = cards.length;
@@ -743,8 +749,7 @@
   function next() { goTo(current + 1 > maxIndex ? 0 : current + 1); }
   function prev() { goTo(current - 1 < 0 ? maxIndex : current - 1); }
 
-  nextBtn.addEventListener('click', () => { resetAuto(); next(); });
-  prevBtn.addEventListener('click', () => { resetAuto(); prev(); });
+  // nav buttons removed
 
   function startAuto() {
     autoTimer = setInterval(next, 4000);
