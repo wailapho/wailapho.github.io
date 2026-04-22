@@ -271,6 +271,15 @@
       white-space:nowrap;
     }
     .leads-export-btn:hover { background:rgba(190,173,133,0.2); }
+    .leads-group-select-btn {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
+      color:var(--sub); border-radius:8px; padding:8px 12px;
+      font-family:'DM Sans',sans-serif; font-size:12.5px;
+      cursor:pointer; display:flex; align-items:center; gap:6px;
+      white-space:nowrap;
+    }
+    .leads-group-select-btn:hover { color:var(--text); background:rgba(255,255,255,0.09); }
+    .leads-group-select-btn.active { background:var(--gold-dim); border-color:rgba(190,173,133,0.4); color:var(--gold); }
 
 
     /* PIC assign */
@@ -320,6 +329,12 @@
     .lsb-send { display:flex;align-items:center;gap:7px; background:var(--gold); color:#1a1414; border:none; border-radius:10px; padding:10px 20px; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer; box-shadow:0 4px 16px rgba(190,173,133,0.3); }
     .lsb-send:hover { opacity:0.9; }
     .lsb-send:disabled { opacity:0.45; pointer-events:none; }
+    .lsb-pic-pill {
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+      color:var(--sub); border-radius:7px; padding:6px 11px;
+      font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer;
+    }
+    .lsb-pic-pill:hover { background:rgba(190,173,133,0.15); color:var(--gold); border-color:rgba(190,173,133,0.35); }
     .lsb-status { font-size:12px; color:var(--muted); }
 
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -386,9 +401,20 @@
             <option value="no">Not qualified only</option>
           </select>
         </div>
-        <button class="leads-clear-btn" onclick="clearLeadsFilters()"><i class="fas fa-xmark" style="font-size:10px"></i> Clear filters</button>
+        <select id="filterPIC" class="leads-select" onchange="applyLeadsFilters()">
+          <option value="">All PIC</option>
+          <option value="Joey">Joey</option>
+          <option value="Ken">Ken</option>
+          <option value="MB">MB</option>
+          <option value="Yanni">Yanni</option>
+          <option value="__unassigned__">Unassigned</option>
+        </select>
+        <button class="leads-clear-btn" onclick="clearLeadsFilters()"><i class="fas fa-xmark" style="font-size:10px"></i> Clear</button>
       </div>
-      <button class="leads-export-btn" onclick="exportLeadsCSV()"><i class="fas fa-download" style="font-size:12px"></i> Export CSV</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="leads-group-select-btn" id="leadsSelectAllBtn" onclick="leadsSelectAll()" title="Select all visible rows"><i class="fas fa-check-double" style="font-size:11px"></i> Select all</button>
+        <button class="leads-export-btn" onclick="exportLeadsCSV()"><i class="fas fa-download" style="font-size:12px"></i> Export CSV</button>
+      </div>
     </div>
     <div class="scroll-track" id="scrollTrack"><span class="scroll-track-inner" id="scrollTrackInner"></span></div>
     <div class="table-wrap" id="tableWrap">
@@ -1179,6 +1205,14 @@ function applyLeadsFilters() {
     rows = rows.filter(r => isQualified(r['Is qualified lead']) === qual);
   }
 
+  // PIC filter (both tabs)
+  const picFilter = document.getElementById('filterPIC')?.value || '';
+  if (picFilter === '__unassigned__') {
+    rows = rows.filter(r => !r['PIC'] || r['PIC'].trim() === '');
+  } else if (picFilter) {
+    rows = rows.filter(r => (r['PIC']||'').trim() === picFilter);
+  }
+
   const sorted = [...rows].sort((a,b)=>(b['date']||'').localeCompare(a['date']||''));
   renderLeadsTable(sorted, leadsFilterPlatform);
   document.getElementById('tableCount').textContent = rows.length + ' lead' + (rows.length!==1?'s':'') + (rows.length !== (data[leadsFilterPlatform]||[]).length ? ' (filtered)' : '');
@@ -1188,6 +1222,8 @@ function clearLeadsFilters() {
   document.getElementById('filterDateFrom').value = '';
   document.getElementById('filterDateTo').value   = '';
   document.getElementById('filterQual').value     = '';
+  const fp = document.getElementById('filterPIC');
+  if (fp) fp.value = '';
   applyLeadsFilters();
 }
 
@@ -1223,6 +1259,10 @@ function exportLeadsCSV() {
   if (isRednote && qual) {
     rows = rows.filter(r => isQualified(r['Is qualified lead']) === qual);
   }
+
+  const picF = document.getElementById('filterPIC')?.value || '';
+  if (picF === '__unassigned__') { rows = rows.filter(r => !r['PIC'] || r['PIC'].trim() === ''); }
+  else if (picF) { rows = rows.filter(r => (r['PIC']||'').trim() === picF); }
 
   if (!rows.length) { alert('No data to export.'); return; }
 
@@ -1357,6 +1397,12 @@ function clearLeadsSelection() {
     const tr = cb.closest('tr');
     if (tr) tr.classList.remove('leads-selected');
   });
+  leadsAllSelected = false;
+  const btn = document.getElementById('leadsSelectAllBtn');
+  if (btn) {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-check-double" style="font-size:11px"></i> Select all';
+  }
   updateLeadsSubmitBar();
 }
 
@@ -1410,6 +1456,64 @@ async function submitLeadsPIC() {
     status.textContent = ` · ${sent} sent, ${errors} failed`;
   }
 }
+
+/* ══ GROUP SELECT for leads ══ */
+let leadsAllSelected = false;
+
+function leadsSelectAll() {
+  const btn = document.getElementById('leadsSelectAllBtn');
+  const cbs = document.querySelectorAll('.leads-cb');
+
+  if (!leadsAllSelected) {
+    // Select all visible rows
+    cbs.forEach(cb => {
+      cb.checked = true;
+      const tr = cb.closest('tr');
+      if (tr) tr.classList.add('leads-selected');
+      const key = cb.dataset.platform + ':' + cb.dataset.idx;
+      leadsChecked.add(key);
+    });
+    leadsAllSelected = true;
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fas fa-xmark" style="font-size:11px"></i> Deselect all';
+  } else {
+    // Deselect all
+    clearLeadsSelection();
+    leadsAllSelected = false;
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-check-double" style="font-size:11px"></i> Select all';
+  }
+
+  updateLeadsSubmitBar();
+}
+
+// Reset the select-all button state when table re-renders
+function resetLeadsSelectAllBtn() {
+  leadsAllSelected = false;
+  const btn = document.getElementById('leadsSelectAllBtn');
+  if (btn) {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-check-double" style="font-size:11px"></i> Select all';
+  }
+}
+
+// Also add a "select by PIC" quick action in submit bar on hover
+function selectByPIC(pic) {
+  clearLeadsSelection();
+  document.querySelectorAll('.leads-cb').forEach(cb => {
+    const key      = cb.dataset.platform + ':' + cb.dataset.idx;
+    const platform = cb.dataset.platform;
+    const idx      = parseInt(cb.dataset.idx);
+    const row      = (data[platform]||[])[idx];
+    if (row && (row['PIC']||'') === pic) {
+      cb.checked = true;
+      const tr = cb.closest('tr');
+      if (tr) tr.classList.add('leads-selected');
+      leadsChecked.add(key);
+    }
+  });
+  updateLeadsSubmitBar();
+}
 </script>
 
 <!-- Leads password modal -->
@@ -1434,7 +1538,13 @@ async function submitLeadsPIC() {
     <strong id="leadsSubmitCount">0</strong> lead<span id="leadsSubmitCountS">s</span> selected
     <span class="lsb-status" id="leadsSubmitStatus"></span>
   </div>
-  <div style="display:flex;gap:8px;align-items:center">
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--muted)">Quick select:</span>
+    <button class="lsb-pic-pill" onclick="selectByPIC('Joey')">Joey</button>
+    <button class="lsb-pic-pill" onclick="selectByPIC('Ken')">Ken</button>
+    <button class="lsb-pic-pill" onclick="selectByPIC('MB')">MB</button>
+    <button class="lsb-pic-pill" onclick="selectByPIC('Yanni')">Yanni</button>
+    <div style="width:1px;height:20px;background:rgba(255,255,255,0.1);margin:0 2px"></div>
     <button class="lsb-clear" onclick="clearLeadsSelection()"><i class="fas fa-xmark"></i> Clear</button>
     <button class="lsb-send" id="leadsSubmitBtn" onclick="submitLeadsPIC()"><i class="fas fa-paper-plane"></i> Assign &amp; Send</button>
   </div>
