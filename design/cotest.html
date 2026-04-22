@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeChat + WhatsApp 最終預覽</title>
+  <style>
+    .contact-container {
+      display: flex;
+      gap: 60px;
+      margin-top: 40px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    /* ====================== WECHAT ====================== */
+    .wechat-header {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .wechat-icon-wrapper {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .wechat-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.75);
+      transition: filter 0.3s ease;
+    }
+
+    .wechat-header:hover .wechat-icon {
+      filter: none;
+    }
+
+    .wechat-label {
+      margin-left: 12px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #222;
+      white-space: nowrap;
+    }
+
+    /* WeChat Popup - 完全按照截圖設計 */
+    .qr-popup-header {
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%) translateX(20px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+
+    .wechat-header:hover .qr-popup-header {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) translateX(26px);
+    }
+
+    .popup-card-header {
+      background: #fff;
+      padding: 24px;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.18);
+      width: 560px;
+      display: flex;
+      gap: 26px;
+    }
+
+    .left-column {
+      flex-shrink: 0;
+      width: 230px;
+    }
+
+    .qr-container {
+      position: relative;
+      background: #f8f9f8;
+      padding: 12px;
+      border-radius: 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .qr-code-header {
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      display: block;
+    }
+
+    /* 綠色角標 */
+    .qr-container::before,
+    .qr-container::after {
+      content: '';
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border: 4px solid #07C160;
+      border-radius: 4px;
+      z-index: 2;
+    }
+    .qr-container::before { top: 12px; left: 12px; border-bottom: none; border-right: none; }
+    .qr-container::after  { bottom: 12px; right: 12px; border-top: none; border-left: none; }
+
+    /* 綠色條 */
+    .green-bar {
+      margin-top: 14px;
+      background: #07C160;
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .green-bar img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .add-contacts {
+      background: #222;
+      color: white;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-left: auto;
+    }
+
+    /* compassoffices 條 */
+    .compass-bar {
+      margin-top: 8px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 6px 12px;
+      text-align: center;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #07C160;
+    }
+
+    .text-content {
+      flex: 1;
+      padding-top: 8px;
+    }
+
+    .wechat-text-header {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15.5px;
+      line-height: 1.65;
+      color: #222;
+      margin: 0 0 8px 0;
+    }
+
+    .wechat-text-header strong {
+      color: #07C160;
+      font-size: 18px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    /* ====================== WHATSAPP ====================== */
+    .whatsapp-header {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .whatsapp-icon-wrapper {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .whatsapp-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.75);
+      transition: filter 0.3s ease;
+    }
+
+    .whatsapp-header:hover .whatsapp-icon {
+      filter: none;
+    }
+
+    .whatsapp-label {
+      margin-left: 12px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #222;
+      white-space: nowrap;
+    }
+
+    .form-popup-header {
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%) translateX(20px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+
+    .whatsapp-header:hover .form-popup-header {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) translateX(26px);
+    }
+
+    /* ====================== MOBILE ====================== */
+    @media (max-width: 768px) {
+      .contact-container {
+        gap: 40px;
+        justify-content: flex-start;
+      }
+      .qr-popup-header,
+      .form-popup-header {
+        top: 100% !important;
+        left: 0 !important;
+        transform: translateY(12px) !important;
+      }
+      .popup-card-header {
+        width: 90vw;
+        max-width: 340px;
+      }
+    }
+  </style>
+</head>
+<body style="font-family: system-ui, sans-serif; background: #f9f9f9; margin: 0; padding: 40px 20px;">
+
+  <h2 style="margin-bottom: 10px;">Live Preview – WeChat + WhatsApp（已完全按照截圖還原）</h2>
+  <p style="color: #666; margin-bottom: 30px;">Hover 圖標即可看到彈窗</p>
+
+  <div class="contact-container">
+
+    <!-- ==================== WECHAT ==================== -->
+    <div class="wechat-header">
+      <div class="wechat-icon-wrapper">
+        <img src="https://www.compassoffices.com/wp-content/uploads/2026/04/wechat-icon.svg" 
+             class="wechat-icon" alt="WeChat">
+      </div>
+      <span class="wechat-label">微信諮詢</span>
+
+      <div class="qr-popup-header">
+        <div class="popup-card-header">
+          <div class="left-column">
+            <div class="qr-container">
+              <img src="https://www.compassoffices.com/wp-content/uploads/2026/04/add-wechat-img-02.jpg" 
+                   class="qr-code-header" alt="微信二維碼">
+            </div>
+
+            <!-- 綠色條 -->
+            <div class="green-bar">
+              <img src="https://www.compassoffices.com/wp-content/uploads/2026/04/wechat-icon.svg" alt="微信">
+              微信
+              <div class="add-contacts">+ Add Contacts</div>
+            </div>
+
+            <!-- compassoffices 條 -->
+            <div class="compass-bar">+ compassoffices</div>
+          </div>
+
+          <div class="text-content">
+            <p class="wechat-text-header"><strong>微信聯絡我們</strong></p>
+            <p class="wechat-text-header">掃碼添加微信</p>
+            <p class="wechat-text-header">獲取服務式辦公室詳細資訊</p>
+            <p class="wechat-text-header">專業顧問一對一諮詢</p>
+            <p class="wechat-text-header" style="color:#07C160; font-weight:600;">即時免費諮詢</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== WHATSAPP ==================== -->
+    <div class="whatsapp-header">
+      <div class="whatsapp-icon-wrapper">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/512px-WhatsApp.svg.png" 
+             class="whatsapp-icon" alt="WhatsApp">
+      </div>
+      <span class="whatsapp-label">WhatsApp 諮詢</span>
+
+      <div class="form-popup-header">
+        <div class="popup-card-header">
+          <h3 style="margin:0 0 16px 0; color:#07C160; font-size:18px;">WhatsApp 聯絡我們</h3>
+          <form id="whatsapp-form" style="display:flex; flex-direction:column; gap:14px;">
+            <input type="text" id="name" placeholder="姓名" style="padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px;" required>
+            <input type="tel" id="phone" placeholder="電話號碼" style="padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px;" required>
+            <input type="email" id="email" placeholder="電郵地址" style="padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px;">
+            <textarea id="message" placeholder="留言 / 問題" rows="4" style="padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; resize:vertical;"></textarea>
+            <button type="submit" style="background:#07C160; color:white; border:none; padding:14px; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;">
+              提交並開啟 WhatsApp
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.getElementById('whatsapp-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value || '未填';
+      const phone = document.getElementById('phone').value || '未填';
+      const email = document.getElementById('email').value || '未填';
+      const message = document.getElementById('message').value || '無留言';
+
+      const text = `姓名：${name}%0A電話：${phone}%0A電郵：${email}%0A留言：${message}%0A%0A來自網站諮詢`;
+      const whatsappNumber = "85293118582";
+      const url = `https://wa.me/${whatsappNumber}?text=${text}`;
+      window.open(url, '_blank');
+    });
+  </script>
+
+</body>
+</html>
