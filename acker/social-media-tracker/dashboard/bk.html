@@ -413,6 +413,7 @@
       </div>
       <div style="display:flex;gap:6px;align-items:center">
         <button class="leads-group-select-btn" id="leadsSelectAllBtn" onclick="leadsSelectAll()" title="Select all visible rows"><i class="fas fa-check-double" style="font-size:11px"></i> Select all</button>
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap">· Shift+click for range</span>
         <button class="leads-export-btn" onclick="exportLeadsCSV()"><i class="fas fa-download" style="font-size:12px"></i> Export CSV</button>
       </div>
     </div>
@@ -867,7 +868,7 @@ function renderLeadsTable(sorted, platform) {
       `<option value="${p}" ${existingPIC===p?'selected':''}>${p||'Assign…'}</option>`
     ).join('');
     const picSel = `<select class="pic-select" data-idx="${rowIdx}" data-platform="${platform}" onchange="onPicChange(this)" onclick="event.stopPropagation()">${picOpts}</select>`;
-    const cbHtml = `<input type="checkbox" class="leads-cb" data-idx="${rowIdx}" data-platform="${platform}" onclick="event.stopPropagation();toggleLeadsCb(this)">`;
+    const cbHtml = `<input type="checkbox" class="leads-cb" data-idx="${rowIdx}" data-platform="${platform}" onclick="event.stopPropagation();toggleLeadsCb(this,event)">`;
 
     if (isRednote) {
       html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
@@ -1366,18 +1367,46 @@ function onPicChange(sel) {
   }
 }
 
-function toggleLeadsCb(cb) {
-  const idx      = cb.dataset.idx;
+let _lastLeadsCbIdx = null; // tracks last clicked checkbox for shift-select
+
+function toggleLeadsCb(cb, event) {
+  const allCbs   = Array.from(document.querySelectorAll('.leads-cb'));
+  const curPos   = allCbs.indexOf(cb);
   const platform = cb.dataset.platform;
-  const key      = platform + ':' + idx;
-  const tr       = cb.closest('tr');
-  if (cb.checked) {
-    leadsChecked.add(key);
-    if (tr) tr.classList.add('leads-selected');
+
+  // Shift-click: select/deselect range between last click and this one
+  if (event && event.shiftKey && _lastLeadsCbIdx !== null) {
+    const lo    = Math.min(_lastLeadsCbIdx, curPos);
+    const hi    = Math.max(_lastLeadsCbIdx, curPos);
+    const check = cb.checked; // direction follows current checkbox state
+    for (let i = lo; i <= hi; i++) {
+      const target = allCbs[i];
+      if (!target) continue;
+      target.checked = check;
+      const key = target.dataset.platform + ':' + target.dataset.idx;
+      const tr  = target.closest('tr');
+      if (check) {
+        leadsChecked.add(key);
+        if (tr) tr.classList.add('leads-selected');
+      } else {
+        leadsChecked.delete(key);
+        if (tr) tr.classList.remove('leads-selected');
+      }
+    }
   } else {
-    leadsChecked.delete(key);
-    if (tr) tr.classList.remove('leads-selected');
+    // Normal single click
+    const key = platform + ':' + cb.dataset.idx;
+    const tr  = cb.closest('tr');
+    if (cb.checked) {
+      leadsChecked.add(key);
+      if (tr) tr.classList.add('leads-selected');
+    } else {
+      leadsChecked.delete(key);
+      if (tr) tr.classList.remove('leads-selected');
+    }
   }
+
+  _lastLeadsCbIdx = curPos;
   updateLeadsSubmitBar();
 }
 
