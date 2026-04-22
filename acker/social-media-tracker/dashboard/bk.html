@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Acker — Performance Dashboard</title>
+  <link rel="icon" href="https://wailapho.github.io/acker/img/favicon.ico"/>
+  <link rel="apple-touch-icon" href="https://wailapho.github.io/acker/img/favicon.ico"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="Acker"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    :root {
+      --bg:#0f0d0d; --burg:#801747; --gold:#BEAD85; --grey:#F2F2F2;
+      --glass:rgba(255,255,255,0.042); --glass2:rgba(255,255,255,0.07);
+      --gb:rgba(255,255,255,0.09); --ghi:rgba(255,255,255,0.11);
+      --text:#F2F2F2; --sub:rgba(242,242,242,0.55); --muted:rgba(242,242,242,0.28);
+      --burg-dim:rgba(128,23,71,0.16); --gold-dim:rgba(190,173,133,0.14);
+      --burg-glow:rgba(128,23,71,0.35); --green:#22c55e; --red:#f43f5e;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{height:100%;overflow-x:hidden}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    .orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+    .orb{position:absolute;border-radius:50%;filter:blur(100px)}
+    .o1{width:500px;height:500px;top:-180px;right:-160px;background:radial-gradient(circle at 40% 40%,rgba(128,23,71,0.45),transparent 70%)}
+    .o2{width:400px;height:400px;bottom:0;left:-100px;background:radial-gradient(circle at 60% 60%,rgba(190,173,133,0.32),transparent 70%)}
+    .o3{width:220px;height:220px;top:55%;left:55%;background:radial-gradient(circle,rgba(128,23,71,0.12),transparent 70%)}
+    .page{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px 60px}
+
+    /* NAV */
+    .topnav{display:flex;align-items:center;justify-content:space-between;padding:24px 0 28px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:28px}
+    .nav-brand{display:flex;align-items:center;gap:12px}
+    .nav-icon{width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .nav-icon img{width:22px;height:22px;object-fit:contain}
+    .nav-title{font-family:'Instrument Serif',serif;font-size:18px;font-weight:400;color:var(--text);letter-spacing:-0.2px}
+    .nav-title em{font-style:italic;color:var(--gold)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .refresh-btn{display:flex;align-items:center;gap:6px;background:var(--glass);border:1px solid var(--gb);color:var(--sub);border-radius:10px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+    .refresh-btn:hover{color:var(--text)}
+    .refresh-btn.spinning i{animation:spin 1s linear infinite}
+    .last-updated{font-size:12px;color:var(--muted)}
+
+    /* PLATFORM TABS */
+    .platform-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
+    .ptab{display:flex;align-items:center;gap:8px;padding:10px 18px;background:var(--glass);border:1px solid var(--gb);border-radius:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;color:var(--muted);white-space:nowrap}
+    .ptab:hover{color:var(--sub)}
+    .ptab i{font-size:14px}
+    .ptab.act-xhs{background:var(--burg-dim);border-color:rgba(128,23,71,0.45);color:#d47099}
+    .ptab.act-ig{background:rgba(228,64,95,0.1);border-color:rgba(228,64,95,0.38);color:#e4405f}
+    .ptab.act-leads{background:rgba(190,173,133,0.12);border-color:rgba(190,173,133,0.4);color:var(--gold)}
+    .ptab.act-leads-meta{background:rgba(96,165,250,0.10);border-color:rgba(96,165,250,0.35);color:#60a5fa}
+    .ptab.tbc{opacity:0.38;cursor:default;pointer-events:none}
+    .tbc-badge{font-size:10px;background:rgba(255,255,255,0.08);border-radius:4px;padding:1px 5px;color:var(--muted)}
+
+    /* STATS */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+    .stat-card{background:var(--glass);border:1px solid var(--gb);border-radius:16px;padding:18px 20px;backdrop-filter:blur(20px);box-shadow:inset 0 1px 0 var(--ghi);animation:fadeUp .4s ease both}
+    .stat-label{font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+    .stat-value{font-family:'Instrument Serif',serif;font-size:28px;font-weight:400;color:var(--text);line-height:1}
+    .stat-value.gold{color:var(--gold)}
+    .stat-value.burg{color:#c45a82}
+    .stat-value.green{color:var(--green)}
+    .stat-value.red{color:var(--red)}
+    .stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+    /* TABLE CARD */
+    .table-card{background:var(--glass);border:1px solid var(--gb);border-radius:20px;overflow:hidden;backdrop-filter:blur(24px);box-shadow:inset 0 1px 0 var(--ghi),0 8px 40px rgba(0,0,0,0.3);animation:fadeUp .4s .1s ease both}
+    .table-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .table-title{font-size:14px;font-weight:600;color:var(--text)}
+    .table-header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .table-count{font-size:12px;color:var(--muted);background:rgba(255,255,255,0.05);border:1px solid var(--gb);border-radius:100px;padding:2px 10px}
+
+    /* Scroll track (top scrollbar) */
+    .scroll-track{overflow-x:auto;overflow-y:hidden;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .scroll-track-inner{height:1px;display:block}
+    .scroll-track::-webkit-scrollbar{height:6px}
+    .scroll-track::-webkit-scrollbar-track{background:rgba(255,255,255,0.04);border-radius:3px}
+    .scroll-track::-webkit-scrollbar-thumb{background:linear-gradient(90deg,var(--burg),var(--gold));border-radius:3px}
+    .scroll-track::-webkit-scrollbar-thumb:hover{background:linear-gradient(90deg,#a01d5a,#d4c99a)}
+    .scroll-track{scrollbar-width:thin;scrollbar-color:var(--burg) rgba(255,255,255,0.04)}
+    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .table-wrap::-webkit-scrollbar{display:none}
+    .table-wrap{scrollbar-width:none}
+
+    table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}
+    thead th{padding:11px 14px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;background:rgba(0,0,0,0.15);cursor:pointer;user-select:none}
+    thead th:hover{color:var(--sub)}
+    thead th.sorted{color:var(--gold)}
+    .sort-icon{margin-left:3px;opacity:.4;font-size:9px}
+    thead th.sorted .sort-icon{opacity:1}
+    tbody tr{border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer}
+    tbody tr:hover{background:rgba(255,255,255,0.035)}
+    tbody tr:last-child{border-bottom:none}
+    tbody td{padding:11px 14px;color:var(--sub);vertical-align:middle}
+    .td-title{font-weight:500;color:var(--text);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .td-date{white-space:nowrap;font-size:12px}
+    .td-num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+    .td-hi{color:var(--gold);font-weight:500}
+    .td-pct{font-size:12px}
+    .thumb-cell{width:44px;height:44px;border-radius:8px;object-fit:cover;display:block;border:1px solid var(--gb);background:rgba(255,255,255,0.04)}
+    .no-thumb{width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
+
+    /* State */
+    .state-box{padding:60px 20px;text-align:center;color:var(--muted);font-size:14px}
+    .state-box i{font-size:26px;margin-bottom:10px;display:block}
+
+    /* Checkbox column */
+    .cb-cell{width:36px;text-align:center;padding:11px 8px}
+    .row-cb{appearance:none;-webkit-appearance:none;width:16px;height:16px;border-radius:4px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;position:relative}
+    .row-cb:checked{background:var(--burg);border-color:var(--burg)}
+    .row-cb:checked::after{content:'';position:absolute;width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(0px,-1px)}
+    tbody tr.row-selected{background:rgba(128,23,71,0.08)}
+    tbody tr.row-selected:hover{background:rgba(128,23,71,0.12)}
+
+    /* Group badges */
+    .title-cell-wrap{display:flex;align-items:center;gap:7px;min-width:0}
+    .title-span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+    .grp-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;cursor:pointer;display:inline-block;position:relative;transition:transform 0.15s}
+    .grp-dot:hover{transform:scale(1.35)}
+    .grp-dot.auto{background:transparent;border:2px dashed var(--gc,#888)}
+    .grp-dot.confirmed{background:var(--gc,#888);border:none;box-shadow:0 0 7px var(--gc,#888)}
+    .grp-dot.solo{background:rgba(255,255,255,0.1);border:none;cursor:default}
+    .grp-dot.solo:hover{transform:none}
+    .grp-legend{display:flex;align-items:center;gap:6px}
+    .grp-swatch-btn{transition:transform 0.15s;cursor:pointer;display:inline-block}
+    .grp-swatch-btn:hover{transform:scale(1.4)}
+    .grp-legend-clear{font-size:11px;color:var(--muted);cursor:pointer}
+    .grp-legend-clear:hover{color:var(--red)}
+
+    /* Group popover */
+    .grp-popover{position:fixed;z-index:500;background:rgba(18,14,14,0.99);border:1px solid rgba(255,255,255,0.13);border-radius:14px;padding:14px 16px;width:248px;box-shadow:0 12px 40px rgba(0,0,0,0.7);backdrop-filter:blur(24px);display:none;pointer-events:all}
+    .grp-popover.show{display:block}
+    .gp-top{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .gp-swatch{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .gp-status{margin-left:auto;font-size:10px;border-radius:4px;padding:1px 6px}
+    .gp-status.auto{background:rgba(190,173,133,0.15);color:var(--gold)}
+    .gp-status.confirmed{background:rgba(34,197,94,0.12);color:#22c55e}
+    .gp-similar{margin-bottom:11px}
+    .gp-similar-label{font-size:10px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em}
+    .gp-similar-item{font-size:12px;color:var(--sub);padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .gp-similar-item:last-child{border-bottom:none}
+    .gp-actions{display:flex;flex-direction:column;gap:5px}
+    .gp-btn{display:flex;align-items:center;gap:7px;width:100%;border:none;border-radius:8px;padding:9px 11px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;text-align:left}
+    .gp-btn-confirm{background:rgba(34,197,94,0.10);color:#22c55e}
+    .gp-btn-confirm:hover{background:rgba(34,197,94,0.18)}
+    .gp-btn-diff{background:rgba(244,63,94,0.08);color:var(--red)}
+    .gp-btn-diff:hover{background:rgba(244,63,94,0.16)}
+    .gp-btn-select{background:rgba(128,23,71,0.12);color:#d47099}
+    .gp-btn-select:hover{background:rgba(128,23,71,0.2)}
+    .gp-btn-undo{background:rgba(255,255,255,0.05);color:var(--sub)}
+    .gp-btn-undo:hover{background:rgba(255,255,255,0.1);color:var(--text)}
+
+    /* Compare bar */
+    .compare-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(14,11,11,0.96);backdrop-filter:blur(28px);border-top:1px solid rgba(128,23,71,0.3);padding:14px 24px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;z-index:100;transform:translateY(100%);transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1)}
+    .compare-bar.visible{transform:translateY(0)}
+    .compare-bar::before{content:'';position:absolute;top:-1px;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,rgba(128,23,71,0.6) 50%,transparent)}
+    .compare-bar-left{font-size:13px;color:var(--sub)}
+    .compare-bar-left strong{color:var(--text);font-weight:600}
+    .compare-bar-right{display:flex;gap:8px}
+    .compare-btn{display:flex;align-items:center;gap:7px;background:var(--burg);color:#F2F2F2;border:none;border-radius:10px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(128,23,71,0.4)}
+    .compare-btn:hover{opacity:0.9}
+    .clear-sel-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);color:var(--sub);border:1px solid var(--gb);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+    .clear-sel-btn:hover{color:var(--text)}
+
+    /* Compare modal */
+    .compare-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;opacity:0;pointer-events:none;transition:opacity 0.22s}
+    .compare-overlay.open{opacity:1;pointer-events:all}
+    .compare-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.95);width:min(680px,calc(100vw - 32px));max-height:calc(100dvh - 40px);background:rgba(18,14,14,0.99);border:1px solid rgba(255,255,255,0.1);border-radius:22px;backdrop-filter:blur(40px);box-shadow:0 24px 80px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.08);z-index:301;opacity:0;pointer-events:none;transition:all 0.26s cubic-bezier(0.34,1.2,0.64,1);display:flex;flex-direction:column;overflow:hidden}
+    .compare-modal.open{opacity:1;pointer-events:all;transform:translate(-50%,-50%) scale(1)}
+    .cm-head{padding:20px 22px 16px;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0}
+    .cm-head-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .cm-title-label{font-size:10.5px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:#c45a82}
+    .cm-close{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,0.06);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sub);font-size:12px}
+    .cm-close:hover{color:var(--text);background:rgba(255,255,255,0.1)}
+    .cm-post-name{font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;color:var(--text);line-height:1.3}
+    .cm-dates{font-size:12px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .cm-date-pill{background:rgba(255,255,255,0.05);border:1px solid var(--gb);border-radius:6px;padding:3px 9px;font-size:12px;color:var(--sub)}
+    .cm-days{color:var(--gold);font-size:12px}
+    .cm-body{overflow-y:auto;padding:16px 22px 22px;flex:1}
+    .cm-timeline{display:flex;gap:6px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+    .cm-snap-pill{background:rgba(255,255,255,0.04);border:1px solid var(--gb);border-radius:8px;padding:5px 11px;font-size:12px;color:var(--sub);display:flex;align-items:center;gap:5px}
+    .cm-snap-pill.first{border-color:rgba(128,23,71,0.4);color:#d47099;background:rgba(128,23,71,0.08)}
+    .cm-snap-pill.last{border-color:rgba(190,173,133,0.4);color:var(--gold);background:rgba(190,173,133,0.08)}
+    .cm-snap-num{font-size:10px;background:rgba(255,255,255,0.1);border-radius:4px;padding:1px 5px}
+    .cm-table{width:100%;border-collapse:collapse}
+    .cm-table thead th{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding:8px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .cm-table thead th:first-child{text-align:left}
+    .cm-table tbody tr{border-bottom:1px solid rgba(255,255,255,0.04)}
+    .cm-table tbody tr:last-child{border-bottom:none}
+    .cm-table tbody td{padding:11px 12px;font-size:13.5px;color:var(--sub);text-align:right;vertical-align:middle}
+    .cm-table tbody td:first-child{text-align:left;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
+    .cm-val{font-family:'Instrument Serif',serif;font-size:18px;color:var(--text)}
+    .cm-val.hi{color:var(--gold)}
+    .cm-delta{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600}
+    .cm-delta.up{background:rgba(34,197,94,0.12);color:var(--green)}
+    .cm-delta.down{background:rgba(244,63,94,0.10);color:var(--red)}
+    .cm-delta.flat{background:rgba(255,255,255,0.05);color:var(--muted)}
+
+    /* Qualified badge */
+    .qual-badge{display:inline-flex;align-items:center;gap:5px;border-radius:100px;padding:3px 10px;font-size:12px;font-weight:600}
+    .qual-badge.yes{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.25)}
+    .qual-badge.no{background:rgba(244,63,94,0.10);color:var(--red);border:1px solid rgba(244,63,94,0.2)}
+    .qual-badge.unk{background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--gb)}
+    .qual-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .qual-badge.yes .qual-dot{background:var(--green);box-shadow:0 0 6px var(--green)}
+    .qual-badge.no .qual-dot{background:var(--red);box-shadow:0 0 6px var(--red)}
+    .qual-badge.unk .qual-dot{background:var(--muted)}
+
+    /* Drawer */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;opacity:0;pointer-events:none;transition:opacity .22s}
+    .overlay.open{opacity:1;pointer-events:all}
+    .drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);background:rgba(16,13,13,0.98);border-left:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(40px);z-index:201;transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+    .drawer.open{transform:translateX(0)}
+    .drawer-top{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0}
+    .d-ptag{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+    .d-close{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sub);font-size:13px}
+    .d-close:hover{background:rgba(255,255,255,0.1);color:var(--text)}
+    .drawer-body{flex:1;overflow-y:auto;padding:20px;-webkit-overflow-scrolling:touch}
+    .d-post-title{font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;color:var(--text);line-height:1.35;margin-bottom:16px}
+    .d-img-wrap{border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.03);border:1px solid var(--gb);margin-bottom:18px;position:relative;min-height:80px}
+    .d-img{width:100%;display:block;object-fit:contain;max-height:340px}
+    .d-img-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;gap:8px}
+    .d-img-loading i{animation:spin 1s linear infinite}
+    .d-img-err{padding:28px;text-align:center;color:var(--muted);font-size:13px}
+    .d-img-err i{font-size:22px;margin-bottom:8px;display:block}
+    .d-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--gold);text-decoration:none}
+    .d-link:hover{text-decoration:underline}
+    .metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+    .mp{background:rgba(255,255,255,0.04);border:1px solid var(--gb);border-radius:10px;padding:12px 14px}
+    .mp-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+    .mp-val{font-family:'Instrument Serif',serif;font-size:22px;color:var(--text)}
+    .mp-val.gold{color:var(--gold)}
+    .overall-box{background:rgba(128,23,71,0.08);border:1px solid rgba(128,23,71,0.2);border-radius:14px;padding:16px}
+    .overall-heading{font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#c45a82;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .overall-text{font-size:13.5px;color:var(--sub);line-height:1.65;white-space:pre-wrap}
+
+    /* Leads toolbar */
+    #leadsToolbar { display:none }
+    #leadsToolbar.show { display:flex !important }
+    .leads-filter-group { display:flex; align-items:center; }
+    .leads-date-input {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      color:var(--text); border-radius:8px; padding:7px 10px;
+      font-family:'DM Sans',sans-serif; font-size:12px; outline:none;
+      color-scheme:dark;
+    }
+    .leads-date-input:focus { border-color:rgba(190,173,133,0.4); }
+    .leads-select {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      color:var(--text); border-radius:8px; padding:7px 10px;
+      font-family:'DM Sans',sans-serif; font-size:12px; outline:none;
+      -webkit-appearance:none; appearance:none; cursor:pointer;
+    }
+    .leads-select option { background:#1a1414; }
+    .leads-clear-btn {
+      background:transparent; border:1px solid rgba(255,255,255,0.1);
+      color:var(--muted); border-radius:8px; padding:7px 11px;
+      font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer;
+      display:flex; align-items:center; gap:5px;
+    }
+    .leads-clear-btn:hover { color:var(--text); }
+    .leads-export-btn {
+      background:rgba(190,173,133,0.12); border:1px solid rgba(190,173,133,0.3);
+      color:var(--gold); border-radius:8px; padding:8px 14px;
+      font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
+      cursor:pointer; display:flex; align-items:center; gap:7px;
+      white-space:nowrap;
+    }
+    .leads-export-btn:hover { background:rgba(190,173,133,0.2); }
+
+
+    /* PIC assign */
+    .pic-select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text); border-radius: 7px;
+      padding: 5px 8px; font-family:'DM Sans',sans-serif;
+      font-size: 12px; cursor: pointer; outline: none;
+      -webkit-appearance: none; appearance: none;
+      width: 72px;
+    }
+    .pic-select:focus { border-color: rgba(190,173,133,0.45); }
+    .pic-select option { background:#1a1414; }
+
+    .leads-cb {
+      appearance: none; -webkit-appearance: none;
+      width: 16px; height: 16px; border-radius: 4px;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04); cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      position: relative; flex-shrink: 0;
+    }
+    .leads-cb:checked { background: var(--gold); border-color: var(--gold); }
+    .leads-cb:checked::after { content:''; position:absolute; width:9px; height:5px; border-left:2px solid #1a1414; border-bottom:2px solid #1a1414; transform:rotate(-45deg) translate(0px,-1px); }
+    tbody tr.leads-selected { background: rgba(190,173,133,0.07); }
+    tbody tr.leads-selected:hover { background: rgba(190,173,133,0.11); }
+
+    /* Leads PIC submit bar */
+    .leads-submit-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(14,11,11,0.96);
+      backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+      border-top: 1px solid rgba(190,173,133,0.25);
+      padding: 14px 24px; padding-bottom: calc(14px + env(safe-area-inset-bottom,0px));
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .leads-submit-bar::before { content:''; position:absolute; top:-1px; left:15%; right:15%; height:1px; background:linear-gradient(90deg,transparent,rgba(190,173,133,0.45) 50%,transparent); }
+    .leads-submit-bar.visible { transform: translateY(0); }
+    .leads-submit-bar-left { font-size:13px; color:var(--sub); }
+    .leads-submit-bar-left strong { color:var(--text); font-weight:600; }
+    .lsb-clear { display:flex;align-items:center;gap:6px; background:rgba(255,255,255,0.06); color:var(--sub); border:1px solid var(--gb); border-radius:10px; padding:10px 14px; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; }
+    .lsb-clear:hover { color:var(--text); }
+    .lsb-send { display:flex;align-items:center;gap:7px; background:var(--gold); color:#1a1414; border:none; border-radius:10px; padding:10px 20px; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer; box-shadow:0 4px 16px rgba(190,173,133,0.3); }
+    .lsb-send:hover { opacity:0.9; }
+    .lsb-send:disabled { opacity:0.45; pointer-events:none; }
+    .lsb-status { font-size:12px; color:var(--muted); }
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:640px){.page{padding:0 14px 40px}.topnav{padding:16px 0 18px;margin-bottom:18px}.stats-row{grid-template-columns:1fr 1fr}.stat-value{font-size:22px}.drawer{width:100vw}}
+  </style>
+</head>
+<body>
+<div class="orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+<div class="page">
+
+  <nav class="topnav">
+    <div class="nav-brand">
+      <div class="nav-icon"><img src="https://wailapho.github.io/acker/img/favicon.ico" alt=""></div>
+      <div class="nav-title">Acker <em>Performance</em> Dashboard</div>
+    </div>
+    <div class="nav-right">
+      <span class="last-updated" id="lastUpdated">—</span>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadAll()"><i class="fas fa-rotate-right"></i> Refresh</button>
+    </div>
+  </nav>
+
+  <div class="platform-tabs">
+    <button class="ptab" id="tab-xhs" onclick="switchPlatform('xhs')"><i class="fas fa-bookmark" style="color:#ff3c50"></i> 小红书 Rednote</button>
+    <button class="ptab tbc"><i class="fab fa-instagram" style="color:#e4405f"></i> Instagram<span class="tbc-badge">TBC</span></button>
+    <button class="ptab" id="tab-leads_rednote" onclick="switchPlatform('leads_rednote')"><i class="fas fa-user-plus" style="color:#BEAD85"></i> Leads · Rednote</button>
+    <button class="ptab" id="tab-leads" onclick="switchPlatform('leads')"><i class="fas fa-user-plus" style="color:#60a5fa"></i> Leads</button>
+    <button class="ptab tbc"><i class="fab fa-facebook-f" style="color:#1877f2"></i> Facebook<span class="tbc-badge">TBC</span></button>
+    <button class="ptab tbc"><i class="fab fa-tiktok"></i> Douyin<span class="tbc-badge">TBC</span></button>
+    <button class="ptab tbc"><i class="fas fa-ellipsis"></i> Other<span class="tbc-badge">TBC</span></button>
+  </div>
+
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-label">Total Posts</div><div class="stat-value" id="s-posts">—</div><div class="stat-sub">tracked</div></div>
+    <div class="stat-card"><div class="stat-label">Total Impressions</div><div class="stat-value gold" id="s-impr">—</div><div class="stat-sub">all posts</div></div>
+    <div class="stat-card"><div class="stat-label">Total Likes</div><div class="stat-value burg" id="s-likes">—</div><div class="stat-sub">engagements</div></div>
+    <div class="stat-card"><div class="stat-label" id="s-label4">Avg Watch</div><div class="stat-value" id="s-metric4">—</div><div class="stat-sub" id="s-sub4">seconds</div></div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-title" id="tableTitle">Posts</span>
+      <div class="table-header-right">
+        <span class="table-count" id="tableCount">— posts</span>
+        <div class="grp-legend" id="grpLegend" style="display:none"></div>
+        <span class="grp-legend-clear" id="grpClearBtn" style="display:none" onclick="clearAllGroupOverrides()">↺ Reset groups</span>
+      </div>
+    </div>
+    <!-- Leads toolbar (shown only on leads tabs) -->
+    <div id="leadsToolbar" style="display:none;padding:12px 22px;border-bottom:1px solid rgba(255,255,255,0.06);display:none;gap:10px;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1">
+        <div class="leads-filter-group">
+          <label style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:6px">From</label>
+          <input type="date" id="filterDateFrom" class="leads-date-input" onchange="applyLeadsFilters()">
+        </div>
+        <div class="leads-filter-group">
+          <label style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:6px">To</label>
+          <input type="date" id="filterDateTo" class="leads-date-input" onchange="applyLeadsFilters()">
+        </div>
+        <div id="qualFilterWrap" style="display:none">
+          <select id="filterQual" class="leads-select" onchange="applyLeadsFilters()">
+            <option value="">All leads</option>
+            <option value="yes">Qualified only</option>
+            <option value="no">Not qualified only</option>
+          </select>
+        </div>
+        <button class="leads-clear-btn" onclick="clearLeadsFilters()"><i class="fas fa-xmark" style="font-size:10px"></i> Clear filters</button>
+      </div>
+      <button class="leads-export-btn" onclick="exportLeadsCSV()"><i class="fas fa-download" style="font-size:12px"></i> Export CSV</button>
+    </div>
+    <div class="scroll-track" id="scrollTrack"><span class="scroll-track-inner" id="scrollTrackInner"></span></div>
+    <div class="table-wrap" id="tableWrap">
+      <div class="state-box"><i class="fas fa-circle-notch" style="animation:spin 1.2s linear infinite"></i>Loading…</div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Group popover -->
+<div class="grp-popover" id="grpPopover"></div>
+
+<!-- Compare bar -->
+<div class="compare-bar" id="compareBar">
+  <div class="compare-bar-left"><strong id="compareCount">0</strong> snapshots selected</div>
+  <div class="compare-bar-right">
+    <button class="clear-sel-btn" onclick="clearSelection()"><i class="fas fa-xmark"></i> Clear</button>
+    <button class="compare-btn" onclick="openCompare()"><i class="fas fa-chart-line"></i> Compare Growth</button>
+  </div>
+</div>
+
+<!-- Compare modal -->
+<div class="compare-overlay" id="compareOverlay" onclick="closeCompare()"></div>
+<div class="compare-modal" id="compareModal">
+  <div class="cm-head">
+    <div class="cm-head-top">
+      <div class="cm-title-label"><i class="fas fa-arrow-trend-up" style="margin-right:5px"></i>Performance Growth</div>
+      <div class="cm-close" onclick="closeCompare()"><i class="fas fa-xmark"></i></div>
+    </div>
+    <div class="cm-post-name" id="cmPostName">—</div>
+    <div class="cm-dates" id="cmDates"></div>
+  </div>
+  <div class="cm-body" id="cmBody"></div>
+</div>
+
+<!-- Drawer -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-top">
+    <div class="d-ptag" id="drawerTag"></div>
+    <div class="d-close" onclick="closeDrawer()"><i class="fas fa-xmark"></i></div>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   CONFIGURATION
+══════════════════════════════════════════════════ */
+const BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCDqW1D_7yP0eP3M9l0_tlfuspKeuHBHMWXfUPX0PGJtSLMQ42oKGBZQyTW7CPj6s4AghLS3HYn7b4/pub';
+
+const SHEET_GIDS = {
+  ig:            0,            // Instagram
+  xhs:           1293904964,   // Xiaohongshu posts
+  xhs_account:   1560506691,   // Xiaohongshu account stats
+  leads:         976166037,    // leads (Meta/general)
+  leads_rednote: 1005058307,   // leads-from-rednote
+};
+
+/* ══════════════════════════════════════════════════
+   COLUMNS — exact sheet headers
+══════════════════════════════════════════════════ */
+const COLS = {
+  ig: [
+    { key:'post_title',                label:'Post Title',       type:'title'   },
+    { key:'post_date',                 label:'Post Date',        type:'date'    },
+    { key:'reach',                     label:'Reach',            type:'num'     },
+    { key:'Impressions',               label:'Impressions',      type:'num-hi'  },
+    { key:'Likes',                     label:'Likes',            type:'num'     },
+    { key:'Comments',                  label:'Comments',         type:'num'     },
+    { key:'Saves',                     label:'Saves',            type:'num'     },
+    { key:'Shares',                    label:'Shares',           type:'num'     },
+    { key:'profile_visits',            label:'Profile Visits',   type:'num'     },
+    { key:'followers_reached_pct',     label:'Followers %',      type:'pct-dec' },
+    { key:'non_followers_reached_pct', label:'Non-Followers %',  type:'pct-dec' },
+    { key:'engagement_rate',           label:'Engagement Rate',  type:'pct-dec' },
+  ],
+  xhs: [
+    { key:'post_title',             label:'Post Title',       type:'title'   },
+    { key:'impressions',            label:'Impressions',      type:'num-hi'  },
+    { key:'views',                  label:'Views',            type:'num'     },
+    { key:'likes',                  label:'Likes',            type:'num'     },
+    { key:'comments',               label:'Comments',         type:'num'     },
+    { key:'saves',                  label:'Saves',            type:'num'     },
+    { key:'shares',                 label:'Shares',           type:'num'     },
+    { key:'cover_click_rate',       label:'Cover Click %',    type:'pct-raw' },
+    { key:'avg_watch_time_seconds', label:'Avg Watch (s)',    type:'num'     },
+    { key:'new_followers',          label:'New Followers',    type:'num'     },
+  ],
+};
+
+const STAT_CONFIG = {
+  ig: {
+    impr:    { key:'Impressions' },
+    likes:   { key:'Likes' },
+    metric4: { key:'engagement_rate', label:'Avg Engagement', sub:'rate', format: v => (v*100).toFixed(2)+'%' },
+  },
+  xhs: {
+    impr:    { key:'impressions' },
+    likes:   { key:'likes' },
+    metric4: { key:'avg_watch_time_seconds', label:'Avg Watch Time', sub:'seconds', format: v => parseFloat(v).toFixed(1)+'s' },
+  },
+};
+
+const PLATFORM_META = {
+  ig:            { label:'Instagram',       icon:'fab fa-instagram', color:'#e4405f', tabCls:'act-ig'         },
+  xhs:           { label:'小红书 Rednote',  icon:'fas fa-bookmark',  color:'#ff3c50', tabCls:'act-xhs'        },
+  leads_rednote: { label:'Leads · Rednote', icon:'fas fa-user-plus', color:'#BEAD85', tabCls:'act-leads'      },
+  leads:         { label:'Leads',    icon:'fas fa-user-plus', color:'#60a5fa', tabCls:'act-leads-meta' },
+};
+
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+let current  = 'xhs';
+let data     = { ig:[], xhs:[], xhs_account:[], leads:[], leads_rednote:[] };
+let sortKey  = 'impressions';
+let sortAsc  = false;
+let selectedIndices = new Set();
+let currentGroupMap = {};
+let gpActiveTitle   = '';
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  switchPlatform('xhs');
+  loadAll();
+  setInterval(loadAll, 5 * 60 * 1000);
+});
+
+/* ══════════════════════════════════════════════════
+   LOAD
+══════════════════════════════════════════════════ */
+async function loadAll() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  const toLoad = Object.keys(SHEET_GIDS).filter(p => SHEET_GIDS[p] !== null && SHEET_GIDS[p] !== undefined);
+  await Promise.all(toLoad.map(loadSheet));
+  btn.classList.remove('spinning');
+  document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  renderCurrent();
+}
+
+function csvUrl(p) {
+  const gid = SHEET_GIDS[p];
+  return `${BASE_URL}?gid=${gid}&single=true&output=csv`;
+}
+
+function loadSheet(p) {
+  return new Promise(resolve => {
+    Papa.parse(csvUrl(p), {
+      download:true, header:true, skipEmptyLines:true,
+      complete: res => { data[p] = res.data || []; resolve(); },
+      error:    ()  => { data[p] = [];              resolve(); },
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   SWITCH PLATFORM
+══════════════════════════════════════════════════ */
+function switchPlatform(p) {
+  // Leads tabs require password
+  if ((p === 'leads' || p === 'leads_rednote') && !leadsUnlocked) {
+    requireLeadsPw(p);
+    return;
+  }
+  _switchToLeads(p);
+}
+
+function _switchToLeads(p) {
+  current = p;
+  selectedIndices.clear();
+  document.getElementById('compareBar').classList.remove('visible');
+  if (p !== 'leads' && p !== 'leads_rednote') {
+    const tb = document.getElementById('leadsToolbar');
+    if (tb) tb.classList.remove('show');
+    const sb = document.getElementById('leadsSubmitBar');
+    if (sb) sb.classList.remove('visible');
+  }
+  if (p === 'xhs')  { sortKey = 'impressions';  sortAsc = false; }
+  else if (p === 'ig') { sortKey = 'Impressions'; sortAsc = false; }
+  else               { sortKey = null;            sortAsc = false; }
+  Object.keys(PLATFORM_META).forEach(k => {
+    const btn = document.getElementById('tab-'+k);
+    if (btn) btn.className = 'ptab' + (k===p ? ' '+PLATFORM_META[k].tabCls : '');
+  });
+  // Reload sheet data for this tab then render
+  loadSheetAndRender(p);
+}
+
+async function loadSheetAndRender(p) {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  // Determine which sheets to reload for this tab
+  const sheetsToLoad = [];
+  if (p === 'xhs') { sheetsToLoad.push('xhs', 'xhs_account'); }
+  else if (p === 'ig') { sheetsToLoad.push('ig'); }
+  else if (p === 'leads') { sheetsToLoad.push('leads'); }
+  else if (p === 'leads_rednote') { sheetsToLoad.push('leads_rednote'); }
+  await Promise.all(sheetsToLoad.filter(s => SHEET_GIDS[s] !== null && SHEET_GIDS[s] !== undefined).map(loadSheet));
+  btn.classList.remove('spinning');
+  document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  renderCurrent();
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER ROUTER
+══════════════════════════════════════════════════ */
+function renderCurrent() {
+  if (current === 'leads_rednote') { renderLeads('leads_rednote'); return; }
+  if (current === 'leads')         { renderLeads('leads');         return; }
+  renderStats(current, data[current]);
+  renderPostTable(current, data[current]);
+}
+
+/* ══════════════════════════════════════════════════
+   STATS
+══════════════════════════════════════════════════ */
+function renderStats(p, rows) {
+  const strip = v => parseFloat(String(v||'').replace(/,/g,'')) || 0;
+  // XHS: use dedicated account tab
+  if (p === 'xhs' && data.xhs_account.length > 0) {
+    const acc = data.xhs_account[0];
+    document.getElementById('s-posts').textContent   = acc['Total Posts'] || '—';
+    document.getElementById('s-impr').textContent    = fmt(strip(acc['Total Impressions']));
+    document.getElementById('s-likes').textContent   = fmt(strip(acc['Total Likes']));
+    document.getElementById('s-label4').textContent  = 'Avg Watch Time';
+    document.getElementById('s-sub4').textContent    = 'seconds';
+    const w = parseFloat(acc['Avg Watch Time']);
+    document.getElementById('s-metric4').textContent = !isNaN(w) && w>0 ? w.toFixed(1)+'s' : '—';
+    return;
+  }
+  const cfg = STAT_CONFIG[p];
+  if (!cfg) return;
+  document.getElementById('s-posts').textContent   = rows.length;
+  document.getElementById('s-impr').textContent    = fmt(sumCol(rows, cfg.impr.key));
+  document.getElementById('s-likes').textContent   = fmt(sumCol(rows, cfg.likes.key));
+  document.getElementById('s-label4').textContent  = cfg.metric4.label;
+  document.getElementById('s-sub4').textContent    = cfg.metric4.sub;
+  const av = avgCol(rows, cfg.metric4.key);
+  document.getElementById('s-metric4').textContent = av > 0 ? cfg.metric4.format(av) : '—';
+}
+
+/* ══════════════════════════════════════════════════
+   POST TABLE
+══════════════════════════════════════════════════ */
+function renderPostTable(p, rawRows) {
+  const wrap  = document.getElementById('tableWrap');
+  const title = document.getElementById('tableTitle');
+  const count = document.getElementById('tableCount');
+  const meta  = PLATFORM_META[p];
+  const cols  = COLS[p];
+
+  title.textContent = meta.label + ' Posts';
+
+  if (!rawRows || rawRows.length === 0) {
+    wrap.innerHTML = `<div class="state-box"><i class="fas fa-table"></i>No data. Make sure the sheet tab is published.</div>`;
+    count.textContent = '0 posts';
+    updateScrollTrack(); return;
+  }
+
+  // Groups (XHS only)
+  if (p === 'xhs') {
+    const autoMap = computeGroupMap(rawRows);
+    currentGroupMap = applyGrpOverrides(autoMap);
+    renderGroupLegend(currentGroupMap);
+  } else {
+    currentGroupMap = {};
+    document.getElementById('grpLegend').style.display = 'none';
+    document.getElementById('grpClearBtn').style.display = 'none';
+  }
+
+  // Sort
+  let rows = [...rawRows];
+  if (p === 'xhs' && sortKey) {
+    rows = groupAwareSort(rows, currentGroupMap, sortKey, sortAsc);
+  } else if (sortKey) {
+    const strip = v => parseFloat(String(v||'').replace(/,/g,'')) || v || '';
+    rows.sort((a,b) => {
+      const av=strip(a[sortKey]), bv=strip(b[sortKey]);
+      if (av<bv) return sortAsc?1:-1;
+      if (av>bv) return sortAsc?-1:1;
+      return 0;
+    });
+  }
+
+  // Unique post count: grouped posts count as 1
+  if (p === 'xhs') {
+    const countedGroups = new Set();
+    let uniquePosts = 0;
+    rows.forEach(row => {
+      const t = row['post_title']||'';
+      const g = currentGroupMap[t];
+      if (g && !g.separated) {
+        if (!countedGroups.has(g.gid)) { countedGroups.add(g.gid); uniquePosts++; }
+      } else {
+        uniquePosts++;
+      }
+    });
+    count.textContent = uniquePosts + ' post' + (uniquePosts!==1?'s':'') + (uniquePosts !== rows.length ? ` (${rows.length} snapshots)` : '');
+  } else {
+    count.textContent = rows.length + ' post' + (rows.length!==1?'s':'');
+  }
+
+  // Header
+  let html = '<table><thead><tr>';
+  html += '<th class="cb-cell" style="cursor:default"><i class="fas fa-code-compare" style="font-size:11px;opacity:0.4"></i></th>';
+  html += '<th style="width:50px;cursor:default">Image</th>';
+  html += '<th style="cursor:default">Upload Date</th>';
+  cols.forEach(c => {
+    const sorted = sortKey === c.key;
+    const arrow  = sorted ? (sortAsc?'fa-arrow-up':'fa-arrow-down') : 'fa-sort';
+    html += `<th class="${sorted?'sorted':''}" onclick="doSort('${c.key}')">${c.label} <i class="fas ${arrow} sort-icon"></i></th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  // Rows
+  rows.forEach(row => {
+    const dataIdx   = rawRows.indexOf(row);
+    const imgThumb  = driveThumb(row['upload-img'] || '');
+    const uploadDate = row['upload-date'] || '—';
+    const isSelected = selectedIndices.has(dataIdx);
+
+    html += `<tr onclick="openDrawer(${dataIdx},'${p}')" class="${isSelected?'row-selected':''}">`;
+    html += `<td class="cb-cell"><input type="checkbox" class="row-cb" ${isSelected?'checked':''} onclick="toggleSelect(event,${dataIdx})"></td>`;
+    // Thumb
+    html += '<td>';
+    if (imgThumb) html += `<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`;
+    else html += `<div class="no-thumb"><i class="fas fa-image"></i></div>`;
+    html += '</td>';
+    // Upload date
+    html += `<td class="td-date">${esc(uploadDate)}</td>`;
+    // Data cols
+    cols.forEach(c => {
+      let val = row[c.key] ?? '—';
+      if (c.type === 'title') {
+        if (p === 'xhs') {
+          const badge = grpBadgeHtml(String(val), currentGroupMap);
+          html += `<td class="td-title"><div class="title-cell-wrap">${badge}<span class="title-span">${esc(String(val))}</span></div></td>`;
+        } else {
+          html += `<td class="td-title">${esc(String(val))}</td>`;
+        }
+        return;
+      }
+      let cls = 'td-num';
+      if (c.type==='date') cls='td-date';
+      else if (c.type==='num-hi') cls='td-num td-hi';
+      else if (c.type==='pct-dec') { cls='td-num td-pct'; const n=parseFloat(val); val=(!isNaN(n)&&val!=='—')?(n*100).toFixed(1)+'%':'—'; }
+      else if (c.type==='pct-raw') { cls='td-num td-pct'; const n=parseFloat(val); val=(!isNaN(n)&&val!=='—')?n.toFixed(1)+'%':'—'; }
+      html += `<td class="${cls}">${esc(String(val))}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  requestAnimationFrame(updateScrollTrack);
+}
+
+function doSort(key) {
+  if (sortKey===key) sortAsc=!sortAsc; else { sortKey=key; sortAsc=false; }
+  renderPostTable(current, data[current]);
+}
+
+/* ══════════════════════════════════════════════════
+   LEADS TABLE
+══════════════════════════════════════════════════ */
+function renderLeads(platform) {
+  platform = platform || 'leads_rednote';
+  const rows = data[platform] || [];
+  const isRednote = platform === 'leads_rednote';
+  const meta = PLATFORM_META[platform];
+  document.getElementById('tableTitle').textContent = meta.label;
+  // Show toolbar, show/hide qual filter
+  const tb = document.getElementById('leadsToolbar');
+  tb.classList.add('show');
+  document.getElementById('qualFilterWrap').style.display = isRednote ? 'block' : 'none';
+  document.getElementById('grpLegend').style.display = 'none';
+  document.getElementById('grpClearBtn').style.display = 'none';
+  currentGroupMap = {};
+
+  const total     = rows.length;
+  const qualified = rows.filter(r => isQualified(r['Is qualified lead'])==='yes').length;
+  const notQual   = rows.filter(r => isQualified(r['Is qualified lead'])==='no').length;
+  const pending   = total - qualified - notQual;
+
+  if (isRednote) {
+    // Rednote: Qualified / Not Qualified only (no pending card)
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Leads</div><div class="stat-value gold">${total}</div><div class="stat-sub">tracked</div></div>
+      <div class="stat-card"><div class="stat-label">Qualified</div><div class="stat-value green">${qualified}</div><div class="stat-sub">confirmed</div></div>
+      <div class="stat-card"><div class="stat-label">Not Qualified</div><div class="stat-value red">${notQual}</div><div class="stat-sub">rejected</div></div>`;
+  } else {
+    // Meta/general: channel breakdown
+    const channelCount = {};
+    rows.forEach(r => { const ch = r['channel'] || 'Unknown'; channelCount[ch] = (channelCount[ch]||0)+1; });
+    const channelCards = Object.entries(channelCount).sort((a,b)=>b[1]-a[1]).map(([ch,n])=>
+      `<div class="stat-card"><div class="stat-label">${esc(ch)}</div><div class="stat-value gold">${n}</div><div class="stat-sub">leads</div></div>`
+    ).join('');
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Leads</div><div class="stat-value gold">${total}</div><div class="stat-sub">tracked</div></div>
+      ${channelCards}`;
+  }
+
+  if (!rows.length) {
+    const gid = SHEET_GIDS[platform];
+    wrap.innerHTML = `<div class="state-box"><i class="fas fa-user-plus"></i>${gid===null?'Paste the leads_rednote GID in the script.':'No leads yet.'}</div>`;
+    document.getElementById('tableCount').textContent = '0 leads';
+    updateScrollTrack(); return;
+  }
+
+  leadsFilterPlatform = platform;
+  const sorted = [...rows].sort((a,b)=>(b['date']||'').localeCompare(a['date']||''));
+  document.getElementById('tableCount').textContent = sorted.length + ' lead' + (sorted.length!==1?'s':'');
+  renderLeadsTable(sorted, platform);
+}
+
+/* Separate function so filters can re-render without recomputing stats */
+function renderLeadsTable(sorted, platform) {
+  platform = platform || leadsFilterPlatform;
+  const isRednote = platform === 'leads_rednote';
+  const wrap = document.getElementById('tableWrap');
+
+  let html = isRednote
+    ? `<table><thead><tr>
+        <th class="cb-cell" style="cursor:default"></th>
+        <th style="width:50px;cursor:default">Image</th>
+        <th>Campaign</th><th>Date</th><th>Account Name</th>
+        <th style="text-align:center">Qualified</th>
+        <th>PIC</th>
+      </tr></thead><tbody>`
+    : `<table><thead><tr>
+        <th class="cb-cell" style="cursor:default"></th>
+        <th style="width:50px;cursor:default">Image</th>
+        <th>Campaign</th><th>Date</th><th>Name</th>
+        <th>Email</th><th>Phone</th>
+        <th>PIC</th>
+      </tr></thead><tbody>`;
+
+  sorted.forEach((row, idx) => {
+    const imgThumb = driveThumb(row['image-url']||'');
+    const rowIdx = sorted.indexOf(row);
+    const thumbHtml = imgThumb
+      ? `<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`
+      : `<div class="no-thumb"><i class="fas fa-image"></i></div>`;
+    const existingPIC = row['PIC'] || '';
+    const picOpts = ['','Joey','Ken','MB','Yanni'].map(p =>
+      `<option value="${p}" ${existingPIC===p?'selected':''}>${p||'Assign…'}</option>`
+    ).join('');
+    const picSel = `<select class="pic-select" data-idx="${rowIdx}" data-platform="${platform}" onchange="onPicChange(this)" onclick="event.stopPropagation()">${picOpts}</select>`;
+    const cbHtml = `<input type="checkbox" class="leads-cb" data-idx="${rowIdx}" data-platform="${platform}" onclick="event.stopPropagation();toggleLeadsCb(this)">`;
+
+    if (isRednote) {
+      html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
+        <td class="cb-cell">${cbHtml}</td>
+        <td>${thumbHtml}</td>
+        <td class="td-title">${esc(row['lead_campaign_name']||'—')}</td>
+        <td class="td-date">${esc(row['date']||'—')}</td>
+        <td style="color:var(--text);font-size:13.5px">${esc(row['Account name']||'—')}</td>
+        <td style="text-align:center">${qualBadge(isQualified(row['Is qualified lead']))}</td>
+        <td onclick="event.stopPropagation()">${picSel}</td>
+      </tr>`;
+    } else {
+      const name = [row['first_name'],row['last_name']].filter(Boolean).join(' ') || row['chat_display_name'] || '—';
+      html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
+        <td class="cb-cell">${cbHtml}</td>
+        <td>${thumbHtml}</td>
+        <td class="td-title">${esc(row['lead_campaign_name']||'—')}</td>
+        <td class="td-date">${esc(row['date']||'—')}</td>
+        <td style="color:var(--text);font-size:13.5px">${esc(name)}</td>
+        <td style="font-size:12px;color:var(--sub)">${esc(row['email']||'—')}</td>
+        <td style="font-size:12px;color:var(--sub)">${esc(row['phone_number']||'—')}</td>
+        <td onclick="event.stopPropagation()">${picSel}</td>
+      </tr>`;
+    };
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  requestAnimationFrame(updateScrollTrack);
+}
+
+function isQualified(val) {
+  if (!val && val!==0) return 'unk';
+  const v = String(val).trim().toLowerCase();
+  if (['true','yes','1','qualified','✓'].includes(v)) return 'yes';
+  if (['false','no','0','not qualified','✗','x'].includes(v)) return 'no';
+  return 'unk';
+}
+function qualBadge(state) {
+  if (state==='yes') return `<span class="qual-badge yes"><span class="qual-dot"></span>Qualified</span>`;
+  if (state==='no')  return `<span class="qual-badge no"><span class="qual-dot"></span>Not Qualified</span>`;
+  return `<span class="qual-badge unk"><span class="qual-dot"></span>Pending</span>`;
+}
+
+function openLeadDrawer(idx, platform) {
+  platform = platform || current;
+  const row = data[platform] ? data[platform][idx] : null;
+  if (!row) return;
+
+  const imgRaw = row['image-url'] || '';
+  const imgUrl = driveThumb(imgRaw, 'w800');
+
+  // Both leads tabs: show image popup
+  openImagePopup(imgRaw, imgUrl);
+}
+
+/* ══════════════════════════════════════════════════
+   DRAWER (posts)
+══════════════════════════════════════════════════ */
+function openDrawer(rowIdx, platform) {
+  const row=data[platform][rowIdx]; if(!row) return;
+  const meta=PLATFORM_META[platform], cols=COLS[platform];
+  document.getElementById('drawerTag').innerHTML=`<i class="${meta.icon}" style="color:${meta.color}"></i> ${meta.label}`;
+  const title=row['post_title']||'Untitled', imgRaw=row['upload-img']||'', imgUrl=driveThumb(imgRaw,'w800'), overall=row['Overall']||'';
+  let imgHtml=imgUrl?`<div class="d-img-wrap"><div class="d-img-loading" id="dil"><i class="fas fa-circle-notch"></i> Loading image…</div><img class="d-img" src="${imgUrl}" alt="" style="display:none" onload="document.getElementById('dil').style.display='none';this.style.display='block'" onerror="imgErr('${esc(imgRaw)}')"></div>`:`<div class="d-img-wrap"><div class="d-img-err"><i class="fas fa-image"></i>No image</div></div>`;
+  let metricsHtml='<div class="metrics-grid">';
+  (cols||[]).forEach(c=>{
+    let val=row[c.key]??'—';
+    if(c.type==='pct-dec'&&val!=='—'&&!isNaN(parseFloat(val))) val=(parseFloat(val)*100).toFixed(2)+'%';
+    else if(c.type==='pct-raw'&&val!=='—'&&!isNaN(parseFloat(val))) val=parseFloat(val).toFixed(1)+'%';
+    metricsHtml+=`<div class="mp"><div class="mp-label">${esc(c.label)}</div><div class="mp-val ${c.type==='num-hi'?'gold':''}">${esc(String(val))}</div></div>`;
+  });
+  metricsHtml+='</div>';
+  const overallHtml=overall?`<div class="overall-box"><div class="overall-heading"><i class="fas fa-brain"></i> Overall Analysis</div><div class="overall-text">${esc(overall)}</div></div>`:'';
+  const linkHtml=imgRaw?`<div style="text-align:center;margin-top:14px"><a class="d-link" href="${esc(imgRaw)}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Open in Drive</a></div>`:'';
+  document.getElementById('drawerBody').innerHTML=`<div class="d-post-title">${esc(title)}</div>${overallHtml}${imgHtml}${metricsHtml}${linkHtml}`;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function imgErr(link) {
+  const el=document.getElementById('dil'); if(!el) return;
+  el.parentElement.innerHTML=`<div class="d-img-err"><i class="fas fa-triangle-exclamation"></i>Preview unavailable<br>${link?`<a class="d-link" href="${link}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Open in Drive</a>`:''}</div>`;
+}
+function closeDrawer() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+/* ══════════════════════════════════════════════════
+   SELECTION + COMPARE
+══════════════════════════════════════════════════ */
+function toggleSelect(e, idx) {
+  e.stopPropagation();
+  if (selectedIndices.has(idx)) selectedIndices.delete(idx);
+  else selectedIndices.add(idx);
+  const cb = e.currentTarget;
+  cb.closest('tr').classList.toggle('row-selected', selectedIndices.has(idx));
+  const n = selectedIndices.size;
+  document.getElementById('compareCount').textContent = n;
+  document.getElementById('compareBar').classList.toggle('visible', n>=2);
+}
+function clearSelection() {
+  selectedIndices.clear();
+  document.querySelectorAll('.row-cb').forEach(cb=>{cb.checked=false;cb.closest('tr').classList.remove('row-selected');});
+  document.getElementById('compareBar').classList.remove('visible');
+}
+function openCompare() {
+  if (selectedIndices.size<2) return;
+  const rows=[...selectedIndices].map(i=>data[current][i]).filter(Boolean);
+  rows.sort((a,b)=>(a['upload-date']||'').localeCompare(b['upload-date']||''));
+  const first=rows[0], last=rows[rows.length-1];
+  const dateA=first['upload-date']||'—', dateB=last['upload-date']||'—';
+  let daysText='';
+  if(dateA!=='—'&&dateB!=='—'&&dateA!==dateB){const d=Math.round((new Date(dateB)-new Date(dateA))/86400000);if(d>0)daysText=d+' day'+(d!==1?'s':'')+' later';}
+  document.getElementById('cmPostName').textContent=first['post_title']||'Untitled';
+  const datesEl=document.getElementById('cmDates');
+  datesEl.innerHTML=rows.length===2?`<span class="cm-date-pill">${esc(dateA)}</span><span style="color:var(--muted)">→</span><span class="cm-date-pill">${esc(dateB)}</span>${daysText?`<span class="cm-days">(${daysText})</span>`:''}`:
+    `<span class="cm-days">${rows.length} snapshots</span>`;
+  const numCols=(COLS[current]||[]).filter(c=>['num','num-hi','pct-dec','pct-raw'].includes(c.type));
+  let timelineHtml='';
+  if(rows.length>2){timelineHtml='<div class="cm-timeline">'+rows.map((r,i)=>{const cls=i===0?'first':(i===rows.length-1?'last':'');return`<div class="cm-snap-pill ${cls}"><span class="cm-snap-num">${i+1}</span>${esc(r['upload-date']||'—')}</div>`+(i<rows.length-1?'<i class="fas fa-arrow-right" style="font-size:9px;color:var(--muted)"></i>':'');}).join('')+'</div>';}
+  const fmtV=(v,type)=>{if(isNaN(v)||v==='')return'—';if(type==='pct-dec')return(v*100).toFixed(1)+'%';if(type==='pct-raw')return v.toFixed(1)+'%';if(v>=1000000)return(v/1000000).toFixed(1)+'M';if(v>=1000)return(v/1000).toFixed(1)+'K';return Math.round(v).toLocaleString();};
+  let tableRows='';
+  tableRows+=`<tr><td>Upload Date</td><td><span style="font-size:13px">${esc(dateA)}</span></td><td><span style="font-size:13px">${esc(dateB)}</span></td><td></td></tr>`;
+  numCols.forEach(col=>{
+    const vA=parseFloat(String(first[col.key]||'').replace(/,/g,'')), vB=parseFloat(String(last[col.key]||'').replace(/,/g,''));
+    if(isNaN(vA)&&isNaN(vB))return;
+    let deltaHtml='<span class="cm-delta flat">—</span>';
+    if(!isNaN(vA)&&!isNaN(vB)){
+      if(vA===vB) deltaHtml='<span class="cm-delta flat">No change</span>';
+      else{const diff=vB-vA,pct=vA!==0?((diff/Math.abs(vA))*100):null,isUp=diff>0,cls=isUp?'up':'down',arrow=isUp?'↑':'↓',sign=isUp?'+':'';
+      deltaHtml=`<span class="cm-delta ${cls}">${arrow} ${sign}${fmtV(Math.abs(diff),col.type)}${pct!==null?` (${sign}${pct.toFixed(0)}%)`:''}`;+'</span>';}
+    }
+    tableRows+=`<tr><td>${esc(col.label)}</td><td><span class="cm-val">${fmtV(vA,col.type)}</span></td><td><span class="cm-val ${col.type==='num-hi'?'hi':''}">${fmtV(vB,col.type)}</span></td><td>${deltaHtml}</td></tr>`;
+  });
+  document.getElementById('cmBody').innerHTML=`${timelineHtml}<table class="cm-table"><thead><tr><th style="text-align:left">Metric</th><th>${rows.length>2?'First':esc(dateA)}</th><th>${rows.length>2?'Latest':esc(dateB)}</th><th style="text-align:right">Change</th></tr></thead><tbody>${tableRows}</tbody></table>`;
+  document.getElementById('compareOverlay').classList.add('open');
+  document.getElementById('compareModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeCompare(){document.getElementById('compareOverlay').classList.remove('open');document.getElementById('compareModal').classList.remove('open');document.body.style.overflow='';}
+
+/* ══════════════════════════════════════════════════
+   GROUP MATCHING
+══════════════════════════════════════════════════ */
+const GRP_COLORS=['#c45a82','#BEAD85','#60a5fa','#34d399','#fb923c','#a78bfa','#f472b6','#2dd4bf','#fbbf24','#4ade80'];
+const GRP_LS='acker_grp_v1';
+function loadGrpLS(){try{return JSON.parse(localStorage.getItem(GRP_LS)||'{}');}catch{return{};}}
+function saveGrpLS(o){try{localStorage.setItem(GRP_LS,JSON.stringify(o));}catch{}}
+
+function strSim(a,b){
+  const clean=s=>[...(s||'').replace(/\s+/g,'').replace(/[\u3000\uFEFF\u200B]/g,'').replace(/[，。！？、.,!?「」【】《》～~()（）""''_…\-]/g,'').replace(/[\uFE0E\uFE0F]/g,'')];
+  const ca=clean(a),cb=clean(b);
+  if(!ca.length&&!cb.length)return 1;
+  if(!ca.length||!cb.length)return 0;
+  if(ca.join('')===cb.join(''))return 1.0;
+  const m=ca.length,n=cb.length;
+  if(Math.abs(m-n)/Math.max(m,n)>0.5)return 0;
+  const dp=[];
+  for(let i=0;i<=m;i++){dp[i]=[];for(let j=0;j<=n;j++)dp[i][j]=i===0?j:j===0?i:0;}
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)dp[i][j]=ca[i-1]===cb[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return 1-dp[m][n]/Math.max(m,n);
+}
+
+function computeGroupMap(rows,threshold=0.65){
+  const titles=rows.map(r=>r['post_title']||'').filter(Boolean);
+  const n=titles.length,groupOf=new Array(n).fill(-1);
+  let gid=0;
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+    if(strSim(titles[i],titles[j])>=threshold){
+      const gi=groupOf[i],gj=groupOf[j];
+      if(gi===-1&&gj===-1){groupOf[i]=gid;groupOf[j]=gid;gid++;}
+      else if(gi===-1)groupOf[i]=gj;
+      else if(gj===-1)groupOf[j]=gi;
+      else if(gi!==gj){const lo=Math.min(gi,gj),hi=Math.max(gi,gj);for(let k=0;k<n;k++)if(groupOf[k]===hi)groupOf[k]=lo;}
+    }
+  }
+  const memberMap={};
+  groupOf.forEach((g,i)=>{if(g>=0){memberMap[g]=memberMap[g]||[];if(!memberMap[g].includes(titles[i]))memberMap[g].push(titles[i]);}});
+  const result={};
+  titles.forEach((t,i)=>{if(groupOf[i]>=0)result[t]={gid:groupOf[i],members:memberMap[groupOf[i]]||[],auto:true};});
+  return result;
+}
+
+function applyGrpOverrides(autoMap){
+  const{confirmed={},separated={}}=loadGrpLS();
+  const result={};
+  Object.entries(autoMap).forEach(([t,v])=>result[t]={...v});
+  Object.keys(separated).forEach(t=>{if(result[t])result[t]={...result[t],separated:true,confirmed:false};});
+  Object.keys(confirmed).forEach(t=>{if(result[t])result[t]={...result[t],confirmed:true,separated:false};else result[t]={gid:confirmed[t].gid,members:confirmed[t].members||[],auto:false,confirmed:true};});
+  return result;
+}
+
+function grpBadgeHtml(title,gmap){
+  const g=gmap[title];
+  if(!g||g.separated)return`<span class="grp-dot solo"></span>`;
+  const color=GRP_COLORS[g.gid%GRP_COLORS.length],cls=g.confirmed?'confirmed':'auto';
+  return`<span class="grp-dot ${cls}" style="--gc:${color}" title="${cls==='confirmed'?'Confirmed same post':'Auto-detected — click to review'}" onclick="showGrpPopover(event,${JSON.stringify(title)})"></span>`;
+}
+
+function renderGroupLegend(gmap){
+  const legendEl=document.getElementById('grpLegend'),clearBtn=document.getElementById('grpClearBtn');
+  if(!legendEl)return;
+  const groups={};
+  Object.entries(gmap).forEach(([t,g])=>{if(!g.separated&&g.members&&g.members.length>1){if(!groups[g.gid])groups[g.gid]={gid:g.gid,members:g.members,confirmed:g.confirmed};}});
+  const groupList=Object.values(groups);
+  if(!groupList.length){legendEl.style.display='none';clearBtn.style.display='none';return;}
+  const swatches=groupList.map(g=>{const color=GRP_COLORS[g.gid%GRP_COLORS.length],confirmed=g.confirmed;return`<span class="grp-swatch-btn" onclick="selectGroupByGid(${g.gid})" title="Group ${g.gid+1} · ${g.members.length} posts" style="width:11px;height:11px;border-radius:50%;display:inline-block;${confirmed?'background:'+color+';box-shadow:0 0 6px '+color:'background:transparent;border:2px dashed '+color}"></span>`;}).join('');
+  legendEl.style.display='flex';legendEl.style.alignItems='center';legendEl.style.gap='6px';
+  legendEl.innerHTML=`<span style="display:flex;gap:4px;align-items:center" title="Click a dot to select all snapshots of that post">${swatches}</span>`;
+  const ls=loadGrpLS(),hasOverrides=Object.keys(ls.confirmed||{}).length+Object.keys(ls.separated||{}).length>0;
+  clearBtn.style.display=hasOverrides?'inline':'none';
+}
+
+function showGrpPopover(e,title){
+  e.stopPropagation();gpActiveTitle=title;
+  const g=currentGroupMap[title],pop=document.getElementById('grpPopover');
+  if(!g){pop.classList.remove('show');return;}
+  const color=GRP_COLORS[g.gid%GRP_COLORS.length],similar=(g.members||[]).filter(t=>t!==title&&!currentGroupMap[t]?.separated),isSep=g.separated,isCon=g.confirmed;
+  let html=`<div class="gp-top"><span class="gp-swatch" style="background:${color}"></span>Group ${g.gid+1}<span class="gp-status ${isCon?'confirmed':'auto'}">${isCon?'✓ Confirmed':'Auto'}</span></div>`;
+  if(similar.length)html+=`<div class="gp-similar"><div class="gp-similar-label">Similar posts</div>${similar.slice(0,3).map(t=>`<div class="gp-similar-item">${esc(t.substring(0,32))}${t.length>32?'…':''}</div>`).join('')}${similar.length>3?`<div class="gp-similar-item" style="color:var(--muted)">+${similar.length-3} more</div>`:''}</div>`;
+  html+=`<div class="gp-actions">`;
+  if(!isCon&&!isSep){html+=`<button class="gp-btn gp-btn-select" onclick="selectGroupByGid(${g.gid});closeGrpPopover()"><i class="fas fa-check-square" style="font-size:11px"></i> Select all for compare</button>`;html+=`<button class="gp-btn gp-btn-confirm" onclick="gpConfirm()"><i class="fas fa-check" style="font-size:11px"></i> Confirm same post</button>`;html+=`<button class="gp-btn gp-btn-diff" onclick="gpMarkDiff()"><i class="fas fa-xmark" style="font-size:11px"></i> Different post</button>`;}
+  else if(isCon){html+=`<button class="gp-btn gp-btn-select" onclick="selectGroupByGid(${g.gid});closeGrpPopover()"><i class="fas fa-check-square" style="font-size:11px"></i> Select all for compare</button>`;html+=`<button class="gp-btn gp-btn-diff" onclick="gpMarkDiff()"><i class="fas fa-xmark" style="font-size:11px"></i> Different post</button>`;html+=`<button class="gp-btn gp-btn-undo" onclick="gpUndo()"><i class="fas fa-rotate-left" style="font-size:11px"></i> Reset to auto</button>`;}
+  else if(isSep){html+=`<button class="gp-btn gp-btn-confirm" onclick="gpConfirm()"><i class="fas fa-check" style="font-size:11px"></i> Actually same post</button>`;html+=`<button class="gp-btn gp-btn-undo" onclick="gpUndo()"><i class="fas fa-rotate-left" style="font-size:11px"></i> Reset to auto</button>`;}
+  html+=`</div>`;
+  pop.innerHTML=html;
+  const rect=e.currentTarget.getBoundingClientRect(),pw=252,ph=220;
+  let left=rect.right+10,top=rect.top-10;
+  if(left+pw>window.innerWidth-12)left=rect.left-pw-10;
+  if(top+ph>window.innerHeight-12)top=window.innerHeight-ph-12;
+  pop.style.left=Math.max(8,left)+'px';pop.style.top=Math.max(8,top)+'px';
+  pop.classList.add('show');
+}
+function closeGrpPopover(){document.getElementById('grpPopover').classList.remove('show');}
+function gpConfirm(){if(!gpActiveTitle)return;const g=currentGroupMap[gpActiveTitle];if(!g)return;const o=loadGrpLS();if(!o.confirmed)o.confirmed={};if(!o.separated)o.separated={};o.confirmed[gpActiveTitle]={gid:g.gid,members:g.members};delete o.separated[gpActiveTitle];saveGrpLS(o);closeGrpPopover();renderCurrent();}
+function gpMarkDiff(){if(!gpActiveTitle)return;const o=loadGrpLS();if(!o.separated)o.separated={};if(!o.confirmed)o.confirmed={};o.separated[gpActiveTitle]=true;delete o.confirmed[gpActiveTitle];saveGrpLS(o);closeGrpPopover();renderCurrent();}
+function gpUndo(){if(!gpActiveTitle)return;const o=loadGrpLS();if(o.confirmed)delete o.confirmed[gpActiveTitle];if(o.separated)delete o.separated[gpActiveTitle];saveGrpLS(o);closeGrpPopover();renderCurrent();}
+function clearAllGroupOverrides(){saveGrpLS({});renderCurrent();}
+function selectGroupByGid(gid){
+  // Clear previous selection first
+  selectedIndices.clear();
+  document.querySelectorAll('.row-cb').forEach(cb=>{cb.checked=false;if(cb.closest('tr'))cb.closest('tr').classList.remove('row-selected');});
+  data[current].forEach((row,idx)=>{
+    const t=row['post_title']||'',g=currentGroupMap[t];
+    if(g&&g.gid===gid&&!g.separated){
+      selectedIndices.add(idx);
+      // Re-render checkboxes since DOM may not match yet
+    }
+  });
+  // Re-render table to show checkboxes checked, then auto-open compare
+  renderPostTable(current, data[current]);
+  const n=selectedIndices.size;
+  document.getElementById('compareCount').textContent=n;
+  document.getElementById('compareBar').classList.toggle('visible',n>=2);
+  if(n>=2) setTimeout(()=>openCompare(),150);
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.grp-popover')&&!e.target.closest('.grp-dot'))closeGrpPopover();});
+
+/* ══════════════════════════════════════════════════
+   GROUP-AWARE SORT
+══════════════════════════════════════════════════ */
+function groupAwareSort(rows,gmap,sk,asc){
+  const pv=v=>parseFloat(String(v||'').replace(/,/g,''))||0;
+  const groupBest={};
+  if(sk)rows.forEach(r=>{const t=r['post_title']||'',g=gmap[t];if(g&&!g.separated){const v=pv(r[sk]);if(!(g.gid in groupBest))groupBest[g.gid]=v;else groupBest[g.gid]=asc?Math.min(groupBest[g.gid],v):Math.max(groupBest[g.gid],v);}});
+  return[...rows].sort((a,b)=>{
+    const ta=a['post_title']||'',tb=b['post_title']||'';
+    const ga=gmap[ta],gb=gmap[tb];
+    const gidA=(ga&&!ga.separated)?ga.gid:null,gidB=(gb&&!gb.separated)?gb.gid:null;
+    const rankA=sk?(gidA!==null?groupBest[gidA]??0:pv(a[sk])):0;
+    const rankB=sk?(gidB!==null?groupBest[gidB]??0:pv(b[sk])):0;
+    if(rankA!==rankB)return asc?rankA-rankB:rankB-rankA;
+    const gA=gidA??99999,gB=gidB??99999;
+    if(gA!==gB)return gA-gB;
+    if(sk){const va=pv(a[sk]),vb=pv(b[sk]);return asc?va-vb:vb-va;}
+    return 0;
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   SCROLL TRACK SYNC
+══════════════════════════════════════════════════ */
+function updateScrollTrack(){
+  const wrap=document.getElementById('tableWrap'),track=document.getElementById('scrollTrack'),inner=document.getElementById('scrollTrackInner');
+  if(!wrap||!track||!inner)return;
+  const table=wrap.querySelector('table');
+  inner.style.width=(table?table.scrollWidth:0)+'px';
+  if(!track._synced){
+    track._synced=true;
+    let busy=false;
+    track.addEventListener('scroll',()=>{if(busy)return;busy=true;wrap.scrollLeft=track.scrollLeft;requestAnimationFrame(()=>busy=false);});
+    wrap.addEventListener('scroll',()=>{if(busy)return;busy=true;track.scrollLeft=wrap.scrollLeft;requestAnimationFrame(()=>busy=false);});
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════ */
+function driveThumb(url,sz='w200'){if(!url)return'';const m1=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/),m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/);const id=m1?.[1]||m2?.[1]||'';return id?`https://drive.google.com/thumbnail?id=${id}&sz=${sz}`:''}
+function sumCol(rows,key){return rows.reduce((a,r)=>a+(parseFloat(String(r[key]||'').replace(/,/g,''))||0),0);}
+function avgCol(rows,key){const vals=rows.map(r=>parseFloat(String(r[key]||'').replace(/,/g,''))).filter(v=>!isNaN(v));return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;}
+function fmt(n){if(!n)return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+// keydown handled in openImagePopup section
+
+/* ══════════════════════════════════════════════════
+   LEADS FILTERS + EXPORT
+══════════════════════════════════════════════════ */
+let leadsFilterPlatform = null;
+
+function applyLeadsFilters() {
+  if (!leadsFilterPlatform) return;
+  const fromVal = document.getElementById('filterDateFrom').value;
+  const toVal   = document.getElementById('filterDateTo').value;
+  const qual    = document.getElementById('filterQual').value;
+  const isRednote = leadsFilterPlatform === 'leads_rednote';
+  let rows = [...(data[leadsFilterPlatform] || [])];
+
+  // Date filter — parse dates flexibly
+  if (fromVal || toVal) {
+    rows = rows.filter(r => {
+      const d = parseDate(r['date']);
+      if (!d) return true; // can't parse → include
+      if (fromVal && d < fromVal) return false;
+      if (toVal   && d > toVal)   return false;
+      return true;
+    });
+  }
+
+  // Qualified filter (rednote only)
+  if (isRednote && qual) {
+    rows = rows.filter(r => isQualified(r['Is qualified lead']) === qual);
+  }
+
+  const sorted = [...rows].sort((a,b)=>(b['date']||'').localeCompare(a['date']||''));
+  renderLeadsTable(sorted, leadsFilterPlatform);
+  document.getElementById('tableCount').textContent = rows.length + ' lead' + (rows.length!==1?'s':'') + (rows.length !== (data[leadsFilterPlatform]||[]).length ? ' (filtered)' : '');
+}
+
+function clearLeadsFilters() {
+  document.getElementById('filterDateFrom').value = '';
+  document.getElementById('filterDateTo').value   = '';
+  document.getElementById('filterQual').value     = '';
+  applyLeadsFilters();
+}
+
+// Parse dates like "14/04/2026", "2026-04-14", "14-4-2026" → "YYYY-MM-DD" for comparison
+function parseDate(str) {
+  if (!str) return null;
+  str = String(str).trim();
+  // Already ISO
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  // DD/MM/YYYY or D/M/YYYY
+  const m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  return null;
+}
+
+function exportLeadsCSV() {
+  if (!leadsFilterPlatform) return;
+  const fromVal = document.getElementById('filterDateFrom').value;
+  const toVal   = document.getElementById('filterDateTo').value;
+  const qual    = document.getElementById('filterQual').value;
+  const isRednote = leadsFilterPlatform === 'leads_rednote';
+  let rows = [...(data[leadsFilterPlatform] || [])];
+
+  if (fromVal || toVal) {
+    rows = rows.filter(r => {
+      const d = parseDate(r['date']);
+      if (!d) return true;
+      if (fromVal && d < fromVal) return false;
+      if (toVal   && d > toVal)   return false;
+      return true;
+    });
+  }
+  if (isRednote && qual) {
+    rows = rows.filter(r => isQualified(r['Is qualified lead']) === qual);
+  }
+
+  if (!rows.length) { alert('No data to export.'); return; }
+
+  // Build CSV
+  const headers = Object.keys(rows[0]);
+  const csv = [
+    headers.join(','),
+    ...rows.map(r => headers.map(h => {
+      const v = String(r[h]||'').replace(/"/g,'""');
+      return v.includes(',') || v.includes('"') || v.includes('\n') ? `"${v}"` : v;
+    }).join(','))
+  ].join('\n');
+
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `acker-leads-${leadsFilterPlatform}-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/* Image popup for rednote leads */
+function openImagePopup(imgRaw, imgUrl) {
+  let popup = document.getElementById('imgPopup');
+  if (!popup) {
+    popup = document.createElement('div');
+    popup.id = 'imgPopup';
+    popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out';
+    popup.onclick = () => popup.style.display = 'none';
+    document.body.appendChild(popup);
+  }
+  if (!imgUrl) {
+    popup.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:14px;text-align:center"><i class="fas fa-image" style="font-size:32px;display:block;margin-bottom:12px;opacity:0.3"></i>No image available</div>';
+  } else {
+    popup.innerHTML = `
+      <div style="position:relative;max-width:90vw;max-height:90vh" onclick="event.stopPropagation()">
+        <img src="${imgUrl}" style="max-width:100%;max-height:88vh;border-radius:12px;display:block;box-shadow:0 20px 60px rgba(0,0,0,0.8)" onerror="this.parentElement.innerHTML='<div style=\'color:rgba(255,255,255,0.4);font-size:14px;text-align:center;padding:40px\'><i class=\'fas fa-triangle-exclamation\' style=\'font-size:28px;display:block;margin-bottom:12px\'></i>Image unavailable</div>'">
+        ${imgRaw ? `<a href="${imgRaw}" target="_blank" rel="noopener" style="position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.5);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:5px" onclick="event.stopPropagation()"><i class="fas fa-arrow-up-right-from-square"></i> Open in Drive</a>` : ''}
+      </div>
+      <div style="position:absolute;top:16px;right:16px;width:32px;height:32px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:rgba(255,255,255,0.7)" onclick="document.getElementById('imgPopup').style.display='none'"><i class="fas fa-xmark"></i></div>`;
+  }
+  popup.style.display = 'flex';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const popup = document.getElementById('imgPopup');
+    if (popup) popup.style.display = 'none';
+    closeDrawer(); closeCompare();
+  }
+});
+
+/* ══ Per-tab password for leads ══ */
+let leadsUnlocked = false;
+let _pendingLeadsTab = null;
+
+function requireLeadsPw(platform) {
+  _pendingLeadsTab = platform;
+  document.getElementById('leadsPwErr').textContent = '';
+  document.getElementById('leadsPwInput').value = '';
+  const overlay = document.getElementById('leadsPwOverlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('leadsPwInput').focus(), 50);
+}
+
+function checkLeadsPw() {
+  const val = document.getElementById('leadsPwInput').value;
+  if (val === 'aw2026') {
+    leadsUnlocked = true;
+    document.getElementById('leadsPwOverlay').style.display = 'none';
+    if (_pendingLeadsTab) {
+      _switchToLeads(_pendingLeadsTab);
+      _pendingLeadsTab = null;
+    }
+  } else {
+    document.getElementById('leadsPwErr').textContent = 'Incorrect password';
+    document.getElementById('leadsPwInput').value = '';
+    document.getElementById('leadsPwInput').focus();
+  }
+}
+
+function closeLeadsPw() {
+  document.getElementById('leadsPwOverlay').style.display = 'none';
+  _pendingLeadsTab = null;
+  _switchToLeads('xhs');
+}
+
+/* ══ LEADS PIC ASSIGNMENT ══ */
+const LEADS_PIC_WEBHOOK = 'https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on';
+let leadsPicSelections = {}; // { "platform:idx": picValue }
+let leadsChecked = new Set(); // "platform:idx"
+
+function onPicChange(sel) {
+  const idx      = sel.dataset.idx;
+  const platform = sel.dataset.platform;
+  const key      = platform + ':' + idx;
+  if (sel.value) {
+    leadsPicSelections[key] = sel.value;
+  } else {
+    delete leadsPicSelections[key];
+  }
+}
+
+function toggleLeadsCb(cb) {
+  const idx      = cb.dataset.idx;
+  const platform = cb.dataset.platform;
+  const key      = platform + ':' + idx;
+  const tr       = cb.closest('tr');
+  if (cb.checked) {
+    leadsChecked.add(key);
+    if (tr) tr.classList.add('leads-selected');
+  } else {
+    leadsChecked.delete(key);
+    if (tr) tr.classList.remove('leads-selected');
+  }
+  updateLeadsSubmitBar();
+}
+
+function updateLeadsSubmitBar() {
+  const n   = leadsChecked.size;
+  const bar = document.getElementById('leadsSubmitBar');
+  document.getElementById('leadsSubmitCount').textContent = n;
+  document.getElementById('leadsSubmitCountS').textContent = n === 1 ? '' : 's';
+  bar.classList.toggle('visible', n > 0);
+  document.getElementById('leadsSubmitStatus').textContent = '';
+}
+
+function clearLeadsSelection() {
+  leadsChecked.clear();
+  document.querySelectorAll('.leads-cb').forEach(cb => {
+    cb.checked = false;
+    const tr = cb.closest('tr');
+    if (tr) tr.classList.remove('leads-selected');
+  });
+  updateLeadsSubmitBar();
+}
+
+async function submitLeadsPIC() {
+  if (!leadsChecked.size) return;
+  const btn    = document.getElementById('leadsSubmitBtn');
+  const status = document.getElementById('leadsSubmitStatus');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+
+  const items = [...leadsChecked];
+  let sent = 0, errors = 0;
+
+  for (const key of items) {
+    const [platform, idxStr] = key.split(':');
+    const idx = parseInt(idxStr);
+    const row = (data[platform] || [])[idx];
+    if (!row) { errors++; continue; }
+
+    // Build payload — all row fields + PIC
+    const pic = leadsPicSelections[key] || document.querySelector(`.pic-select[data-idx="${idx}"][data-platform="${platform}"]`)?.value || '';
+
+    const fd = new FormData();
+    fd.append('record_type', 'leads_pic_assign');
+    fd.append('source',      platform);
+    fd.append('PIC',         pic);
+
+    // All columns from the row
+    Object.entries(row).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') fd.append(k, String(v));
+    });
+
+    status.textContent = ` · Sending ${sent + errors + 1} of ${items.length}…`;
+
+    try {
+      const res = await fetch(LEADS_PIC_WEBHOOK, { method: 'POST', body: fd });
+      if (res.ok) sent++;
+      else errors++;
+    } catch { errors++; }
+
+    await new Promise(r => setTimeout(r, 500)); // gap between sends
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-paper-plane"></i> Assign &amp; Send';
+
+  if (errors === 0) {
+    status.textContent = ` · ✓ All ${sent} sent`;
+    setTimeout(() => { clearLeadsSelection(); }, 2000);
+  } else {
+    status.textContent = ` · ${sent} sent, ${errors} failed`;
+  }
+}
+</script>
+
+<!-- Leads password modal -->
+<div id="leadsPwOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px)">
+  <div style="background:rgba(22,18,18,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:22px;padding:36px 32px;width:min(340px,88vw);box-shadow:0 24px 80px rgba(0,0,0,0.7);text-align:center">
+    <div style="width:44px;height:44px;border-radius:50%;background:rgba(128,23,71,0.2);border:1px solid rgba(128,23,71,0.35);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:18px;color:#d47099"><i class="fas fa-lock"></i></div>
+    <div style="font-family:'Instrument Serif',serif;font-size:20px;color:#F2F2F2;margin-bottom:4px">Leads Access</div>
+    <div style="font-size:12px;color:rgba(242,242,242,0.3);margin-bottom:22px">Enter password to view leads data</div>
+    <input id="leadsPwInput" type="password" placeholder="Password" autocomplete="current-password"
+      style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F2F2F2;border-radius:11px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:10px;box-sizing:border-box;color-scheme:dark"
+      onkeydown="if(event.key==='Enter')checkLeadsPw()">
+    <div id="leadsPwErr" style="font-size:12px;color:#f43f5e;margin-bottom:10px;min-height:16px"></div>
+    <button onclick="checkLeadsPw()" style="width:100%;background:#801747;color:#F2F2F2;border:none;border-radius:11px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(128,23,71,0.4)">Enter</button>
+    <button onclick="closeLeadsPw()" style="width:100%;background:transparent;color:rgba(242,242,242,0.3);border:none;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-top:4px">Cancel</button>
+  </div>
+</div>
+
+
+<!-- Leads PIC submit bar -->
+<div class="leads-submit-bar" id="leadsSubmitBar">
+  <div class="leads-submit-bar-left">
+    <strong id="leadsSubmitCount">0</strong> lead<span id="leadsSubmitCountS">s</span> selected
+    <span class="lsb-status" id="leadsSubmitStatus"></span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="lsb-clear" onclick="clearLeadsSelection()"><i class="fas fa-xmark"></i> Clear</button>
+    <button class="lsb-send" id="leadsSubmitBtn" onclick="submitLeadsPIC()"><i class="fas fa-paper-plane"></i> Assign &amp; Send</button>
+  </div>
+</div>
+
+</body>
+</html>
