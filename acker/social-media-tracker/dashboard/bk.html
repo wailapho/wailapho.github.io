@@ -329,12 +329,17 @@
     .lsb-send { display:flex;align-items:center;gap:7px; background:var(--gold); color:#1a1414; border:none; border-radius:10px; padding:10px 20px; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer; box-shadow:0 4px 16px rgba(190,173,133,0.3); }
     .lsb-send:hover { opacity:0.9; }
     .lsb-send:disabled { opacity:0.45; pointer-events:none; }
-    .lsb-pic-pill {
-      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
-      color:var(--sub); border-radius:7px; padding:6px 11px;
-      font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer;
+    .lsb-assign-btn {
+      background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15);
+      color:var(--text); border-radius:9px; padding:9px 16px;
+      font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
+      cursor:pointer; transition:background 0.12s, border-color 0.12s;
+      white-space:nowrap;
     }
-    .lsb-pic-pill:hover { background:rgba(190,173,133,0.15); color:var(--gold); border-color:rgba(190,173,133,0.35); }
+    .lsb-assign-btn:hover { background:rgba(190,173,133,0.2); border-color:rgba(190,173,133,0.45); color:var(--gold); }
+    .lsb-assign-btn:active { transform:scale(0.97); }
+    .lsb-assign-btn:disabled { opacity:0.4; pointer-events:none; }
+    .lsb-assign-btn.sending { background:rgba(190,173,133,0.12); border-color:rgba(190,173,133,0.3); color:var(--gold); }
     .lsb-status { font-size:12px; color:var(--muted); }
 
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -1543,6 +1548,62 @@ function selectByPIC(pic) {
   });
   updateLeadsSubmitBar();
 }
+
+/* ══ BULK ASSIGN + SEND ══ */
+async function bulkAssignAndSend(pic) {
+  if (!leadsChecked.size) return;
+
+  // Lock all assign buttons
+  const assignBtns = document.querySelectorAll('.lsb-assign-btn');
+  assignBtns.forEach(b => { b.disabled = true; b.classList.add('sending'); });
+
+  const status = document.getElementById('leadsSubmitStatus');
+  const items  = [...leadsChecked];
+  let sent = 0, errors = 0;
+
+  for (const key of items) {
+    const [platform, idxStr] = key.split(':');
+    const idx = parseInt(idxStr);
+    const row = (data[platform] || [])[idx];
+    if (!row) { errors++; continue; }
+
+    status.textContent = ` · Sending ${sent + errors + 1} of ${items.length}…`;
+
+    // Update the PIC dropdown in the DOM
+    const sel = document.querySelector(`.pic-select[data-idx="${idx}"][data-platform="${platform}"]`);
+    if (sel) sel.value = pic;
+
+    // Also store in local selection map
+    leadsPicSelections[key] = pic;
+
+    // Build FormData with all row fields + PIC
+    const fd = new FormData();
+    fd.append('record_type', 'leads_pic_assign');
+    fd.append('source',      platform);
+    fd.append('PIC',         pic);
+    Object.entries(row).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') fd.append(k, String(v));
+    });
+
+    try {
+      const res = await fetch(LEADS_PIC_WEBHOOK, { method:'POST', body:fd });
+      if (res.ok) sent++;
+      else errors++;
+    } catch { errors++; }
+
+    await new Promise(r => setTimeout(r, 400));
+  }
+
+  // Unlock buttons
+  assignBtns.forEach(b => { b.disabled = false; b.classList.remove('sending'); });
+
+  if (errors === 0) {
+    status.textContent = ` · ✓ ${sent} assigned to ${pic}`;
+    setTimeout(() => clearLeadsSelection(), 2200);
+  } else {
+    status.textContent = ` · ${sent} sent, ${errors} failed`;
+  }
+}
 </script>
 
 <!-- Leads password modal -->
@@ -1564,18 +1625,17 @@ function selectByPIC(pic) {
 <!-- Leads PIC submit bar -->
 <div class="leads-submit-bar" id="leadsSubmitBar">
   <div class="leads-submit-bar-left">
-    <strong id="leadsSubmitCount">0</strong> lead<span id="leadsSubmitCountS">s</span> selected
+    <strong id="leadsSubmitCount">0</strong> row<span id="leadsSubmitCountS">s</span> selected
     <span class="lsb-status" id="leadsSubmitStatus"></span>
   </div>
   <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-    <span style="font-size:11px;color:var(--muted)">Quick select:</span>
-    <button class="lsb-pic-pill" onclick="selectByPIC('Joey')">Joey</button>
-    <button class="lsb-pic-pill" onclick="selectByPIC('Ken')">Ken</button>
-    <button class="lsb-pic-pill" onclick="selectByPIC('MB')">MB</button>
-    <button class="lsb-pic-pill" onclick="selectByPIC('Yanni')">Yanni</button>
-    <div style="width:1px;height:20px;background:rgba(255,255,255,0.1);margin:0 2px"></div>
+    <span style="font-size:11px;color:var(--muted);white-space:nowrap">Assign &amp; send to:</span>
+    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('Joey')">Joey</button>
+    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('Ken')">Ken</button>
+    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('MB')">MB</button>
+    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('Yanni')">Yanni</button>
+    <div style="width:1px;height:20px;background:rgba(255,255,255,0.1);margin:0 4px"></div>
     <button class="lsb-clear" onclick="clearLeadsSelection()"><i class="fas fa-xmark"></i> Clear</button>
-    <button class="lsb-send" id="leadsSubmitBtn" onclick="submitLeadsPIC()"><i class="fas fa-paper-plane"></i> Assign &amp; Send</button>
   </div>
 </div>
 
