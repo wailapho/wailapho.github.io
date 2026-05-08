@@ -271,6 +271,76 @@
       white-space:nowrap;
     }
     .leads-export-btn:hover { background:rgba(190,173,133,0.2); }
+    .leads-group-select-btn {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
+      color:var(--sub); border-radius:8px; padding:8px 12px;
+      font-family:'DM Sans',sans-serif; font-size:12.5px;
+      cursor:pointer; display:flex; align-items:center; gap:6px;
+      white-space:nowrap;
+    }
+    .leads-group-select-btn:hover { color:var(--text); background:rgba(255,255,255,0.09); }
+    .leads-group-select-btn.active { background:var(--gold-dim); border-color:rgba(190,173,133,0.4); color:var(--gold); }
+
+
+    /* PIC assign */
+    .pic-select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text); border-radius: 7px;
+      padding: 5px 8px; font-family:'DM Sans',sans-serif;
+      font-size: 12px; cursor: pointer; outline: none;
+      -webkit-appearance: none; appearance: none;
+      width: 72px;
+    }
+    .pic-select:focus { border-color: rgba(190,173,133,0.45); }
+    .pic-select option { background:#1a1414; }
+
+    .leads-cb {
+      appearance: none; -webkit-appearance: none;
+      width: 16px; height: 16px; border-radius: 4px;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04); cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      position: relative; flex-shrink: 0;
+    }
+    .leads-cb:checked { background: var(--gold); border-color: var(--gold); }
+    .leads-cb:checked::after { content:''; position:absolute; width:9px; height:5px; border-left:2px solid #1a1414; border-bottom:2px solid #1a1414; transform:rotate(-45deg) translate(0px,-1px); }
+    tbody tr.leads-selected { background: rgba(190,173,133,0.07); }
+    tbody tr.leads-selected:hover { background: rgba(190,173,133,0.11); }
+
+    /* Leads PIC submit bar */
+    .leads-submit-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(14,11,11,0.96);
+      backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+      border-top: 1px solid rgba(190,173,133,0.25);
+      padding: 14px 24px; padding-bottom: calc(14px + env(safe-area-inset-bottom,0px));
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .leads-submit-bar::before { content:''; position:absolute; top:-1px; left:15%; right:15%; height:1px; background:linear-gradient(90deg,transparent,rgba(190,173,133,0.45) 50%,transparent); }
+    .leads-submit-bar.visible { transform: translateY(0); }
+    .leads-submit-bar-left { font-size:13px; color:var(--sub); }
+    .leads-submit-bar-left strong { color:var(--text); font-weight:600; }
+    .lsb-clear { display:flex;align-items:center;gap:6px; background:rgba(255,255,255,0.06); color:var(--sub); border:1px solid var(--gb); border-radius:10px; padding:10px 14px; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; }
+    .lsb-clear:hover { color:var(--text); }
+    .lsb-send { display:flex;align-items:center;gap:7px; background:var(--gold); color:#1a1414; border:none; border-radius:10px; padding:10px 20px; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer; box-shadow:0 4px 16px rgba(190,173,133,0.3); }
+    .lsb-send:hover { opacity:0.9; }
+    .lsb-send:disabled { opacity:0.45; pointer-events:none; }
+    .lsb-assign-btn {
+      background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15);
+      color:var(--text); border-radius:9px; padding:9px 16px;
+      font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
+      cursor:pointer; transition:background 0.12s, border-color 0.12s;
+      white-space:nowrap;
+    }
+    .lsb-assign-btn:hover { background:rgba(190,173,133,0.2); border-color:rgba(190,173,133,0.45); color:var(--gold); }
+    .lsb-assign-btn:active { transform:scale(0.97); }
+    .lsb-assign-btn:disabled { opacity:0.4; pointer-events:none; }
+    .lsb-assign-btn.sending { background:rgba(190,173,133,0.12); border-color:rgba(190,173,133,0.3); color:var(--gold); }
+    .lsb-status { font-size:12px; color:var(--muted); }
 
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -336,9 +406,21 @@
             <option value="no">Not qualified only</option>
           </select>
         </div>
-        <button class="leads-clear-btn" onclick="clearLeadsFilters()"><i class="fas fa-xmark" style="font-size:10px"></i> Clear filters</button>
+        <select id="filterPIC" class="leads-select" onchange="applyLeadsFilters()">
+          <option value="">All PIC</option>
+          <option value="Joey">Joey</option>
+          <option value="Ken">Ken</option>
+          <option value="MB">MB</option>
+          <option value="Yanni">Yanni</option>
+          <option value="__unassigned__">Unassigned</option>
+        </select>
+        <button class="leads-clear-btn" onclick="clearLeadsFilters()"><i class="fas fa-xmark" style="font-size:10px"></i> Clear</button>
       </div>
-      <button class="leads-export-btn" onclick="exportLeadsCSV()"><i class="fas fa-download" style="font-size:12px"></i> Export CSV</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="leads-group-select-btn" id="leadsSelectAllBtn" onclick="leadsSelectAll()" title="Select all visible rows"><i class="fas fa-check-double" style="font-size:11px"></i> Select all</button>
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap">· Shift+click for range</span>
+        <button class="leads-export-btn" onclick="exportLeadsCSV()"><i class="fas fa-download" style="font-size:12px"></i> Export CSV</button>
+      </div>
     </div>
     <div class="scroll-track" id="scrollTrack"><span class="scroll-track-inner" id="scrollTrackInner"></span></div>
     <div class="table-wrap" id="tableWrap">
@@ -517,6 +599,8 @@ function _switchToLeads(p) {
   if (p !== 'leads' && p !== 'leads_rednote') {
     const tb = document.getElementById('leadsToolbar');
     if (tb) tb.classList.remove('show');
+    const sb = document.getElementById('leadsSubmitBar');
+    if (sb) sb.classList.remove('visible');
   }
   if (p === 'xhs')  { sortKey = 'impressions';  sortAsc = false; }
   else if (p === 'ig') { sortKey = 'Impressions'; sortAsc = false; }
@@ -764,14 +848,18 @@ function renderLeadsTable(sorted, platform) {
 
   let html = isRednote
     ? `<table><thead><tr>
+        <th class="cb-cell" style="cursor:default"></th>
         <th style="width:50px;cursor:default">Image</th>
         <th>Campaign</th><th>Date</th><th>Account Name</th>
         <th style="text-align:center">Qualified</th>
+        <th>PIC</th>
       </tr></thead><tbody>`
     : `<table><thead><tr>
+        <th class="cb-cell" style="cursor:default"></th>
         <th style="width:50px;cursor:default">Image</th>
         <th>Campaign</th><th>Date</th><th>Name</th>
         <th>Email</th><th>Phone</th>
+        <th>PIC</th>
       </tr></thead><tbody>`;
 
   sorted.forEach((row, idx) => {
@@ -780,23 +868,34 @@ function renderLeadsTable(sorted, platform) {
     const thumbHtml = imgThumb
       ? `<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`
       : `<div class="no-thumb"><i class="fas fa-image"></i></div>`;
+    const existingPIC = row['PIC'] || '';
+    const picOpts = ['','Joey','Ken','MB','Yanni'].map(p =>
+      `<option value="${p}" ${existingPIC===p?'selected':''}>${p||'Assign…'}</option>`
+    ).join('');
+    const picSel = `<select class="pic-select" data-idx="${rowIdx}" data-platform="${platform}" onchange="onPicChange(this)" onclick="event.stopPropagation()">${picOpts}</select>`;
+    const cbHtml = `<input type="checkbox" class="leads-cb" data-idx="${rowIdx}" data-platform="${platform}" onclick="event.stopPropagation();toggleLeadsCb(this,event)">`;
+
     if (isRednote) {
       html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
+        <td class="cb-cell">${cbHtml}</td>
         <td>${thumbHtml}</td>
         <td class="td-title">${esc(row['lead_campaign_name']||'—')}</td>
         <td class="td-date">${esc(row['date']||'—')}</td>
         <td style="color:var(--text);font-size:13.5px">${esc(row['Account name']||'—')}</td>
         <td style="text-align:center">${qualBadge(isQualified(row['Is qualified lead']))}</td>
+        <td onclick="event.stopPropagation()">${picSel}</td>
       </tr>`;
     } else {
       const name = [row['first_name'],row['last_name']].filter(Boolean).join(' ') || row['chat_display_name'] || '—';
       html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
+        <td class="cb-cell">${cbHtml}</td>
         <td>${thumbHtml}</td>
         <td class="td-title">${esc(row['lead_campaign_name']||'—')}</td>
         <td class="td-date">${esc(row['date']||'—')}</td>
         <td style="color:var(--text);font-size:13.5px">${esc(name)}</td>
         <td style="font-size:12px;color:var(--sub)">${esc(row['email']||'—')}</td>
         <td style="font-size:12px;color:var(--sub)">${esc(row['phone_number']||'—')}</td>
+        <td onclick="event.stopPropagation()">${picSel}</td>
       </tr>`;
     };
   });
@@ -1112,6 +1211,14 @@ function applyLeadsFilters() {
     rows = rows.filter(r => isQualified(r['Is qualified lead']) === qual);
   }
 
+  // PIC filter (both tabs)
+  const picFilter = document.getElementById('filterPIC')?.value || '';
+  if (picFilter === '__unassigned__') {
+    rows = rows.filter(r => !r['PIC'] || r['PIC'].trim() === '');
+  } else if (picFilter) {
+    rows = rows.filter(r => (r['PIC']||'').trim() === picFilter);
+  }
+
   const sorted = [...rows].sort((a,b)=>(b['date']||'').localeCompare(a['date']||''));
   renderLeadsTable(sorted, leadsFilterPlatform);
   document.getElementById('tableCount').textContent = rows.length + ' lead' + (rows.length!==1?'s':'') + (rows.length !== (data[leadsFilterPlatform]||[]).length ? ' (filtered)' : '');
@@ -1121,6 +1228,8 @@ function clearLeadsFilters() {
   document.getElementById('filterDateFrom').value = '';
   document.getElementById('filterDateTo').value   = '';
   document.getElementById('filterQual').value     = '';
+  const fp = document.getElementById('filterPIC');
+  if (fp) fp.value = '';
   applyLeadsFilters();
 }
 
@@ -1156,6 +1265,10 @@ function exportLeadsCSV() {
   if (isRednote && qual) {
     rows = rows.filter(r => isQualified(r['Is qualified lead']) === qual);
   }
+
+  const picF = document.getElementById('filterPIC')?.value || '';
+  if (picF === '__unassigned__') { rows = rows.filter(r => !r['PIC'] || r['PIC'].trim() === ''); }
+  else if (picF) { rows = rows.filter(r => (r['PIC']||'').trim() === picF); }
 
   if (!rows.length) { alert('No data to export.'); return; }
 
@@ -1242,6 +1355,255 @@ function closeLeadsPw() {
   _pendingLeadsTab = null;
   _switchToLeads('xhs');
 }
+
+/* ══ LEADS PIC ASSIGNMENT ══ */
+const LEADS_PIC_WEBHOOK = 'https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on';
+let leadsPicSelections = {}; // { "platform:idx": picValue }
+let leadsChecked = new Set(); // "platform:idx"
+
+function onPicChange(sel) {
+  const idx      = sel.dataset.idx;
+  const platform = sel.dataset.platform;
+  const key      = platform + ':' + idx;
+  if (sel.value) {
+    leadsPicSelections[key] = sel.value;
+  } else {
+    delete leadsPicSelections[key];
+  }
+}
+
+let _lastLeadsCbIdx = null; // tracks last clicked checkbox for shift-select
+
+function toggleLeadsCb(cb, event) {
+  const allCbs   = Array.from(document.querySelectorAll('.leads-cb'));
+  const curPos   = allCbs.indexOf(cb);
+  const platform = cb.dataset.platform;
+
+  // Shift-click: select/deselect range between last click and this one
+  if (event && event.shiftKey && _lastLeadsCbIdx !== null) {
+    const lo    = Math.min(_lastLeadsCbIdx, curPos);
+    const hi    = Math.max(_lastLeadsCbIdx, curPos);
+    const check = cb.checked; // direction follows current checkbox state
+    for (let i = lo; i <= hi; i++) {
+      const target = allCbs[i];
+      if (!target) continue;
+      target.checked = check;
+      const key = target.dataset.platform + ':' + target.dataset.idx;
+      const tr  = target.closest('tr');
+      if (check) {
+        leadsChecked.add(key);
+        if (tr) tr.classList.add('leads-selected');
+      } else {
+        leadsChecked.delete(key);
+        if (tr) tr.classList.remove('leads-selected');
+      }
+    }
+  } else {
+    // Normal single click
+    const key = platform + ':' + cb.dataset.idx;
+    const tr  = cb.closest('tr');
+    if (cb.checked) {
+      leadsChecked.add(key);
+      if (tr) tr.classList.add('leads-selected');
+    } else {
+      leadsChecked.delete(key);
+      if (tr) tr.classList.remove('leads-selected');
+    }
+  }
+
+  _lastLeadsCbIdx = curPos;
+  updateLeadsSubmitBar();
+}
+
+function updateLeadsSubmitBar() {
+  const n   = leadsChecked.size;
+  const bar = document.getElementById('leadsSubmitBar');
+  document.getElementById('leadsSubmitCount').textContent = n;
+  document.getElementById('leadsSubmitCountS').textContent = n === 1 ? '' : 's';
+  bar.classList.toggle('visible', n > 0);
+  document.getElementById('leadsSubmitStatus').textContent = '';
+}
+
+function clearLeadsSelection() {
+  leadsChecked.clear();
+  document.querySelectorAll('.leads-cb').forEach(cb => {
+    cb.checked = false;
+    const tr = cb.closest('tr');
+    if (tr) tr.classList.remove('leads-selected');
+  });
+  leadsAllSelected = false;
+  const btn = document.getElementById('leadsSelectAllBtn');
+  if (btn) {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-check-double" style="font-size:11px"></i> Select all';
+  }
+  updateLeadsSubmitBar();
+}
+
+async function submitLeadsPIC() {
+  if (!leadsChecked.size) return;
+  const btn    = document.getElementById('leadsSubmitBtn');
+  const status = document.getElementById('leadsSubmitStatus');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+
+  const items = [...leadsChecked];
+  let sent = 0, errors = 0;
+
+  for (const key of items) {
+    const [platform, idxStr] = key.split(':');
+    const idx = parseInt(idxStr);
+    const row = (data[platform] || [])[idx];
+    if (!row) { errors++; continue; }
+
+    // Build payload — all row fields + PIC
+    const pic = leadsPicSelections[key] || document.querySelector(`.pic-select[data-idx="${idx}"][data-platform="${platform}"]`)?.value || '';
+
+    const fd = new FormData();
+    fd.append('record_type', 'leads_pic_assign');
+    fd.append('source',      platform);
+    fd.append('PIC',         pic);
+
+    // All columns from the row
+    Object.entries(row).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') fd.append(k, String(v));
+    });
+
+    status.textContent = ` · Sending ${sent + errors + 1} of ${items.length}…`;
+
+    try {
+      const res = await fetch(LEADS_PIC_WEBHOOK, { method: 'POST', body: fd });
+      if (res.ok) sent++;
+      else errors++;
+    } catch { errors++; }
+
+    await new Promise(r => setTimeout(r, 500)); // gap between sends
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-paper-plane"></i> Assign &amp; Send';
+
+  if (errors === 0) {
+    status.textContent = ` · ✓ All ${sent} sent`;
+    setTimeout(() => { clearLeadsSelection(); }, 2000);
+  } else {
+    status.textContent = ` · ${sent} sent, ${errors} failed`;
+  }
+}
+
+/* ══ GROUP SELECT for leads ══ */
+let leadsAllSelected = false;
+
+function leadsSelectAll() {
+  const btn = document.getElementById('leadsSelectAllBtn');
+  const cbs = document.querySelectorAll('.leads-cb');
+
+  if (!leadsAllSelected) {
+    // Select all visible rows
+    cbs.forEach(cb => {
+      cb.checked = true;
+      const tr = cb.closest('tr');
+      if (tr) tr.classList.add('leads-selected');
+      const key = cb.dataset.platform + ':' + cb.dataset.idx;
+      leadsChecked.add(key);
+    });
+    leadsAllSelected = true;
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fas fa-xmark" style="font-size:11px"></i> Deselect all';
+  } else {
+    // Deselect all
+    clearLeadsSelection();
+    leadsAllSelected = false;
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-check-double" style="font-size:11px"></i> Select all';
+  }
+
+  updateLeadsSubmitBar();
+}
+
+// Reset the select-all button state when table re-renders
+function resetLeadsSelectAllBtn() {
+  leadsAllSelected = false;
+  const btn = document.getElementById('leadsSelectAllBtn');
+  if (btn) {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-check-double" style="font-size:11px"></i> Select all';
+  }
+}
+
+// Also add a "select by PIC" quick action in submit bar on hover
+function selectByPIC(pic) {
+  clearLeadsSelection();
+  document.querySelectorAll('.leads-cb').forEach(cb => {
+    const key      = cb.dataset.platform + ':' + cb.dataset.idx;
+    const platform = cb.dataset.platform;
+    const idx      = parseInt(cb.dataset.idx);
+    const row      = (data[platform]||[])[idx];
+    if (row && (row['PIC']||'') === pic) {
+      cb.checked = true;
+      const tr = cb.closest('tr');
+      if (tr) tr.classList.add('leads-selected');
+      leadsChecked.add(key);
+    }
+  });
+  updateLeadsSubmitBar();
+}
+
+/* ══ BULK ASSIGN + SEND ══ */
+async function bulkAssignAndSend(pic) {
+  if (!leadsChecked.size) return;
+
+  // Lock all assign buttons
+  const assignBtns = document.querySelectorAll('.lsb-assign-btn');
+  assignBtns.forEach(b => { b.disabled = true; b.classList.add('sending'); });
+
+  const status = document.getElementById('leadsSubmitStatus');
+  const items  = [...leadsChecked];
+  let sent = 0, errors = 0;
+
+  for (const key of items) {
+    const [platform, idxStr] = key.split(':');
+    const idx = parseInt(idxStr);
+    const row = (data[platform] || [])[idx];
+    if (!row) { errors++; continue; }
+
+    status.textContent = ` · Sending ${sent + errors + 1} of ${items.length}…`;
+
+    // Update the PIC dropdown in the DOM
+    const sel = document.querySelector(`.pic-select[data-idx="${idx}"][data-platform="${platform}"]`);
+    if (sel) sel.value = pic;
+
+    // Also store in local selection map
+    leadsPicSelections[key] = pic;
+
+    // Build FormData with all row fields + PIC
+    const fd = new FormData();
+    fd.append('record_type', 'leads_pic_assign');
+    fd.append('source',      platform);
+    fd.append('PIC',         pic);
+    Object.entries(row).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') fd.append(k, String(v));
+    });
+
+    try {
+      const res = await fetch(LEADS_PIC_WEBHOOK, { method:'POST', body:fd });
+      if (res.ok) sent++;
+      else errors++;
+    } catch { errors++; }
+
+    await new Promise(r => setTimeout(r, 400));
+  }
+
+  // Unlock buttons
+  assignBtns.forEach(b => { b.disabled = false; b.classList.remove('sending'); });
+
+  if (errors === 0) {
+    status.textContent = ` · ✓ ${sent} assigned to ${pic}`;
+    setTimeout(() => clearLeadsSelection(), 2200);
+  } else {
+    status.textContent = ` · ${sent} sent, ${errors} failed`;
+  }
+}
 </script>
 
 <!-- Leads password modal -->
@@ -1256,6 +1618,24 @@ function closeLeadsPw() {
     <div id="leadsPwErr" style="font-size:12px;color:#f43f5e;margin-bottom:10px;min-height:16px"></div>
     <button onclick="checkLeadsPw()" style="width:100%;background:#801747;color:#F2F2F2;border:none;border-radius:11px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(128,23,71,0.4)">Enter</button>
     <button onclick="closeLeadsPw()" style="width:100%;background:transparent;color:rgba(242,242,242,0.3);border:none;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-top:4px">Cancel</button>
+  </div>
+</div>
+
+
+<!-- Leads PIC submit bar -->
+<div class="leads-submit-bar" id="leadsSubmitBar">
+  <div class="leads-submit-bar-left">
+    <strong id="leadsSubmitCount">0</strong> row<span id="leadsSubmitCountS">s</span> selected
+    <span class="lsb-status" id="leadsSubmitStatus"></span>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--muted);white-space:nowrap">Assign &amp; send to:</span>
+    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('Joey')">Joey</button>
+    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('Ken')">Ken</button>
+    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('MB')">MB</button>
+    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('Yanni')">Yanni</button>
+    <div style="width:1px;height:20px;background:rgba(255,255,255,0.1);margin:0 4px"></div>
+    <button class="lsb-clear" onclick="clearLeadsSelection()"><i class="fas fa-xmark"></i> Clear</button>
   </div>
 </div>
 
