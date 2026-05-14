@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bordeaux 2025 En Primeur — Acker</title>
+<meta name="description" content="Acker's tasting report on the 2025 Bordeaux vintage: small, classical, delicious, paradoxical, and potentially quixotic.">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER  (two-tier: dark top + white nav)
+     ============================================================ -->
+<header>
+  <div class="header-top" id="header-top">
+    <a href="#hero" class="logo-wrap" aria-label="Acker — home">
+      <img class="logo-img" src="acker-logo-white.svg" alt="Acker" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <svg style="display:none;height:42px;width:auto;" viewBox="0 0 180 52" fill="none" aria-hidden="true">
+        <text x="4" y="36" font-family="Georgia,serif" font-size="36" font-style="italic" fill="white" letter-spacing="0.5">Acker</text>
+        <line x1="4" y1="41" x2="116" y2="41" stroke="#BEAD85" stroke-width="0.8" opacity="0.5"/>
+        <text x="5" y="50" font-family="Arial,sans-serif" font-size="7.5" fill="#8a8580" letter-spacing="4">SINCE  1820</text>
+      </svg>
+    </a>
+    <div class="header-divider"></div>
+    <span class="header-tagline">Bordeaux 2025 · En Primeur Tasting Report</span>
+    <div class="header-spacer"></div>
+    <span class="header-meta">Updated Live</span>
+    <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <nav class="header-nav" aria-label="Sections">
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#intro"        class="nav-link" data-section="intro">Introduction</a></li>
+      <li class="nav-item"><a href="#small"        class="nav-link" data-section="small">Small</a></li>
+      <li class="nav-item"><a href="#classical"    class="nav-link" data-section="classical">Classical</a></li>
+      <li class="nav-item"><a href="#delicious"    class="nav-link" data-section="delicious">Delicious</a></li>
+      <li class="nav-item"><a href="#paradoxical"  class="nav-link" data-section="paradoxical">Paradoxical</a></li>
+      <li class="nav-item"><a href="#quixotic"     class="nav-link" data-section="quixotic">Quixotic</a></li>
+      <li class="nav-item"><a href="#releases"     class="nav-link featured" data-section="releases">Releases</a></li>
+      <li class="nav-item"><a href="#wines"        class="nav-link featured" data-section="wines">Wines</a></li>
+      <li class="nav-item"><a href="#how"          class="nav-link" data-section="how">How to Buy En Primeur</a></li>
+    </ul>
+  </nav>
+</header>
+
+<nav class="mobile-nav" id="mobile-nav" aria-label="Sections — mobile">
+  <ul>
+    <li><a href="#intro"       class="mobile-link">Introduction</a></li>
+    <li><a href="#small"       class="mobile-link">Small</a></li>
+    <li><a href="#classical"   class="mobile-link">Classical</a></li>
+    <li><a href="#delicious"   class="mobile-link">Delicious</a></li>
+    <li><a href="#paradoxical" class="mobile-link">Paradoxical</a></li>
+    <li><a href="#quixotic"    class="mobile-link">Quixotic</a></li>
+    <li><a href="#releases"    class="mobile-link">Releases</a></li>
+    <li><a href="#wines"       class="mobile-link">Wines</a></li>
+    <li><a href="#how"         class="mobile-link">How to Buy En Primeur</a></li>
+  </ul>
+</nav>
+
+<div class="page-offset"></div>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+
+  <div class="hero-top">
+    <div class="hero-rail">En Primeur <span>·</span> Tasting Report <span>·</span> 2025</div>
+    <div class="hero-loc">Bordeaux · April 2026</div>
+  </div>
+
+  <div class="hero-center">
+    <p class="hero-eyebrow fu d1">The 2025 Vintage</p>
+    <h1 class="hero-title fu d2">Bordeaux <em>2025</em></h1>
+    <p class="hero-subtitle fu d3">Our thoughts after four days and nearly 150 wines tasted across the appellations.</p>
+    <p class="hero-tagline fu d4">Small · Classical · Delicious · Paradoxical · Potentially Quixotic</p>
+  </div>
+
+  <div class="hero-bottom fu d5">
+    <div class="stats-strip">
+      <div class="stat"><div class="stat-num">150</div><div class="stat-label">Wines Tasted</div></div>
+      <div class="stat"><div class="stat-num">40<sup>+</sup></div><div class="stat-label">Recommended</div></div>
+      <div class="stat"><div class="stat-num">4<sup>days</sup></div><div class="stat-label">In Bordeaux</div></div>
+    </div>
+    <div class="hero-ctas">
+      <a href="#" class="btn-primary" data-mailto="interested">I'm Interested &nbsp;→</a>
+      <a href="#" class="btn-outline" data-mailto="wishlist">Send Your Wish-List &nbsp;→</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     INTRODUCTION
+     ============================================================ -->
+<section id="intro" class="scroll-margin" data-reveal>
+  <div class="max-content">
+    <p class="section-label">Introduction</p>
+    <h2 class="heading">A really good year it is. A great year <em>everywhere</em>, it is not.</h2>
+    <div class="intro-grid">
+      <div class="intro-body">
+        <p>Returning from four days in Bordeaux, and after tasting nearly 150 wines, we are happy to conclude that 2025 is a return to form for Bordeaux after last year's washout. The highs are higher than 2023, in some cases even meriting near-perfect scores, and there are over 40 wines we will be very happy to recommend.</p>
+        <p>That is not to say this is a year to buy across the board, far from it, but there are bound to be classical, delicious wines that might well in years to come look like savvy purchases.</p>
+        <p>We hope you enjoy our report below, and do let us know if you would like to register your interest.</p>
+      </div>
+      <div class="intro-quote">
+        <p>Either way, we are unlikely to see such quality at these prices again.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FIVE THEMES
+     ============================================================ -->
+<section id="themes" data-reveal>
+  <div class="max-content">
+    <div class="themes-header">
+      <p class="section-label">The Vintage in Five Words</p>
+      <h2 class="heading">Small, Classical, Delicious, <em>Paradoxical</em>, and potentially Quixotic.</h2>
+    </div>
+
+    <div class="themes-list">
+
+      <!-- SMALL -->
+      <article id="small" class="theme scroll-margin">
+        <aside class="theme-aside">
+          <div class="theme-name">Small</div>
+          <div class="theme-tag"><em>but perfectly formed</em></div>
+        </aside>
+        <div class="theme-body">
+          <p>Mostly because it was a very dry year throughout the Bordeaux appellations. Late-August thunderstorms saved the crop from total desiccation, but most properties had tiny berries weighing a gram at best. Poor flower-initiation from the previous year meant that there were fewer grapes per bunch too. Thus the average yield is less than 30 hectolitres per hectare versus 48 hl/ha, with volumes half of what 2016 was — the smallest crop since 1991. Cheval Blanc cropped at 15 hl/ha.</p>
+        </div>
+      </article>
+
+      <!-- CLASSICAL -->
+      <article id="classical" class="theme scroll-margin">
+        <aside class="theme-aside">
+          <div class="theme-name">Classical</div>
+          <div class="theme-tag">'96 / '16</div>
+        </aside>
+        <div class="theme-body">
+          <p>Stylistically, the wines look back to the more classical, structured vintages — '96 and '16 spring to mind. The fruit is fresh, the acidity bright, and the tannins are present without being aggressive. These are wines of architecture rather than opulence, of line and length rather than sheer pomp. For the long-term collector, that's no bad thing.</p>
+        </div>
+      </article>
+
+      <!-- DELICIOUS -->
+      <article id="delicious" class="theme scroll-margin">
+        <aside class="theme-aside">
+          <div class="theme-name">Delicious</div>
+          <div class="theme-tag">Ripe tannins</div>
+        </aside>
+        <div class="theme-body">
+          <p>Courtesy of the sun, nearly every wine we tasted had ripe tannins. This, coupled with the fresh acidity and more elegant fruit profiles, gives wines a lovely succulence and drinkability, with very few unbalanced or disjointed wines. They will probably also be fairly approachable when young, much like the 2023s.</p>
+        </div>
+      </article>
+
+      <!-- PARADOXICAL -->
+      <article id="paradoxical" class="theme scroll-margin">
+        <aside class="theme-aside">
+          <div class="theme-name">Paradoxical</div>
+          <div class="theme-tag">12.5–13.5%</div>
+        </aside>
+        <div class="theme-body">
+          <p>With climatic parallels to 2003 or 2022, one would expect alcohol levels in the 14.5%+ range, but most are in the low teens — 12.5–13.5%. Similarly with the flavour profile, which is much more Atlantic and cool than some of the more sunny vintages like 2015 or 2018 — a "solar" vintage this is not. Lastly, warm and dry vintages normally favour Bordeaux all over and lend to homogenously good wines, like 2009 or 2020; frustratingly, not every property has produced a great wine and there is far more appellational variation.</p>
+        </div>
+      </article>
+
+      <!-- QUIXOTIC -->
+      <article id="quixotic" class="theme scroll-margin">
+        <aside class="theme-aside">
+          <div class="theme-name">Quixotic</div>
+          <div class="theme-tag"><em>either / or</em></div>
+        </aside>
+        <div class="theme-body">
+          <p>In the idealistic, romantic and possibly unrealistic sense — the Châteaux have once again produced delicious, classical wines at a time that prices in the secondary market have been falling, and with a deteriorating global macro-economic picture. All of which means that despite their best efforts, this will be a campaign to navigate carefully. The upshot for the collector is that the 2025s will likely be released in line or just above their 2024 predecessors; most Châteaux we spoke to were aware of the broader market picture, the lack of demand in the previous year, and wanting to make a success of this one.</p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     EITHER / OR — INFLECTION POINT
+     ============================================================ -->
+<section id="scenarios" data-reveal>
+  <div class="max-content">
+    <p class="section-label">An Inflection Point</p>
+    <h2 class="heading on-dark">With En Primeur and Bordeaux as a whole at an inflection point, <em>one of two things</em> will happen.</h2>
+
+    <div class="scenario-grid">
+      <div class="scenario">
+        <span class="scenario-tag">Either</span>
+        <p>The campaign will be a success, where Châteaux honour last year's historic low prices, and everyone will comment in the coming years how 2025 was the last "affordable vintage" — and "we should have bought more".</p>
+      </div>
+      <div class="scenario-divider">OR</div>
+      <div class="scenario">
+        <span class="scenario-tag">Or</span>
+        <p>The campaign will meet a potentially recalcitrant market — lack of consumer demand, misjudged pricing — and be deemed a failure with poor sales along the chain, forcing the Châteaux to cut production costs and thus making a lesser-quality wine going forward.</p>
+      </div>
+    </div>
+
+    <p class="scenarios-conclusion">Either way, we are unlikely to see such quality at these prices again.</p>
+    <p class="scenarios-footnote">"So what?" the price-burnt historic En Primeur buyer might say — and they'd be right not to leap in. We would certainly advise caution; hence the small, separate recommendation lists below. However, if you're reading this, you're certainly interested in Bordeaux — and there are wines this year that are definitely worthy of your attention and your cellar.</p>
+    <p class="scenarios-footnote">Lastly, En Primeur is a great time to buy in formats other than bottles. Post-bottling, halves, magnums, double-magnums and larger are often harder to track down or carry a premium. We will not be charging anything more than the per-bottle price this year.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     RELEASES — populated by main.js (from Sheet or starter data)
+     ============================================================ -->
+<section id="releases" class="scroll-margin" data-reveal>
+  <div class="max-content">
+    <div class="releases-header">
+      <div>
+        <p class="section-label" style="color: rgba(190,173,133,0.7); margin-bottom: 0.5rem;">2025 Releases</p>
+        <h2 class="releases-title">Release Dates <em>so far</em></h2>
+      </div>
+      <div class="releases-meta"><span class="dot"></span> Updated as wines drop</div>
+    </div>
+    <div class="release-grid" id="release-grid">
+      <!-- Rendered by main.js -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     WINES — populated by main.js (from Sheet or starter data)
+     ============================================================ -->
+<section id="wines" class="scroll-margin" data-reveal>
+  <div class="max-content">
+    <div class="wines-header">
+      <div>
+        <p class="section-label">Our Recommendations</p>
+        <h2 class="heading">Wines we <em>highly recommend</em></h2>
+      </div>
+      <div class="filter-chips" role="tablist" aria-label="Filter by bank">
+        <button class="chip active" data-filter="all" type="button">All</button>
+        <button class="chip" data-filter="left" type="button">Left Bank</button>
+        <button class="chip" data-filter="right" type="button">Right Bank</button>
+      </div>
+    </div>
+
+    <h3 class="wine-subhead">
+      <span>Wines we highly recommend</span>
+      <span class="wine-subhead-count" id="wines-recommended-count">—</span>
+    </h3>
+    <div class="wine-grid" id="wines-recommended">
+      <!-- Rendered by main.js -->
+    </div>
+
+    <h3 class="wine-subhead">
+      <span>Wines to <em>watch</em></span>
+      <span class="wine-subhead-count" id="wines-watch-count">—</span>
+    </h3>
+    <div class="wine-grid" id="wines-watch">
+      <!-- Rendered by main.js -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     APPELLATION SUMMARY
+     ============================================================ -->
+<section id="appellation" data-reveal>
+  <div class="max-content">
+    <div class="appellation-grid">
+      <div>
+        <p class="section-label">Appellation Summary</p>
+      </div>
+      <div class="appellation-body">
+        <p>This is neither a Left-bank nor a Right-bank favoured vintage. The best appellation as a whole on the Left is Margaux, with strong showings across the range, and St-Émilion on the Right. That said, Pauillac beyond the Firsts and Seconds underperformed — a similar story over in Pomerol. St-Estèphe and St-Julien both have flashes of greatness in the usual places, whilst the Haut-Médoc and Graves have some excellent wines from familiar names.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     HOW TO BUY EN PRIMEUR
+     ============================================================ -->
+<section id="how" class="scroll-margin">
+  <div class="accordion-wrap" style="padding-top: 4rem; padding-bottom: 4rem;">
+    <details>
+      <summary><span>How to buy <em>En Primeur</em></span></summary>
+      <div class="accordion-body">
+        <p>En Primeur is purchasing newly made and newly released wine for delivery at a future date — in this case, Spring 2028. The wines are currently sold whilst still maturing in barrel, and will be bottled in late 2027.</p>
+        <p>All wines will be made available for shipping to the UK, HK or US. Please notify us at the time of initial purchase where you would like your wines sent. We can also offer to store the wines under-bond for you within our temperature-controlled facility at London City Bond Eton Park, for future delivery after the wines have become physically available.</p>
+        <span class="accordion-fine">All prices are in bond (exclusive of tax) · Offered subject to final confirmation · Available for delivery ex-UK in Spring 2028</span>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ============================================================
+     WISH-LIST CTA
+     ============================================================ -->
+<section id="wishlist">
+  <div class="wishlist-grid">
+    <div>
+      <h2 class="wishlist-title">Send your <em>Wish-List</em></h2>
+      <p class="wishlist-fine">All prices are in bond (exclusive of tax) · Offered subject to final confirmation · Available for delivery ex-UK in Spring 2028.</p>
+    </div>
+    <div class="wishlist-actions">
+      <a href="#" class="btn-primary" data-mailto="wishlist">Email Your Wish-List &nbsp;→</a>
+      <a href="#" class="btn-outline" data-mailto="consult">Speak to the Team &nbsp;→</a>
+      <p class="wishlist-contact">Or write directly to <a href="mailto:Arthur@ackeruk.com">Arthur@ackeruk.com</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <img src="acker-logo-white.svg" alt="Acker" style="height:36px;width:auto;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <svg style="display:none;height:36px;width:auto;" viewBox="0 0 180 52" fill="none" aria-hidden="true">
+        <text x="4" y="36" font-family="Georgia,serif" font-size="36" font-style="italic" fill="white" letter-spacing="0.5">Acker</text>
+        <line x1="4" y1="41" x2="116" y2="41" stroke="#BEAD85" stroke-width="0.8" opacity="0.4"/>
+        <text x="5" y="50" font-family="Arial,sans-serif" font-size="7.5" fill="#8a8580" letter-spacing="4">SINCE  1820</text>
+      </svg>
+      <p>The world's number one fine and rare wine auction house and merchant, with a legacy of record-breaking sales and a trusted global network of collectors.</p>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Bordeaux 2025</p>
+      <ul>
+        <li><a href="#intro">Introduction</a></li>
+        <li><a href="#releases">Release Dates</a></li>
+        <li><a href="#wines">Wines</a></li>
+        <li><a href="#how">How to Buy En Primeur</a></li>
+        <li><a href="#wishlist">Send Wish-List</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Acker</p>
+      <ul>
+        <li><a href="https://www.ackerwines.com">Auctions</a></li>
+        <li><a href="https://www.ackerwines.com">Shop</a></li>
+        <li><a href="https://www.ackerwines.com">Sell</a></li>
+        <li><a href="https://www.ackerwines.com">Calendar</a></li>
+        <li><a href="https://www.ackerwines.com">Corporate Services</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Company</p>
+      <ul>
+        <li><a href="https://www.ackerwines.com">About Acker</a></li>
+        <li><a href="https://www.ackerwines.com">Press</a></li>
+        <li><a href="https://www.ackerwines.com">Wine Education</a></li>
+        <li><a href="https://www.ackerwines.com">Privacy Policy</a></li>
+        <li><a href="https://www.ackerwines.com">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 Acker. All rights reserved. Top 10 of the World's Most Iconic Wine Shops.</p>
+    <ul class="footer-socials">
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#">LinkedIn</a></li>
+      <li><a href="#">Facebook</a></li>
+      <li><a href="#">WeChat</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>
