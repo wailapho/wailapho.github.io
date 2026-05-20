@@ -4,10 +4,14 @@
 
 // ---------- CONFIG ----------
 const CONFIG = {
-  // ⚠️ PASTE YOUR GOOGLE SHEET ID HERE.
-  // From the URL: docs.google.com/spreadsheets/d/[SHEET_ID]/edit
-  // Until you do, the site runs on fallback sample data.
-  SHEET_ID: 'YOUR_SHEET_ID_HERE',
+  // Google Sheets "Publish to web" ID (everything after /d/e/ in the URL)
+  PUBLISH_ID: '2PACX-1vSnvCQCkEuaStabK0hXEymAxKgHl_r6zvO2ObCahmeyXOGH6dd_hStySQT7wucd_LIXKJcrD1gNI9DO',
+
+  // gid of each tab — from each tab's URL after publishing
+  TABS: {
+    settings: '1064445661',
+    projects: '2017465380',
+  },
 
   // Cache duration (ms). Sheet refetches after this. Set to 0 to disable cache.
   CACHE_MS: 60 * 1000,
@@ -89,18 +93,19 @@ function csvToObjects(csvText) {
 // ============================================================
 // FETCH SHEET DATA
 // ============================================================
-async function fetchSheet(tabName) {
-  if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID === 'YOUR_SHEET_ID_HERE') {
+async function fetchSheet(tabKey) {
+  const gid = CONFIG.TABS[tabKey];
+  if (!CONFIG.PUBLISH_ID || CONFIG.PUBLISH_ID === 'YOUR_PUBLISH_ID' || !gid) {
     return null;
   }
-  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+  const url = `https://docs.google.com/spreadsheets/d/e/${CONFIG.PUBLISH_ID}/pub?gid=${gid}&single=true&output=csv`;
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Sheet fetch failed: ${res.status}`);
     const text = await res.text();
     return csvToObjects(text);
   } catch (err) {
-    console.error(`Failed to fetch ${tabName}:`, err);
+    console.error(`Failed to fetch ${tabKey}:`, err);
     return null;
   }
 }
@@ -130,8 +135,8 @@ async function loadData() {
   if (STORE.loaded && fresh) return;
 
   const [settingsRows, projectRows] = await Promise.all([
-    fetchSheet('Settings'),
-    fetchSheet('Projects'),
+    fetchSheet('settings'),
+    fetchSheet('projects'),
   ]);
 
   if (settingsRows) {
