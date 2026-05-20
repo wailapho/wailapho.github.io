@@ -1,0 +1,3 @@
+# Cloudflare Pages SPA routing
+# All paths fall through to index.html so JS can handle them
+/*  /index.html  200
