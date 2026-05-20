@@ -351,7 +351,7 @@ function renderWorkGrid() {
     return;
   }
 
-  grid.innerHTML = visible.map(p => renderTile(p)).join('');
+  grid.innerHTML = visible.map((p, i) => renderTile(p, i)).join('');
 
   // Wire hover-to-play for video tiles
   grid.querySelectorAll('.tile[data-video]').forEach(tile => {
@@ -376,6 +376,39 @@ function renderWorkGrid() {
         videoEl.pause();
         videoEl.currentTime = 0;
       }
+    });
+  });
+
+  // Wire hover-cycle gallery for IMAGE tiles only (graphic projects)
+  grid.querySelectorAll('.tile[data-gallery]:not([data-video])').forEach(tile => {
+    const urls = tile.dataset.gallery.split('|').map(u => u.trim()).filter(Boolean);
+    if (urls.length < 1) return;
+
+    const img = tile.querySelector('.tile-media img');
+    if (!img) return;
+
+    const originalSrc = img.src;
+    const allUrls = [originalSrc, ...urls];
+    const dots = tile.querySelectorAll('.gallery-indicator .dot');
+
+    // Preload gallery images (so cycling is instant)
+    urls.forEach(url => { const pre = new Image(); pre.src = url; });
+
+    let idx = 0;
+    let timer = null;
+
+    tile.addEventListener('mouseenter', () => {
+      timer = setInterval(() => {
+        idx = (idx + 1) % allUrls.length;
+        img.src = allUrls[idx];
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }, 1400);
+    });
+    tile.addEventListener('mouseleave', () => {
+      clearInterval(timer);
+      idx = 0;
+      img.src = originalSrc;
+      dots.forEach((d, i) => d.classList.toggle('active', i === 0));
     });
   });
 
@@ -406,7 +439,7 @@ function renderWorkGrid() {
   });
 }
 
-function renderTile(p) {
+function renderTile(p, idx = 0) {
   const isVideo = isVideoURL(p.media);
   const thumb = p.thumbnail || (isVideo ? '' : p.media);
   const hasThumb = !!thumb;
@@ -414,22 +447,46 @@ function renderTile(p) {
   const showDuration = p.duration && (p.type === 'film' || p.type === '3d-loop');
   const showFeaturedBadge = p.size === 'feature';
 
+  // Parse gallery for hover-cycle (image projects only)
+  const galleryUrls = (p.gallery || '')
+    .split('|')
+    .map(u => u.trim())
+    .filter(Boolean);
+  const hasGalleryHover = !isVideo && galleryUrls.length > 0;
+  const totalDots = hasGalleryHover ? galleryUrls.length + 1 : 0; // +1 for thumbnail
+
+  // Subtitle = role || client || empty, then year
+  const subtitleParts = [p.role || p.client, p.year].filter(Boolean);
+  const subtitle = subtitleParts.join(' · ');
+
   return `
-    <article class="tile size-${p.size || 'small'}" data-id="${escapeHTML(p.id)}" ${videoSrc ? `data-video="${escapeHTML(videoSrc)}"` : ''}>
+    <article class="tile size-${p.size || 'small'}"
+             style="--i: ${idx}"
+             data-id="${escapeHTML(p.id)}"
+             ${videoSrc ? `data-video="${escapeHTML(videoSrc)}"` : ''}
+             ${hasGalleryHover ? `data-gallery="${escapeHTML(galleryUrls.join('|'))}"` : ''}>
       <div class="tile-media">
         ${hasThumb
           ? `<img src="${escapeHTML(thumb)}" alt="${escapeHTML(p.title)}" loading="lazy" />`
           : `<div class="placeholder"></div>`}
       </div>
       <div class="tile-overlay"></div>
+      ${hasGalleryHover ? `
+      <div class="gallery-indicator">
+        ${Array.from({length: totalDots}, (_, i) =>
+          `<span class="dot${i === 0 ? ' active' : ''}"></span>`
+        ).join('')}
+      </div>` : ''}
       <div class="tile-content">
         <div class="tile-meta">
           <span>${escapeHTML(p.number)} · ${escapeHTML(typeLabel(p.type))}</span>
-          ${showDuration ? `<span>${escapeHTML(p.duration)}</span>` : (showFeaturedBadge ? `<span class="featured-badge">Featured</span>` : '')}
+          ${showDuration ? `<span>${escapeHTML(p.duration)}</span>` :
+            showFeaturedBadge ? `<span class="featured-badge">Featured</span>` :
+            (hasGalleryHover ? `<span>${galleryUrls.length + 1} stills</span>` : '')}
         </div>
         <div class="tile-info">
           <h3 class="tile-title">${escapeHTML(p.title)}</h3>
-          <div class="tile-subtitle">${escapeHTML(p.role || p.client || '')} · ${escapeHTML(p.year)}</div>
+          ${subtitle ? `<div class="tile-subtitle">${escapeHTML(subtitle)}</div>` : ''}
         </div>
       </div>
     </article>
