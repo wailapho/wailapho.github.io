@@ -594,7 +594,8 @@ async function route() {
   await loadData();
 
   const path = location.pathname;
-  const projectMatch = path.match(/^\/work\/([^/]+)\/?$/);
+  // Match /work/some-id or /any-base-path/work/some-id (GitHub Pages project sites)
+  const projectMatch = path.match(/\/work\/([^/]+)\/?$/);
 
   if (projectMatch) {
     const id = decodeURIComponent(projectMatch[1]);
@@ -602,9 +603,12 @@ async function route() {
     if (ok) {
       showView('project');
     } else {
-      showView('notfound');
+      // Project doesn't exist — fall back to home rather than 404
+      renderHome();
+      showView('home');
     }
-  } else if (path === '/' || path === '/index.html') {
+  } else {
+    // Default to home for any other path (including weird subpaths from GitHub Pages 404.html)
     renderHome();
     showView('home');
     // Handle hash for in-page nav (#about, #contact)
@@ -614,8 +618,6 @@ async function route() {
         if (target) target.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
-  } else {
-    showView('notfound');
   }
 
   hideLoader();

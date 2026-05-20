@@ -70,6 +70,11 @@ img, video {
   color: var(--bg);
 }
 
+/* CRITICAL: ensures the `hidden` HTML attribute always wins over any display rule below */
+[hidden] {
+  display: none !important;
+}
+
 /* ============================================================
    LOADER
    ============================================================ */
