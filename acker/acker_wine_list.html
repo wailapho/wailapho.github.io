@@ -123,6 +123,10 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 .wine-cell{font-weight:700;font-size:15px;white-space:normal}
 .price-cell{font-weight:600;text-align:right;white-space:nowrap;font-size:14px;font-variant-numeric:tabular-nums}
 .qty-cell{font-size:14px;color:var(--ink2)}
+.pct-cell{font-weight:700;font-size:13px;text-align:center;white-space:nowrap;letter-spacing:.02em}
+.pct-off{color:#27ae60}
+.pct-over{color:#c0392b}
+.pct-none{color:var(--ink3);font-weight:300}
 
 /* RESIZE HANDLE */
 .rh{position:absolute;top:0;right:0;bottom:0;width:7px;cursor:col-resize;z-index:2;display:flex;align-items:center;justify-content:center}
@@ -251,22 +255,96 @@ body.resizing,.resizing *{cursor:col-resize!important;user-select:none!important
 <script>
 /* ── STATE ── */
 let allData=[], colOrder=[], selectedCols=new Set();
-let wineCol=null, lang='en', translations={}, translating=false;
+let wineCol=null, listPriceCol=null, salePriceCol=null, lang='en';
 let colWidths={}, dragSrc=null, resizeListenerSet=false;
+const PCT_KEY='__PCT_OFF__'; // virtual computed column key
 
-const isPriceLike=c=>/price|usd|eur|gbp|hkd|amount|value|hammer/i.test(c);
-const isLotLike  =c=>/^lot$/i.test(c);
-const isQtyLike  =c=>/^qty|quantity/i.test(c);
+const isPriceLike =c=>/price|usd|eur|gbp|hkd|amount|value|hammer/i.test(c);
+const isLotLike   =c=>/^(lot|item\s*#?)$/i.test(c);
+const isQtyLike   =c=>/^(qty|quantity)$/i.test(c);
+const isFmtLike   =c=>/^(fmt|format)$/i.test(c);
+const isScoreLike =c=>/^score$/i.test(c);
+const isRegionLike=c=>/region|appellation/i.test(c);
+const isPctOff    =c=>c===PCT_KEY;
 
 function defaultWidth(col){
-  if(isLotLike(col))   return 72;
-  if(isQtyLike(col))   return 100;
-  if(isPriceLike(col)) return 145;
-  if(col===wineCol)    return 420;
-  return 130;
+  if(isPctOff(col))    return 90;
+  if(isLotLike(col))   return 80;
+  if(isQtyLike(col))   return 60;
+  if(isFmtLike(col))   return 110;
+  if(isScoreLike(col)) return 80;
+  if(isRegionLike(col))return 160;
+  if(isPriceLike(col)) return 130;
+  if(col===wineCol)    return 380;
+  return 120;
 }
 function getW(col){ return colWidths[col]||defaultWidth(col); }
 function initWidths(){ colOrder.forEach(c=>{ colWidths[c]=defaultWidth(c); }); }
+
+/* ── PURE-JS TRANSLATION (no API — works offline, instant) ── */
+const ZH={
+  // Column headers
+  'ITEM #':'编号','ITEM':'编号','LOT':'拍品编号',
+  'QTY':'数量','QUANTITY':'数量',
+  'FMT':'规格','FORMAT':'规格',
+  'VINTAGE':'年份',
+  'WINE':'葡萄酒','NAME':'名称',
+  'REGION/APPELLATION':'产区','REGION':'产区','APPELLATION':'产区',
+  'SCORE':'评分','RATING':'评分',
+  'HKD PRICE':'港元定价','HKD':'港元',
+  'PRICE':'价格','PRICE (USD)':'价格（美元）','PRICE (HKD)':'价格（港元）',
+  'COST':'成本','COST PRICE':'成本价',
+  'SALE PRICE':'销售价','SALE':'售价',
+  [PCT_KEY]:'折扣','% OFF':'折扣','% SAVINGS':'节省',
+  // Bottle formats
+  'bottle':'瓶','Bottle':'瓶','BOTTLE':'瓶',
+  'magnum':'马格南','Magnum':'马格南','MAGNUM':'马格南',
+  'half-bottle':'半瓶','jeroboam':'耶罗波安','rehoboam':'罗波安',
+  'methuselah':'麦修撒拉','salmanazar':'撒缦以色',
+  // Storage/packaging — exact
+  'OWC':'原木箱','OCB':'原纸箱',
+  'in OWC':'附原木箱','in OCB':'附原纸箱',
+  'NV':'无年份',
+  // Champagne region (kept in French/English — wine context)
+  'Champagne':'香槟','Bordeaux':'波尔多',
+  'Burgundy':'勃艮第','Sauternes':'苏玳',
+  'Cote de Nuits':'夜丘','Cote de Beaune':'伯恩丘',
+  'Côte Chalonnaise':'夏隆内丘','Cote Chalonnaise':'夏隆内丘',
+  'USA Red':'美国红葡萄酒','English Sparkling':'英国气泡酒',
+};
+
+function zhTranslate(text){
+  if(!text||typeof text!=='string') return text;
+  // 1. Exact match (try original, then uppercase)
+  if(ZH[text]!==undefined) return ZH[text];
+  const up=text.toUpperCase();
+  for(const [k,v] of Object.entries(ZH)){
+    if(k.toUpperCase()===up) return v;
+  }
+  // 2. Quantity patterns: "3 Btls", "1 Mag", "12 Btls", etc.
+  let r=text;
+  r=r.replace(/\b(\d+)\s*Btls?\b/gi,(_,n)=>n+'瓶');
+  r=r.replace(/\b(\d+)\s*Mags?\b/gi,(_,n)=>n+'支马格南');
+  r=r.replace(/\b(\d+)\s*[Mm]agnums?\b/g,(_,n)=>n+'支马格南');
+  r=r.replace(/\b(\d+)\s*[Bb]ottles?\b/g,(_,n)=>n+'瓶');
+  // 3. OWC/OCB with numbers & parenthetical: "OWC12", "OCB3(magnum)"
+  r=r.replace(/\bOWC\d*(\([^)]*\))?/gi,'原木箱');
+  r=r.replace(/\bOCB\d*(\([^)]*\))?/gi,'原纸箱');
+  // 4. "in OWC" / "in OCB" already handled above; handle "in" suffix
+  r=r.replace(/附?\s*原木箱/g,'附原木箱').replace(/^原木箱$/,'原木箱');
+  return r;
+}
+
+function tr(val,isWine){
+  if(lang==='en'||isWine) return val;
+  if(val===null||val===undefined) return '';
+  return zhTranslate(String(val));
+}
+function trCol(col){
+  if(lang==='en') return col;
+  if(isPctOff(col)) return '折扣';
+  return zhTranslate(col)||col;
+}
 
 /* ── FILE ── */
 document.getElementById('file-input').addEventListener('change',e=>handleFile(e.target.files[0]));
@@ -286,8 +364,26 @@ function handleFile(file){
     if(!allData.length)return;
     colOrder=Object.keys(allData[0]);
     selectedCols=new Set(colOrder);
-    wineCol=colOrder.find(c=>/wine|name|cuvee|label|desc/i.test(c))||null;
-    translations={}; lang='en'; colWidths={};
+    wineCol=colOrder.find(c=>/^wine$|^name$|cuvee|label/i.test(c))||null;
+
+    // Auto-detect list price & sale price for % Off calculation
+    listPriceCol=colOrder.find(c=>/hkd.?price|retail|list.?price/i.test(c)&&!/sale/i.test(c))
+                 ||colOrder.find(c=>isPriceLike(c)&&!/sale|cost/i.test(c))||null;
+    salePriceCol=colOrder.find(c=>/sale.?price|hammer|auction.?price/i.test(c))||null;
+
+    // Add virtual % Off column if both price cols found and data has non-empty sale prices
+    const hasSales=salePriceCol&&allData.some(r=>r[salePriceCol]!==''&&r[salePriceCol]!=null);
+    if(listPriceCol&&hasSales){
+      if(!colOrder.includes(PCT_KEY)){
+        colOrder.push(PCT_KEY);
+        selectedCols.add(PCT_KEY);
+      }
+    } else {
+      const i=colOrder.indexOf(PCT_KEY);
+      if(i>-1){ colOrder.splice(i,1); selectedCols.delete(PCT_KEY); }
+    }
+
+    lang='en'; colWidths={};
     document.getElementById('btn-en').classList.add('active');
     document.getElementById('btn-zh').classList.remove('active');
     document.getElementById('status-wrap').innerHTML='';
@@ -421,79 +517,27 @@ function updateMeta(){
 /* ── STEP ── */
 function setStep(n){['s1','s2','s3'].forEach((id,i)=>{document.getElementById(id).className='step'+(i+1===n?' active':i+1<n?' done':'');})}
 
-/* ── TRANSLATION ── */
+/* ── LANG TOGGLE ── */
 function setStatus(type,html){
   document.getElementById('status-wrap').innerHTML=html?`<span class="status-pill ${type}">${html}</span>`:'';
 }
-
-async function setLang(l){
-  if(translating||l===lang)return;
+function setLang(l){
+  if(l===lang)return;
   lang=l;
   document.getElementById('btn-en').classList.toggle('active',l==='en');
   document.getElementById('btn-zh').classList.toggle('active',l==='zh');
-  if(l==='zh'&&Object.keys(translations).length===0) await runTranslation();
-  else updatePreview();
-}
-
-async function runTranslation(){
-  translating=true;
-  setStatus('loading','<span class="spinner"></span>&nbsp;Translating…');
-  ['btn-en','btn-zh'].forEach(id=>document.getElementById(id).disabled=true);
-
-  const items=new Set();
-  colOrder.forEach(c=>items.add(c));
-  allData.forEach(row=>colOrder.forEach(c=>{
-    if(c===wineCol)return;
-    const v=String(row[c]||'').trim();
-    if(v)items.add(v);
-  }));
-
-  const prompt=`You are a wine auction data translator. Translate each item in the JSON array to Simplified Chinese.
-
-STRICT RULES:
-1. Wine names, producer names, domaine/château/vineyard names, vintage years (e.g. 1947, 2010) → keep in English exactly as-is
-2. Quantities: "1 Mag"→"1支马格南", "1 Btl"→"1瓶", "3 Btls"→"3瓶", "6 Btls"→"6瓶", "12 Btls"→"12瓶", "3 Mags"→"3支马格南"
-3. Storage: "OWC"→"原木箱", "OCB"→"原纸箱", "in OWC"→"附原木箱", "in OCB"→"附原纸箱"
-4. Column headers: "LOT"→"拍品编号", "QTY"→"数量", "WINE"→"葡萄酒", "PRICE"→"价格", "PRICE (USD)"→"价格（美元）"
-5. Pure numbers → keep as-is
-6. When uncertain → keep original
-
-Output ONLY valid JSON {"original":"translated",...} — no markdown, no explanation, no code fences.
-
-Items: ${JSON.stringify([...items])}`;
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})
-    });
-    if(!res.ok)throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-    const data=await res.json();
-    if(data.error)throw new Error(data.error.message);
-    const raw=data.content?.find(b=>b.type==='text')?.text||'{}';
-    translations=JSON.parse(raw.replace(/^```[a-z]*\n?|\n?```$/g,'').trim());
-    setStatus('success','✓ Translated');
-    setTimeout(()=>setStatus('',''),2500);
-  }catch(err){
-    console.error('Translation error:',err);
-    setStatus('error',`⚠ ${err.message}`);
-    lang='en';
-    document.getElementById('btn-en').classList.add('active');
-    document.getElementById('btn-zh').classList.remove('active');
-  }finally{
-    translating=false;
-    ['btn-en','btn-zh'].forEach(id=>document.getElementById(id).disabled=false);
-    updatePreview();
-  }
-}
-
-function tr(val,isWine){
-  if(lang==='en'||isWine)return val;
-  return translations[String(val)]||val;
+  updatePreview();
 }
 
 /* ── RENDER PREVIEW ── */
+function computePctOff(row){
+  if(!listPriceCol||!salePriceCol)return null;
+  const list=parseFloat(String(row[listPriceCol]).replace(/[^0-9.]/g,''));
+  const sale=parseFloat(String(row[salePriceCol]).replace(/[^0-9.]/g,''));
+  if(!list||!sale||list<=0)return null;
+  return (list-sale)/list*100;
+}
+
 function updatePreview(){
   setStep(3);
   const visCols=colOrder.filter(c=>selectedCols.has(c));
@@ -502,18 +546,30 @@ function updatePreview(){
   // colgroup
   document.getElementById('colgroup').innerHTML=visCols.map((col,i)=>`<col id="cw-${i}" style="width:${getW(col)}px">`).join('');
 
-  // thead with resize handles
-  document.getElementById('thead').innerHTML=`<tr>${visCols.map((col,i)=>`<th><span style="pointer-events:none">${tr(col,false)}</span><div class="rh" data-vi="${i}" data-col="${col}" title="Drag to resize column"></div></th>`).join('')}</tr>`;
+  // thead
+  document.getElementById('thead').innerHTML=`<tr>${visCols.map((col,i)=>{
+    const label=isPctOff(col)?'% Off':trCol(col);
+    return `<th><span style="pointer-events:none">${label}</span><div class="rh" data-vi="${i}" data-col="${col}" title="Drag to resize"></div></th>`;
+  }).join('')}</tr>`;
 
   // tbody
   document.getElementById('tbody').innerHTML=allData.map(row=>`<tr>${visCols.map(col=>{
+    // Virtual % Off column
+    if(isPctOff(col)){
+      const pct=computePctOff(row);
+      if(pct===null) return `<td class="pct-cell pct-none">—</td>`;
+      const abs=Math.abs(pct).toFixed(1);
+      const cls=pct>0?'pct-off':pct<0?'pct-over':'pct-none';
+      const label=pct>0?`↓ ${abs}%`:pct<0?`↑ ${abs}%`:'—';
+      return `<td class="pct-cell ${cls}">${label}</td>`;
+    }
     const raw=String(row[col]??'');
     const isWine=(col===wineCol);
     const val=tr(raw,isWine);
-    if(isLotLike(col))   return `<td><span class="lot-badge">${val}</span></td>`;
-    if(isPriceLike(col)) return `<td class="price-cell">${fmtPrice(raw)}</td>`;
-    if(isWine)           return `<td class="wine-cell">${raw}</td>`;
-    if(isQtyLike(col))   return `<td class="qty-cell">${val}</td>`;
+    if(isLotLike(col))    return `<td><span class="lot-badge">${val}</span></td>`;
+    if(isPriceLike(col))  return `<td class="price-cell">${fmtPrice(raw)}</td>`;
+    if(isWine)            return `<td class="wine-cell">${raw}</td>`;
+    if(isQtyLike(col))    return `<td class="qty-cell">${val}</td>`;
     return `<td>${val}</td>`;
   }).join('')}</tr>`).join('')||`<tr><td colspan="${visCols.length}" style="text-align:center;padding:3rem;color:var(--ink3)">No data</td></tr>`;
 
@@ -683,10 +739,10 @@ async function downloadPDF(){
       let x=ML;
       visCols.forEach((col,i)=>{
         const cw=colMMs[i];
-        const label=tr(col,false).toUpperCase();
+        const label=(isPctOff(col)?'% Off':trCol(col)).toUpperCase();
         const safe=doc.splitTextToSize(label,cw-3)[0]||label;
-        const isP=isPriceLike(col);
-        doc.text(safe,isP?(x+cw-2):(x+2),startY+TBL_H-2.5,{align:isP?'right':'left'});
+        const isP=isPriceLike(col)||isPctOff(col);
+        doc.text(safe,isP?(x+cw/2):(x+2),startY+TBL_H-2.5,{align:isP?'center':'left'});
         x+=cw;
       });
       return startY+TBL_H;
@@ -704,7 +760,7 @@ async function downloadPDF(){
       doc.setTextColor(...BUR);
       doc.text(`— ${pn} / ${TP} —`,PW/2,fy+3.5,{align:'center'});
       doc.setTextColor(...GOLD);
-      doc.text('Acker Wine Merchant  ·  hk.ackerwines.com',PW-MR,fy+3.5,{align:'right'});
+      doc.text('Acker Wines  ·  ackerwines.com',PW-MR,fy+3.5,{align:'right'});
     }
 
     function newPage(){
@@ -734,6 +790,20 @@ async function downloadPDF(){
       let x=ML;
       visCols.forEach((col,ci)=>{
         const cw=colMMs[ci];
+
+        // Virtual % Off column
+        if(isPctOff(col)){
+          const pct=computePctOff(row);
+          if(pct!==null){
+            const abs=Math.abs(pct).toFixed(1);
+            const label=pct>0?`-${abs}%`:pct<0?`+${abs}%`:'—';
+            const color=pct>0?[39,174,96]:pct<0?[192,57,43]:INK3;
+            doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...color);
+            doc.text(label,x+cw/2,y+ROW_H-2.2,{align:'center'});
+          }
+          x+=cw; return;
+        }
+
         const raw=String(row[col]??'');
         const isWine=(col===wineCol);
         const val=tr(raw,isWine);
@@ -745,8 +815,6 @@ async function downloadPDF(){
           doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK);
         }else if(isPriceLike(col)){
           doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK);
-        }else if(isQtyLike(col)){
-          doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...INK2);
         }else{
           doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...INK2);
         }
