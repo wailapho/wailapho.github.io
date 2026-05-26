@@ -521,25 +521,80 @@ function updatePreview(){
 }
 
 /* ── PDF GENERATION ── */
-async function loadLogoDataURL(){
+const LOGO_URL='https://wailapho.github.io/acker/img/acker-logo-white.svg';
+// Known aspect ratio from SVG viewBox="0 0 180 52"
+const LOGO_AR_FALLBACK=180/52;
+
+function renderSVGToCanvas(svgSrc, ar){
+  // svgSrc: a URL (blob or http) guaranteed to load without taint
   return new Promise(resolve=>{
     const img=new Image();
-    img.crossOrigin='anonymous';
-    const t=setTimeout(()=>resolve(null),3000);
+    const H=312; // render at 6× SVG natural 52 units → sharp output
+    const W=Math.round(H*ar);
     img.onload=()=>{
-      clearTimeout(t);
       try{
         const c=document.createElement('canvas');
-        c.width=img.naturalWidth||400; c.height=img.naturalHeight||110;
-        if(!c.width||!c.height){resolve(null);return;}
-        const ctx=c.getContext('2d');
-        ctx.drawImage(img,0,0);
+        c.width=W; c.height=H;
+        c.getContext('2d').drawImage(img,0,0,W,H);
         resolve(c.toDataURL('image/png'));
       }catch(e){resolve(null);}
     };
-    img.onerror=()=>{clearTimeout(t);resolve(null);};
-    img.src='https://wailapho.github.io/acker/img/acker-logo-white.svg';
+    img.onerror=()=>resolve(null);
+    img.src=svgSrc;
   });
+}
+
+async function loadLogoDataURL(){
+  // 1. Try fetching SVG text (GitHub Pages sends CORS *) so we can:
+  //    a) parse the exact viewBox aspect ratio
+  //    b) create a same-origin blob URL → canvas draw never taints
+  try{
+    const res=await Promise.race([
+      fetch(LOGO_URL),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),4000))
+    ]);
+    if(!res.ok) throw new Error('fetch failed');
+    const svgText=await res.text();
+
+    // Parse viewBox e.g. "0 0 180 52"
+    let ar=LOGO_AR_FALLBACK;
+    const m=svgText.match(/viewBox=["'][^"']*?(\d[\d.]*)\s+(\d[\d.]*)["']/);
+    if(m){ const w=parseFloat(m[1]),h=parseFloat(m[2]); if(w&&h) ar=w/h; }
+
+    window._logoAR=ar;
+    const blob=new Blob([svgText],{type:'image/svg+xml'});
+    const blobURL=URL.createObjectURL(blob);
+    const dataURL=await renderSVGToCanvas(blobURL,ar);
+    URL.revokeObjectURL(blobURL);
+    return dataURL;
+
+  }catch(fetchErr){
+    // 2. Fallback: load directly with crossOrigin (works if server sends CORS headers)
+    try{
+      const ar=LOGO_AR_FALLBACK;
+      window._logoAR=ar;
+      return await new Promise(resolve=>{
+        const img=new Image();
+        img.crossOrigin='anonymous';
+        const t=setTimeout(()=>resolve(null),3000);
+        img.onload=()=>{
+          clearTimeout(t);
+          try{
+            const natAR=(img.naturalWidth&&img.naturalHeight)
+              ?(img.naturalWidth/img.naturalHeight):ar;
+            window._logoAR=natAR;
+            const H=312, W=Math.round(H*natAR);
+            const c=document.createElement('canvas');
+            c.width=W; c.height=H;
+            c.getContext('2d').drawImage(img,0,0,W,H);
+            resolve(c.toDataURL('image/png'));
+          }catch(e){resolve(null);}
+        };
+        img.onerror=()=>{clearTimeout(t);resolve(null);};
+        img.src=LOGO_URL;
+      });
+    }catch(e){ return null; }
+  }
 }
 
 async function downloadPDF(){
@@ -585,10 +640,14 @@ async function downloadPDF(){
       doc.setLineWidth(0.3);
       doc.line(ML,HDR_H+1.2,PW-MR,HDR_H+1.2);
 
-      // LOGO
+      // LOGO — maintain exact aspect ratio, no distortion
       if(logoDataURL){
-        try{ doc.addImage(logoDataURL,'PNG',ML,5,52,18,undefined,'FAST'); }
-        catch(e){ drawLogoText(); }
+        try{
+          const ar=window._logoAR||LOGO_AR_FALLBACK;
+          const logoH=16;          // mm fixed height
+          const logoW=logoH*ar;    // width from AR → no stretch
+          doc.addImage(logoDataURL,'PNG',ML,7,logoW,logoH,undefined,'FAST');
+        }catch(e){ drawLogoText(); }
       } else { drawLogoText(); }
 
       // Date top-right
