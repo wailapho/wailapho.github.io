@@ -2,95 +2,159 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acker Wine List Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bur:#801747;--bur2:#9a1d57;--gold:#BEAD85;--gold2:#a8996e;--ink:#212121;--ink2:#5a5755;--ink3:#8a8884;--bg:#F2F2F2;--white:#fff;--blk:#111;--font:'Nunito Sans','Avenir Next',sans-serif}
-body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.65;font-weight:300}
-.app{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 3rem}
-.topbar{background:var(--blk);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;margin-bottom:1.75rem;border-bottom:2px solid var(--bur)}
-.logo-text{font-size:1.6rem;font-style:italic;font-weight:300;color:#fff}
-.logo-sub{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);opacity:.8;margin-top:-2px}
-.topbar-tag{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-left:auto}
-.section-label{font-size:10px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:var(--gold2);margin-bottom:.7rem}
+:root{
+  --bur:#801747;--bur2:#9a1d57;--gold:#BEAD85;--gold2:#a8996e;
+  --ink:#212121;--ink2:#5a5755;--ink3:#8a8884;
+  --bg:#F2F2F2;--white:#fff;--blk:#111;
+  --font:'Nunito Sans','Avenir Next',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.65;font-weight:300;min-height:100vh}
+.app{max-width:1160px;margin:0 auto;padding:0 1rem 3rem}
+
+/* TOPBAR */
+.topbar{background:var(--blk);padding:.85rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:2.5px solid var(--bur);margin-bottom:1.75rem;position:sticky;top:0;z-index:100}
+.topbar-logo{height:40px;width:auto;display:block}
+.topbar-sep{width:1px;height:28px;background:rgba(255,255,255,.12);flex-shrink:0}
+.topbar-sub{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);font-weight:400}
+.topbar-spacer{flex:1}
+.topbar-tag{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.1);padding:.25rem .6rem}
+
+/* STEPS */
+.steps{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.step{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;padding:.28rem .75rem;border:1px solid rgba(33,33,33,.12);color:var(--ink3)}
+.step.active{background:var(--bur);color:#fff;border-color:var(--bur)}
+.step.done{border-color:var(--gold2);color:var(--gold2)}
+
+/* CARDS */
 .card{background:var(--white);border:1px solid rgba(33,33,33,.1);padding:1.5rem;margin-bottom:1.5rem}
+.section-label{font-size:10px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:var(--gold2);margin-bottom:.75rem}
+.divider{height:1px;background:rgba(33,33,33,.1);margin:1.25rem 0}
+
+/* UPLOAD */
 .upload-zone{border:1.5px dashed rgba(128,23,71,.3);padding:2.5rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--bur);background:rgba(128,23,71,.03)}
 .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.upload-icon{font-size:2rem;margin-bottom:.75rem;opacity:.35}
+.upload-icon{font-size:2.2rem;margin-bottom:.75rem;opacity:.3}
 .upload-title{font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:.3rem}
 .upload-sub{font-size:13px;color:var(--ink3)}
-.badge-file{display:inline-flex;align-items:center;gap:.5rem;background:rgba(128,23,71,.08);border:1px solid rgba(128,23,71,.2);padding:.35rem .75rem;font-size:12px;color:var(--bur);font-weight:600;letter-spacing:.05em;margin-top:.75rem}
-.meta-grid{display:grid;grid-template-columns:1fr 1fr 140px;gap:1rem;margin-bottom:1.5rem}
+.file-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(128,23,71,.08);border:1px solid rgba(128,23,71,.2);padding:.35rem .8rem;font-size:12px;color:var(--bur);font-weight:600;margin-top:.85rem}
+
+/* META */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 110px;gap:1rem;margin-bottom:1.5rem}
 .meta-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:.35rem;font-weight:600}
 .meta-input{width:100%;border:1px solid rgba(33,33,33,.15);padding:.55rem .8rem;font-family:var(--font);font-size:14px;color:var(--ink);background:var(--white);outline:none;transition:border-color .2s}
 .meta-input:focus{border-color:var(--bur)}
-.divider{height:1px;background:rgba(33,33,33,.1);margin:1.25rem 0}
-.col-chips-hint{font-size:12px;color:var(--ink3);font-style:italic;margin-bottom:.6rem}
+
+/* CHIPS */
+.chips-hint{font-size:12px;color:var(--ink3);font-style:italic;margin-bottom:.65rem}
 .col-grid{display:flex;flex-wrap:wrap;gap:.45rem;min-height:2.5rem}
-.col-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .75rem .3rem .5rem;border:1px solid rgba(33,33,33,.15);font-size:12px;font-weight:600;letter-spacing:.06em;cursor:grab;transition:all .18s;background:var(--white);color:var(--ink2);user-select:none}
+.col-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.32rem .75rem .32rem .5rem;border:1px solid rgba(33,33,33,.15);font-size:12px;font-weight:600;cursor:grab;transition:all .18s;background:var(--white);color:var(--ink2);user-select:none}
 .col-chip:active{cursor:grabbing}
 .col-chip.on{background:var(--bur);color:#fff;border-color:var(--bur)}
 .col-chip:hover:not(.on){border-color:var(--bur);color:var(--bur)}
-.col-chip.dragging{opacity:.3;transform:scale(.95)}
-.col-chip.dragover{border-left:3px solid var(--gold);padding-left:.35rem}
-.drag-handle{opacity:.4;font-size:14px;letter-spacing:-2px;pointer-events:none}
-.col-chip.on .drag-handle{opacity:.55}
-.step-indicator{display:flex;gap:.45rem;margin-bottom:1.5rem}
-.step{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;padding:.25rem .7rem;border:1px solid rgba(33,33,33,.12);color:var(--ink3)}
-.step.active{background:var(--bur);color:#fff;border-color:var(--bur)}
-.step.done{border-color:var(--gold2);color:var(--gold2)}
-.action-row{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:1.25rem}
-.count-badge{font-size:12px;color:var(--ink3)}
-.count-num{font-weight:700;color:var(--ink);font-size:14px}
-.btn{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:.62rem 1.25rem;cursor:pointer;border:none;transition:all .2s;outline:none}
+.col-chip.dragging{opacity:.3}
+.col-chip.dragover{border-left:3px solid var(--gold);padding-left:.3rem}
+.drag-h{opacity:.4;font-size:13px;letter-spacing:-2px;pointer-events:none}
+.col-chip.on .drag-h{opacity:.5}
+
+/* WIDTH PANEL */
+.width-panel{display:none;margin-top:1.25rem}
+.width-panel.open{display:block}
+.width-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.75rem 1.5rem;margin-top:.75rem}
+.width-row{display:flex;align-items:center;gap:.6rem}
+.wc-name{font-size:11px;font-weight:600;color:var(--ink2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+input[type=range]{-webkit-appearance:none;appearance:none;width:80px;height:3px;background:rgba(33,33,33,.15);outline:none;border-radius:2px;cursor:pointer;flex-shrink:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--bur);cursor:pointer;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--bur)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--bur);cursor:pointer;border:2px solid #fff}
+.wc-val{font-size:11px;color:var(--ink3);min-width:34px;text-align:right}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:.45rem;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:.65rem 1.3rem;cursor:pointer;border:none;transition:all .2s;outline:none}
 .btn-dark{background:var(--blk);color:#fff}
 .btn-dark:hover{background:#222}
+.btn-bur{background:var(--bur);color:#fff}
+.btn-bur:hover{background:var(--bur2)}
 .btn-ghost{background:transparent;color:var(--ink);border:1px solid rgba(33,33,33,.2)}
 .btn-ghost:hover{border-color:var(--bur);color:var(--bur)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
+.link-btn{font-family:var(--font);background:none;border:none;cursor:pointer;font-size:11px;color:var(--bur);font-weight:600;letter-spacing:.06em;text-decoration:underline;text-underline-offset:3px;padding:.2rem 0}
+
+/* LANG TOGGLE */
 .lang-toggle{display:flex;border:1.5px solid rgba(33,33,33,.18);overflow:hidden}
 .lang-opt{padding:.5rem 1rem;font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.1em;background:transparent;border:none;cursor:pointer;transition:all .2s;color:var(--ink3)}
 .lang-opt.active{background:var(--bur);color:#fff}
 .lang-opt:hover:not(.active){background:rgba(128,23,71,.06);color:var(--bur)}
 .lang-opt:disabled{opacity:.4;cursor:not-allowed}
-.status-pill{display:inline-flex;align-items:center;gap:.4rem;font-size:11px;color:var(--gold2);font-weight:600;padding:.3rem .7rem;background:rgba(190,173,133,.1);border:1px solid rgba(190,173,133,.3)}
-.status-pill.err{color:#c0392b;background:rgba(192,57,43,.07);border-color:rgba(192,57,43,.2)}
+
+/* STATUS */
+.status-pill{display:inline-flex;align-items:center;gap:.4rem;font-size:11px;font-weight:600;padding:.3rem .75rem;letter-spacing:.04em}
+.status-pill.loading{color:var(--gold2);background:rgba(190,173,133,.1);border:1px solid rgba(190,173,133,.3)}
+.status-pill.success{color:#27ae60;background:rgba(39,174,96,.07);border:1px solid rgba(39,174,96,.2)}
+.status-pill.error{color:#c0392b;background:rgba(192,57,43,.07);border:1px solid rgba(192,57,43,.2)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:11px;height:11px;border:2px solid var(--gold2);border-top-color:transparent;border-radius:50%;animation:spin .75s linear infinite;flex-shrink:0}
-.preview-header{background:var(--blk);padding:1.3rem 1.5rem;display:flex;justify-content:space-between;align-items:flex-end}
+
+/* PREVIEW */
+.preview-header{background:var(--blk);padding:1.3rem 1.6rem;display:flex;justify-content:space-between;align-items:flex-end}
 .preview-bar{height:3px;background:linear-gradient(90deg,var(--bur) 0%,var(--gold) 100%)}
-.ph-date{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
-.ph-title{font-size:1.05rem;font-weight:300;color:#fff}
+.ph-eyebrow{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);opacity:.85;margin-bottom:5px}
+.ph-title{font-size:1.1rem;font-weight:300;color:#fff}
 .ph-title strong{font-weight:700}
-.ph-brand{font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.28);text-align:right;line-height:2}
+.ph-brand{font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.25);text-align:right;line-height:2}
+.action-row{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:1.25rem}
+.count-info{font-size:12px;color:var(--ink3)}
+.count-num{font-weight:700;color:var(--ink);font-size:14px}
+
+/* TABLE */
 .preview-wrap{overflow-x:auto}
-.wine-table{width:100%;border-collapse:collapse}
-.wine-table th{background:var(--bur);color:#fff;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;padding:.8rem 1.1rem;text-align:left;white-space:nowrap}
-.wine-table td{padding:.75rem 1.1rem;border-bottom:1px solid rgba(33,33,33,.08);font-size:15px;vertical-align:middle}
-.wine-table tr:nth-child(even) td{background:rgba(242,242,242,.5)}
+.wine-table{border-collapse:collapse;table-layout:fixed;width:100%}
+.wine-table th{background:var(--bur);color:#fff;font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:600;padding:.8rem 1rem;text-align:left;white-space:nowrap;position:relative;overflow:hidden}
+.wine-table td{padding:.75rem 1rem;border-bottom:1px solid rgba(33,33,33,.08);font-size:15px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wine-table tr:nth-child(even) td{background:rgba(242,242,242,.55)}
 .wine-table tr:hover td{background:rgba(128,23,71,.03)!important}
 .lot-badge{display:inline-block;background:rgba(128,23,71,.1);color:var(--bur);font-size:11px;font-weight:700;padding:.12rem .5rem;letter-spacing:.06em}
-.wine-cell{font-weight:700;font-size:15px}
-.price-cell{font-weight:600;text-align:right;white-space:nowrap;font-size:14px;letter-spacing:.02em}
-.qty-cell{font-size:14px;white-space:nowrap;color:var(--ink2)}
+.wine-cell{font-weight:700;font-size:15px;white-space:normal}
+.price-cell{font-weight:600;text-align:right;white-space:nowrap;font-size:14px;font-variant-numeric:tabular-nums}
+.qty-cell{font-size:14px;color:var(--ink2)}
+
+/* RESIZE HANDLE */
+.rh{position:absolute;top:0;right:0;bottom:0;width:7px;cursor:col-resize;z-index:2;display:flex;align-items:center;justify-content:center}
+.rh::after{content:'';display:block;width:2px;height:55%;background:rgba(190,173,133,0);transition:background .15s;border-radius:1px}
+.wine-table th:hover .rh::after,.rh.active::after{background:rgba(190,173,133,.75)}
+body.resizing,.resizing *{cursor:col-resize!important;user-select:none!important}
 </style>
 </head>
 <body>
 <div class="app">
 
+<!-- TOPBAR -->
 <div class="topbar">
-  <div><div class="logo-text">Acker</div><div class="logo-sub">Wines Financial Services</div></div>
+  <img class="topbar-logo"
+    src="https://wailapho.github.io/acker/img/acker-logo-white.svg"
+    alt="Acker"
+    onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block'">
+  <span id="logo-fallback" style="display:none;font-size:1.55rem;font-style:italic;font-weight:300;color:#fff;letter-spacing:.02em">Acker</span>
+  <div class="topbar-sep"></div>
+  <span class="topbar-sub">Wines Financial Services</span>
+  <div class="topbar-spacer"></div>
   <span class="topbar-tag">Wine List Generator</span>
 </div>
 
-<div class="step-indicator">
+<!-- STEPS -->
+<div class="steps">
   <div class="step active" id="s1">① Upload</div>
   <div class="step" id="s2">② Configure</div>
   <div class="step" id="s3">③ Preview & Export</div>
 </div>
 
+<!-- UPLOAD -->
 <div class="card">
   <p class="section-label">Upload Sale Data</p>
   <div class="upload-zone" id="dropzone">
@@ -102,83 +166,138 @@ body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:15p
   </div>
 </div>
 
+<!-- CONFIG -->
 <div class="card" id="config-card" style="display:none">
   <p class="section-label">Sale Information</p>
   <div class="meta-grid">
-    <div><p class="meta-label">Sale Title</p><input class="meta-input" id="sale-title" value="May Fine Wine Auction" oninput="updateMeta()"></div>
-    <div><p class="meta-label">Date / Location</p><input class="meta-input" id="sale-date" placeholder="May 2026 · Hong Kong" oninput="updateMeta()"></div>
-    <div><p class="meta-label">Currency Code</p><input class="meta-input" id="currency-code" value="HKD" placeholder="HKD" oninput="updatePreview()" style="text-transform:uppercase"></div>
+    <div>
+      <p class="meta-label">Sale Title</p>
+      <input class="meta-input" id="sale-title" value="May Fine Wine Auction" oninput="updateMeta()">
+    </div>
+    <div>
+      <p class="meta-label">Date / Location</p>
+      <input class="meta-input" id="sale-date" placeholder="May 2026 · Hong Kong" oninput="updateMeta()">
+    </div>
+    <div>
+      <p class="meta-label">Currency</p>
+      <input class="meta-input" id="currency-code" value="HKD" oninput="updatePreview()" style="text-transform:uppercase">
+    </div>
   </div>
+
   <div class="divider"></div>
-  <p class="section-label">Columns — Drag to Reorder · Click to Toggle</p>
-  <p class="col-chips-hint">⠿ drag to reorder &nbsp;·&nbsp; click to show / hide</p>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+    <p class="section-label" style="margin:0">Columns — Drag to Reorder · Click to Toggle</p>
+    <button class="link-btn" id="toggle-w-btn" onclick="toggleWidthPanel()">▸ Adjust column widths</button>
+  </div>
+  <p class="chips-hint">⠿ drag to reorder &nbsp;·&nbsp; click to show / hide</p>
   <div class="col-grid" id="col-grid"></div>
-  <div style="margin-top:1rem;display:flex;gap:.5rem">
+  <div style="margin-top:.9rem;display:flex;gap:.5rem">
     <button class="btn btn-ghost" onclick="selectAll()">Select All</button>
     <button class="btn btn-ghost" onclick="selectNone()">Clear All</button>
   </div>
+
+  <!-- Width panel -->
+  <div class="width-panel" id="width-panel">
+    <div class="divider"></div>
+    <p class="section-label">Column Widths &nbsp;<span style="font-size:11px;color:var(--ink3);font-weight:300;text-transform:none;letter-spacing:0">— or drag ↔ handles on the table headers below</span></p>
+    <div class="width-grid" id="width-grid"></div>
+    <div style="margin-top:.9rem">
+      <button class="btn btn-ghost" onclick="resetWidths()">Reset to defaults</button>
+    </div>
+  </div>
 </div>
 
+<!-- PREVIEW -->
 <div class="card" id="preview-card" style="display:none">
   <div class="action-row">
-    <div><p class="section-label">Preview</p><span class="count-badge"><span class="count-num" id="row-count">0</span> lots</span></div>
+    <div>
+      <p class="section-label">Preview</p>
+      <span class="count-info"><span class="count-num" id="row-count">0</span> lots</span>
+    </div>
     <div style="flex:1"></div>
     <div id="status-wrap"></div>
     <div class="lang-toggle">
       <button class="lang-opt active" id="btn-en" onclick="setLang('en')">EN</button>
       <button class="lang-opt" id="btn-zh" onclick="setLang('zh')">中文</button>
     </div>
-    <button class="btn btn-dark" onclick="downloadPDF()">⬇ &nbsp;Download PDF</button>
+    <button class="btn btn-bur" id="pdf-btn" onclick="downloadPDF()">⬇ &nbsp;Download PDF</button>
   </div>
 
   <div class="preview-header">
     <div>
-      <div class="ph-date" id="ph-date"></div>
+      <div class="ph-eyebrow" id="ph-eyebrow"></div>
       <div class="ph-title" id="ph-title"><strong>May Fine Wine Auction</strong></div>
     </div>
-    <div class="ph-brand">Acker Wines<br>Since 1820</div>
+    <div style="display:flex;align-items:flex-end;gap:1.5rem">
+      <img src="https://wailapho.github.io/acker/img/acker-logo-white.svg" alt="Acker" style="height:32px;width:auto;opacity:.85" onerror="this.style.display='none'">
+      <div class="ph-brand">Fine Wine<br>Since 1820</div>
+    </div>
   </div>
   <div class="preview-bar"></div>
+
   <div class="preview-wrap">
-    <table class="wine-table"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+    <table class="wine-table" id="wine-table">
+      <colgroup id="colgroup"></colgroup>
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
   <div class="preview-bar"></div>
 </div>
 
-</div>
+</div><!-- /app -->
+
 <script>
+/* ── STATE ── */
 let allData=[], colOrder=[], selectedCols=new Set();
 let wineCol=null, lang='en', translations={}, translating=false;
-let dragSrc=null;
+let colWidths={}, dragSrc=null, resizeListenerSet=false;
 
-const fileInput=document.getElementById('file-input');
-const dropzone=document.getElementById('dropzone');
+const isPriceLike=c=>/price|usd|eur|gbp|hkd|amount|value|hammer/i.test(c);
+const isLotLike  =c=>/^lot$/i.test(c);
+const isQtyLike  =c=>/^qty|quantity/i.test(c);
 
-fileInput.addEventListener('change',e=>handleFile(e.target.files[0]));
-dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('drag')});
-dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('drag'));
-dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('drag');handleFile(e.dataTransfer.files[0])});
+function defaultWidth(col){
+  if(isLotLike(col))   return 72;
+  if(isQtyLike(col))   return 100;
+  if(isPriceLike(col)) return 145;
+  if(col===wineCol)    return 420;
+  return 130;
+}
+function getW(col){ return colWidths[col]||defaultWidth(col); }
+function initWidths(){ colOrder.forEach(c=>{ colWidths[c]=defaultWidth(c); }); }
+
+/* ── FILE ── */
+document.getElementById('file-input').addEventListener('change',e=>handleFile(e.target.files[0]));
+const dz=document.getElementById('dropzone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');handleFile(e.dataTransfer.files[0])});
 
 function handleFile(file){
-  if(!file) return;
-  document.getElementById('file-badge').innerHTML=`<div class="badge-file">📄 ${file.name}</div>`;
+  if(!file)return;
+  document.getElementById('file-badge').innerHTML=`<div class="file-badge">📄 ${file.name}</div>`;
   const reader=new FileReader();
   reader.onload=e=>{
     const wb=XLSX.read(e.target.result,{type:'binary'});
     const ws=wb.Sheets[wb.SheetNames[0]];
     allData=XLSX.utils.sheet_to_json(ws,{defval:''});
-    if(!allData.length) return;
+    if(!allData.length)return;
     colOrder=Object.keys(allData[0]);
     selectedCols=new Set(colOrder);
     wineCol=colOrder.find(c=>/wine|name|cuvee|label|desc/i.test(c))||null;
-    translations={}; lang='en';
+    translations={}; lang='en'; colWidths={};
     document.getElementById('btn-en').classList.add('active');
     document.getElementById('btn-zh').classList.remove('active');
+    document.getElementById('status-wrap').innerHTML='';
+    initWidths();
     buildChips();
+    buildWidthPanel();
     document.getElementById('config-card').style.display='block';
     document.getElementById('preview-card').style.display='block';
     setStep(2); updateMeta(); updatePreview();
-    setTimeout(()=>document.getElementById('config-card').scrollIntoView({behavior:'smooth',block:'start'}),100);
+    setTimeout(()=>document.getElementById('config-card').scrollIntoView({behavior:'smooth',block:'start'}),120);
   };
   reader.readAsBinaryString(file);
 }
@@ -190,9 +309,8 @@ function buildChips(){
   colOrder.forEach(col=>{
     const c=document.createElement('div');
     c.className='col-chip'+(selectedCols.has(col)?' on':'');
-    c.dataset.col=col;
-    c.draggable=true;
-    c.innerHTML=`<span class="drag-handle">⠿⠿</span><span>${col}</span>`;
+    c.dataset.col=col; c.draggable=true;
+    c.innerHTML=`<span class="drag-h">⠿⠿</span><span>${col}</span>`;
     c.addEventListener('click',()=>toggleChip(col,c));
     c.addEventListener('dragstart',e=>{dragSrc=col;c.classList.add('dragging');e.dataTransfer.effectAllowed='move'});
     c.addEventListener('dragend',()=>{c.classList.remove('dragging');document.querySelectorAll('.col-chip').forEach(x=>x.classList.remove('dragover'))});
@@ -202,7 +320,7 @@ function buildChips(){
       if(col!==dragSrc){
         const fi=colOrder.indexOf(dragSrc),ti=colOrder.indexOf(col);
         colOrder.splice(fi,1);colOrder.splice(ti,0,dragSrc);
-        buildChips();updatePreview();
+        buildChips();buildWidthPanel();updatePreview();
       }
     });
     g.appendChild(c);
@@ -211,207 +329,391 @@ function buildChips(){
 function toggleChip(col,el){
   if(selectedCols.has(col)){selectedCols.delete(col);el.classList.remove('on')}
   else{selectedCols.add(col);el.classList.add('on')}
-  updatePreview();
+  buildWidthPanel();updatePreview();
 }
-function selectAll(){colOrder.forEach(c=>selectedCols.add(c));buildChips();updatePreview()}
-function selectNone(){selectedCols.clear();buildChips();updatePreview()}
+function selectAll(){colOrder.forEach(c=>selectedCols.add(c));buildChips();buildWidthPanel();updatePreview()}
+function selectNone(){selectedCols.clear();buildChips();buildWidthPanel();updatePreview()}
+
+/* ── WIDTH PANEL ── */
+let widthOpen=false;
+function toggleWidthPanel(){
+  widthOpen=!widthOpen;
+  document.getElementById('width-panel').classList.toggle('open',widthOpen);
+  document.getElementById('toggle-w-btn').textContent=(widthOpen?'▾':'▸')+' Adjust column widths';
+}
+function buildWidthPanel(){
+  const visCols=colOrder.filter(c=>selectedCols.has(c));
+  const g=document.getElementById('width-grid');
+  g.innerHTML='';
+  visCols.forEach(col=>{
+    const w=getW(col);
+    const div=document.createElement('div');
+    div.className='width-row';
+    div.innerHTML=`<span class="wc-name" title="${col}">${col}</span>
+      <input type="range" min="50" max="650" value="${w}" data-col="${col}" oninput="applySlider(this)">
+      <span class="wc-val" id="wv-${btoa(col).replace(/[^a-z0-9]/gi,'')}">${w}px</span>`;
+    g.appendChild(div);
+  });
+}
+function applySlider(input){
+  const col=input.dataset.col, w=+input.value;
+  colWidths[col]=w;
+  const id='wv-'+btoa(col).replace(/[^a-z0-9]/gi,'');
+  const lbl=document.getElementById(id);
+  if(lbl) lbl.textContent=w+'px';
+  const visCols=colOrder.filter(c=>selectedCols.has(c));
+  const vi=visCols.indexOf(col);
+  const el=document.getElementById('cw-'+vi);
+  if(el) el.style.width=w+'px';
+}
+function resetWidths(){
+  colOrder.forEach(c=>{colWidths[c]=defaultWidth(c)});
+  buildWidthPanel();updatePreview();
+}
+
+/* ── RESIZE HANDLES ── */
+function setupResizeHandles(){
+  document.getElementById('thead').addEventListener('mousedown',e=>{
+    const rh=e.target.closest('.rh');
+    if(!rh)return;
+    e.preventDefault();
+    const vi=+rh.dataset.vi, col=rh.dataset.col;
+    const colEl=document.getElementById('cw-'+vi);
+    const startX=e.clientX;
+    const startW=colEl?parseInt(colEl.style.width)||getW(col):getW(col);
+    rh.classList.add('active');
+    document.body.classList.add('resizing');
+    function onMove(e){
+      const nw=Math.max(50,startW+(e.clientX-startX));
+      colWidths[col]=nw;
+      if(colEl) colEl.style.width=nw+'px';
+      const id='wv-'+btoa(col).replace(/[^a-z0-9]/gi,'');
+      const lbl=document.getElementById(id);
+      if(lbl) lbl.textContent=Math.round(nw)+'px';
+      const sldr=document.querySelector(`input[type=range][data-col="${CSS.escape(col)}"]`);
+      if(sldr) sldr.value=nw;
+    }
+    function onUp(){
+      rh.classList.remove('active');
+      document.body.classList.remove('resizing');
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+    }
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+  });
+}
 
 /* ── PRICE FORMAT ── */
 function fmtPrice(raw){
   const code=(document.getElementById('currency-code')?.value||'HKD').trim().toUpperCase()||'HKD';
   const n=parseFloat(String(raw).replace(/[^0-9.]/g,''));
-  if(isNaN(n)) return raw;
+  if(isNaN(n))return raw;
   return code+'\u00A0'+Math.round(n).toLocaleString('en-US');
 }
-
-/* ── DETECT COLUMN TYPES ── */
-const isPriceLike=c=>/price|usd|eur|gbp|hkd|amount|value|hammer/i.test(c);
-const isLotLike=c=>/^lot$/i.test(c);
-const isQtyLike=c=>/^qty|quantity/i.test(c);
 
 /* ── META ── */
 function updateMeta(){
   document.getElementById('ph-title').innerHTML=`<strong>${document.getElementById('sale-title').value||'Wine Auction'}</strong>`;
-  document.getElementById('ph-date').textContent=document.getElementById('sale-date').value||'';
+  document.getElementById('ph-eyebrow').textContent=document.getElementById('sale-date').value||'';
 }
 
-/* ── LANG ── */
+/* ── STEP ── */
+function setStep(n){['s1','s2','s3'].forEach((id,i)=>{document.getElementById(id).className='step'+(i+1===n?' active':i+1<n?' done':'');})}
+
+/* ── TRANSLATION ── */
+function setStatus(type,html){
+  document.getElementById('status-wrap').innerHTML=html?`<span class="status-pill ${type}">${html}</span>`:'';
+}
+
 async function setLang(l){
-  if(translating) return;
-  if(l===lang) return;
+  if(translating||l===lang)return;
   lang=l;
   document.getElementById('btn-en').classList.toggle('active',l==='en');
   document.getElementById('btn-zh').classList.toggle('active',l==='zh');
-  if(l==='zh' && Object.keys(translations).length===0){
-    await runTranslation();
-  } else {
-    updatePreview();
-  }
+  if(l==='zh'&&Object.keys(translations).length===0) await runTranslation();
+  else updatePreview();
 }
-
-function setStatus(html){document.getElementById('status-wrap').innerHTML=html}
 
 async function runTranslation(){
   translating=true;
-  setStatus(`<span class="status-pill"><span class="spinner"></span>Translating…</span>`);
-  document.getElementById('btn-en').disabled=true;
-  document.getElementById('btn-zh').disabled=true;
+  setStatus('loading','<span class="spinner"></span>&nbsp;Translating…');
+  ['btn-en','btn-zh'].forEach(id=>document.getElementById(id).disabled=true);
 
   const items=new Set();
   colOrder.forEach(c=>items.add(c));
-  allData.forEach(row=>{
-    colOrder.forEach(c=>{
-      if(c===wineCol) return;
-      const v=String(row[c]||'').trim();
-      if(v) items.add(v);
-    });
-  });
-  const list=[...items];
+  allData.forEach(row=>colOrder.forEach(c=>{
+    if(c===wineCol)return;
+    const v=String(row[c]||'').trim();
+    if(v)items.add(v);
+  }));
 
-  const prompt=`You are a wine auction data translator. Translate each item in the JSON array from English to Simplified Chinese.
+  const prompt=`You are a wine auction data translator. Translate each item in the JSON array to Simplified Chinese.
 
-STRICT RULES — follow exactly:
-1. Wine names, producer names, domaine names, château names, vineyard names, vintage years (e.g. 2010, 1947) → MUST stay in English, do NOT translate.
-2. Quantity shorthands → translate: "1 Mag"→"1支马格南", "1 Btl"→"1瓶", "3 Btls"→"3瓶", "6 Btls"→"6瓶", "12 Btls"→"12瓶", "3 Mags"→"3支马格南"
-3. Storage notes → translate: "OWC"→"原木箱装", "OCB"→"原纸箱装", "in OWC"→"附原木箱", "in OCB"→"附原纸箱"
-4. Column headers → translate: "LOT"→"拍品编号", "QTY"→"数量", "WINE"→"葡萄酒", "PRICE"→"价格", "PRICE (USD)"→"价格（美元）"
-5. Pure numbers or lot IDs → keep as-is
-6. If unsure → keep original English
+STRICT RULES:
+1. Wine names, producer names, domaine/château/vineyard names, vintage years (e.g. 1947, 2010) → keep in English exactly as-is
+2. Quantities: "1 Mag"→"1支马格南", "1 Btl"→"1瓶", "3 Btls"→"3瓶", "6 Btls"→"6瓶", "12 Btls"→"12瓶", "3 Mags"→"3支马格南"
+3. Storage: "OWC"→"原木箱", "OCB"→"原纸箱", "in OWC"→"附原木箱", "in OCB"→"附原纸箱"
+4. Column headers: "LOT"→"拍品编号", "QTY"→"数量", "WINE"→"葡萄酒", "PRICE"→"价格", "PRICE (USD)"→"价格（美元）"
+5. Pure numbers → keep as-is
+6. When uncertain → keep original
 
-Return ONLY a valid JSON object like {"original":"translated",...} with NO markdown, NO explanation, NO code fences.
+Output ONLY valid JSON {"original":"translated",...} — no markdown, no explanation, no code fences.
 
-Array to translate:
-${JSON.stringify(list)}`;
+Items: ${JSON.stringify([...items])}`;
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:2000,
-        messages:[{role:'user',content:prompt}]
-      })
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})
     });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    if(!res.ok)throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     const data=await res.json();
-    if(data.error) throw new Error(data.error.message);
-    const raw=data.content?.find(b=>b.type==='text')?.text||'';
-    const cleaned=raw.replace(/^```[a-z]*\n?|\n?```$/g,'').trim();
-    translations=JSON.parse(cleaned);
-    setStatus('');
-    updatePreview();
-  } catch(err){
+    if(data.error)throw new Error(data.error.message);
+    const raw=data.content?.find(b=>b.type==='text')?.text||'{}';
+    translations=JSON.parse(raw.replace(/^```[a-z]*\n?|\n?```$/g,'').trim());
+    setStatus('success','✓ Translated');
+    setTimeout(()=>setStatus('',''),2500);
+  }catch(err){
     console.error('Translation error:',err);
-    setStatus(`<span class="status-pill err">⚠ Translation failed: ${err.message}</span>`);
+    setStatus('error',`⚠ ${err.message}`);
     lang='en';
     document.getElementById('btn-en').classList.add('active');
     document.getElementById('btn-zh').classList.remove('active');
-  } finally{
+  }finally{
     translating=false;
-    document.getElementById('btn-en').disabled=false;
-    document.getElementById('btn-zh').disabled=false;
+    ['btn-en','btn-zh'].forEach(id=>document.getElementById(id).disabled=false);
+    updatePreview();
   }
 }
 
-function t(val,isWine){
-  if(lang==='en'||isWine) return val;
+function tr(val,isWine){
+  if(lang==='en'||isWine)return val;
   return translations[String(val)]||val;
 }
 
-/* ── RENDER TABLE ── */
+/* ── RENDER PREVIEW ── */
 function updatePreview(){
   setStep(3);
-  const cols=colOrder.filter(c=>selectedCols.has(c));
+  const visCols=colOrder.filter(c=>selectedCols.has(c));
   document.getElementById('row-count').textContent=allData.length;
 
-  document.getElementById('thead').innerHTML=`<tr>${cols.map(c=>`<th>${t(c,false)}</th>`).join('')}</tr>`;
-  document.getElementById('tbody').innerHTML=allData.map(row=>`<tr>${cols.map(c=>{
-    const raw=String(row[c]??'');
-    const isWine=(c===wineCol);
-    const val=t(raw,isWine);
-    if(isLotLike(c)) return `<td><span class="lot-badge">${val}</span></td>`;
-    if(isPriceLike(c)) return `<td class="price-cell">${fmtPrice(raw)}</td>`;
-    if(isWine) return `<td class="wine-cell">${raw}</td>`;
-    if(isQtyLike(c)) return `<td class="qty-cell">${val}</td>`;
+  // colgroup
+  document.getElementById('colgroup').innerHTML=visCols.map((col,i)=>`<col id="cw-${i}" style="width:${getW(col)}px">`).join('');
+
+  // thead with resize handles
+  document.getElementById('thead').innerHTML=`<tr>${visCols.map((col,i)=>`<th><span style="pointer-events:none">${tr(col,false)}</span><div class="rh" data-vi="${i}" data-col="${col}" title="Drag to resize column"></div></th>`).join('')}</tr>`;
+
+  // tbody
+  document.getElementById('tbody').innerHTML=allData.map(row=>`<tr>${visCols.map(col=>{
+    const raw=String(row[col]??'');
+    const isWine=(col===wineCol);
+    const val=tr(raw,isWine);
+    if(isLotLike(col))   return `<td><span class="lot-badge">${val}</span></td>`;
+    if(isPriceLike(col)) return `<td class="price-cell">${fmtPrice(raw)}</td>`;
+    if(isWine)           return `<td class="wine-cell">${raw}</td>`;
+    if(isQtyLike(col))   return `<td class="qty-cell">${val}</td>`;
     return `<td>${val}</td>`;
-  }).join('')}</tr>`).join('');
+  }).join('')}</tr>`).join('')||`<tr><td colspan="${visCols.length}" style="text-align:center;padding:3rem;color:var(--ink3)">No data</td></tr>`;
+
+  if(!resizeListenerSet){setupResizeHandles();resizeListenerSet=true;}
 }
 
-function setStep(n){
-  ['s1','s2','s3'].forEach((id,i)=>{
-    document.getElementById(id).className='step'+(i+1===n?' active':i+1<n?' done':'');
+/* ── PDF GENERATION ── */
+async function loadLogoDataURL(){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    const t=setTimeout(()=>resolve(null),3000);
+    img.onload=()=>{
+      clearTimeout(t);
+      try{
+        const c=document.createElement('canvas');
+        c.width=img.naturalWidth||400; c.height=img.naturalHeight||110;
+        if(!c.width||!c.height){resolve(null);return;}
+        const ctx=c.getContext('2d');
+        ctx.drawImage(img,0,0);
+        resolve(c.toDataURL('image/png'));
+      }catch(e){resolve(null);}
+    };
+    img.onerror=()=>{clearTimeout(t);resolve(null);};
+    img.src='https://wailapho.github.io/acker/img/acker-logo-white.svg';
   });
 }
 
-/* ── PDF ── */
-function downloadPDF(){
-  const cols=colOrder.filter(c=>selectedCols.has(c));
-  const title=document.getElementById('sale-title').value||'Wine Auction';
-  const date=document.getElementById('sale-date').value||'';
-  const safeTitleCSS=title.replace(/"/g,"'");
-  const safeDateCSS=date.replace(/"/g,"'");
+async function downloadPDF(){
+  const btn=document.getElementById('pdf-btn');
+  btn.disabled=true; btn.textContent='⏳  Generating…';
 
-  const headerRow=`<tr>${cols.map(c=>`<th>${t(c,false)}</th>`).join('')}</tr>`;
-  const bodyRows=allData.map((row,ri)=>`<tr class="${ri%2===1?'alt':''}">${cols.map(c=>{
-    const raw=String(row[c]??'');
-    const isWine=(c===wineCol);
-    const val=t(raw,isWine);
-    if(isLotLike(c)) return `<td class="lot">${val}</td>`;
-    if(isPriceLike(c)) return `<td class="price">${fmtPrice(raw)}</td>`;
-    if(isWine) return `<td class="wine">${raw}</td>`;
-    return `<td>${val}</td>`;
-  }).join('')}</tr>`).join('');
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait',compress:true});
 
-  const html=`<!DOCTYPE html><html><head>
-<meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
-<title>${title}</title>
-<style>
-@page{
-  size:A4 portrait;
-  margin:2cm 1.5cm 2.8cm 1.5cm;
-}
-@page{
-  @bottom-left{content:"${safeTitleCSS}  ·  ${safeDateCSS}";font-size:7.5pt;color:#8a8884;font-family:'Nunito Sans',sans-serif;letter-spacing:.08em}
-  @bottom-center{content:"— " counter(page) " / " counter(pages) " —";font-size:8.5pt;color:#801747;font-family:'Nunito Sans',sans-serif;letter-spacing:.12em}
-  @bottom-right{content:"Acker Wines  ·  Since 1820";font-size:7.5pt;color:#BEAD85;font-family:'Nunito Sans',sans-serif;letter-spacing:.08em}
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Nunito Sans',sans-serif;color:#212121;font-size:12pt;font-weight:300;background:#fff}
-.doc-header{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:.85rem;border-bottom:2px solid #801747;margin-bottom:.3rem}
-.gold-rule{height:1px;background:#BEAD85;opacity:.5;margin-bottom:1.6rem}
-.logo-name{font-size:2rem;font-style:italic;font-weight:300;color:#111;line-height:1}
-.logo-since{font-size:7pt;letter-spacing:.26em;text-transform:uppercase;color:#8a8884;margin-top:2px}
-.sale-block{text-align:right}
-.sale-date{font-size:8pt;letter-spacing:.2em;text-transform:uppercase;color:#BEAD85;margin-bottom:4px}
-.sale-title{font-size:13pt;font-weight:300;color:#111}
-.sale-title strong{font-weight:700}
-table{width:100%;border-collapse:collapse;font-size:11.5pt}
-thead{display:table-header-group}
-th{background:#801747;color:#fff;font-size:8pt;letter-spacing:.18em;text-transform:uppercase;font-weight:600;padding:.55rem .85rem;text-align:left}
-td{padding:.55rem .85rem;border-bottom:1px solid rgba(33,33,33,.09);vertical-align:middle;line-height:1.4}
-tr.alt td{background:rgba(242,242,242,.6)}
-tr{page-break-inside:avoid}
-td.lot{font-weight:700;color:#801747;font-size:10pt}
-td.wine{font-weight:700;font-size:12pt}
-td.price{font-weight:600;text-align:right;white-space:nowrap;font-size:11pt;letter-spacing:.02em}
-</style>
-</head><body>
-<div class="doc-header">
-  <div><div class="logo-name">Acker</div><div class="logo-since">Since 1820 · Fine Wine Auction House</div></div>
-  <div class="sale-block"><div class="sale-date">${date}</div><div class="sale-title"><strong>${title}</strong></div></div>
-</div>
-<div class="gold-rule"></div>
-<table><thead>${headerRow}</thead><tbody>${bodyRows}</tbody></table>
-<script>window.addEventListener('load',()=>{setTimeout(()=>window.print(),400)});<\/script>
-</body></html>`;
+    const PW=210,PH=297;
+    const ML=14,MR=14,MB=20;
+    const CW=PW-ML-MR;
 
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  const w=window.open(url,'_blank');
-  if(!w){const a=document.createElement('a');a.href=url;a.download=title.replace(/\s+/g,'-')+'.html';a.click()}
-  setTimeout(()=>URL.revokeObjectURL(url),15000);
+    const title=document.getElementById('sale-title').value||'Wine Auction';
+    const date=document.getElementById('sale-date').value||'';
+    const visCols=colOrder.filter(c=>selectedCols.has(c));
+    const totalPx=visCols.reduce((s,c)=>s+getW(c),0);
+    const colMMs=visCols.map(c=>(getW(c)/totalPx*CW));
+
+    // Colors
+    const BUR=[128,23,71],GOLD=[190,173,133],INK=[33,33,33],
+          INK2=[90,87,85],INK3=[138,136,132],BLK=[17,17,17],
+          LGRAY=[246,245,244],LINE=[218,215,210],WHITE=[255,255,255];
+
+    const HDR_H=30, TBL_H=9, ROW_H=8;
+    const TP='{TP}';
+
+    // Try loading logo
+    const logoDataURL=await loadLogoDataURL();
+
+    let page=0,y=0;
+
+    function drawDocHeader(){
+      // Black bg
+      doc.setFillColor(...BLK);
+      doc.rect(0,0,PW,HDR_H,'F');
+      // Burgundy bottom strip
+      doc.setFillColor(...BUR);
+      doc.rect(0,HDR_H-1.5,PW,1.5,'F');
+      // Gold rule
+      doc.setDrawColor(...GOLD);
+      doc.setLineWidth(0.3);
+      doc.line(ML,HDR_H+1.2,PW-MR,HDR_H+1.2);
+
+      // LOGO
+      if(logoDataURL){
+        try{ doc.addImage(logoDataURL,'PNG',ML,5,52,18,undefined,'FAST'); }
+        catch(e){ drawLogoText(); }
+      } else { drawLogoText(); }
+
+      // Date top-right
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(7);
+      doc.setTextColor(...GOLD);
+      doc.text(date.toUpperCase(),PW-MR,13,{align:'right'});
+
+      // Title right
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(14);
+      doc.setTextColor(...WHITE);
+      doc.text(title,PW-MR,24,{align:'right'});
+    }
+
+    function drawLogoText(){
+      doc.setFont('helvetica','bolditalic');
+      doc.setFontSize(22);
+      doc.setTextColor(...WHITE);
+      doc.text('Acker',ML,20);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(...GOLD);
+      doc.text('SINCE 1820  ·  FINE WINE AUCTION HOUSE',ML,26);
+    }
+
+    function drawTableHeader(startY){
+      doc.setFillColor(...BUR);
+      doc.rect(ML,startY,CW,TBL_H,'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(...WHITE);
+      let x=ML;
+      visCols.forEach((col,i)=>{
+        const cw=colMMs[i];
+        const label=tr(col,false).toUpperCase();
+        const safe=doc.splitTextToSize(label,cw-3)[0]||label;
+        const isP=isPriceLike(col);
+        doc.text(safe,isP?(x+cw-2):(x+2),startY+TBL_H-2.5,{align:isP?'right':'left'});
+        x+=cw;
+      });
+      return startY+TBL_H;
+    }
+
+    function drawFooter(pn){
+      const fy=PH-MB+4;
+      doc.setDrawColor(...GOLD);
+      doc.setLineWidth(0.25);
+      doc.line(ML,fy-1,PW-MR,fy-1);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(7);
+      doc.setTextColor(...INK3);
+      doc.text(`${title}  ·  ${date}`,ML,fy+3.5);
+      doc.setTextColor(...BUR);
+      doc.text(`— ${pn} / ${TP} —`,PW/2,fy+3.5,{align:'center'});
+      doc.setTextColor(...GOLD);
+      doc.text('Acker Wines  ·  ackerwines.com',PW-MR,fy+3.5,{align:'right'});
+    }
+
+    function newPage(){
+      if(page>0)doc.addPage();
+      page++;
+      drawDocHeader();
+      return drawTableHeader(HDR_H+3);
+    }
+
+    y=newPage();
+
+    allData.forEach((row,ri)=>{
+      if(y+ROW_H>PH-MB){
+        drawFooter(page);
+        y=newPage();
+      }
+      // Alt row bg
+      if(ri%2===1){
+        doc.setFillColor(...LGRAY);
+        doc.rect(ML,y,CW,ROW_H,'F');
+      }
+      // Row bottom border
+      doc.setDrawColor(...LINE);
+      doc.setLineWidth(0.2);
+      doc.line(ML,y+ROW_H,ML+CW,y+ROW_H);
+
+      let x=ML;
+      visCols.forEach((col,ci)=>{
+        const cw=colMMs[ci];
+        const raw=String(row[col]??'');
+        const isWine=(col===wineCol);
+        const val=tr(raw,isWine);
+        const disp=isPriceLike(col)?fmtPrice(raw):val;
+
+        if(isLotLike(col)){
+          doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...BUR);
+        }else if(isWine){
+          doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK);
+        }else if(isPriceLike(col)){
+          doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK);
+        }else if(isQtyLike(col)){
+          doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...INK2);
+        }else{
+          doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...INK2);
+        }
+
+        const isP=isPriceLike(col);
+        const truncated=doc.splitTextToSize(disp,cw-3)[0]||disp;
+        doc.text(truncated,isP?(x+cw-2):(x+2),y+ROW_H-2.2,{align:isP?'right':'left'});
+        x+=cw;
+      });
+      y+=ROW_H;
+    });
+
+    drawFooter(page);
+    doc.putTotalPages(TP);
+
+    const fileName=(title.replace(/[^a-z0-9]+/gi,'-').toLowerCase())+'.pdf';
+    doc.save(fileName);
+
+  }catch(err){
+    console.error('PDF error:',err);
+    alert('PDF generation failed: '+err.message);
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='⬇ &nbsp;Download PDF';
+  }
 }
 </script>
-</body></html>
+</body>
+</html>
