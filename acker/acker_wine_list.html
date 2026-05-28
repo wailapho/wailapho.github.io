@@ -802,7 +802,7 @@ async function downloadPDF_Direct(logoDataURL,title,date,fileName){
   const visCols=colOrder.filter(c=>selectedCols.has(c));
   const totalPx=visCols.reduce((s,c)=>s+getW(c),0);
   const colMMs=visCols.map(c=>getW(c)/totalPx*CW);
-  const {BUR,GOLD,INK,INK2,INK3,LGRAY,LINE,WHITE}=pdfColors();
+  const {BUR,GOLD,INK,INK2,INK3,BLK,LGRAY,LINE,WHITE}=pdfColors();
   const HDR_H=30,TBL_H=9,ROW_H=8;
   const TP='{TP}';
   let page=0,y=0;
