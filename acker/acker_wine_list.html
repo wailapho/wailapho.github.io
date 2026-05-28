@@ -128,6 +128,12 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 .pct-over{color:#c0392b}
 .pct-none{color:var(--ink3);font-weight:300}
 
+/* Section dividers */
+.section-divider td{padding:0;border-bottom:none!important;background:transparent!important}
+.sec-label{display:block;background:var(--blk);color:var(--gold);font-size:10px;font-weight:700;
+  letter-spacing:.22em;text-transform:uppercase;padding:.6rem 1rem;margin-top:.5rem;
+  border-left:3px solid var(--bur)}
+
 /* RESIZE HANDLE */
 .rh{position:absolute;top:0;right:0;bottom:0;width:7px;cursor:col-resize;z-index:2;display:flex;align-items:center;justify-content:center}
 .rh::after{content:'';display:block;width:2px;height:55%;background:rgba(190,173,133,0);transition:background .15s;border-radius:1px}
@@ -257,7 +263,9 @@ body.resizing,.resizing *{cursor:col-resize!important;user-select:none!important
 let allData=[], colOrder=[], selectedCols=new Set();
 let wineCol=null, listPriceCol=null, salePriceCol=null, lang='en';
 let colWidths={}, dragSrc=null, resizeListenerSet=false;
-const PCT_KEY='__PCT_OFF__'; // virtual computed column key
+let isStructured=false; // true when file has section headers
+const PCT_KEY='__PCT_OFF__';
+const SEC_KEY='__SEC__';   // internal section name stored per row
 
 const isPriceLike =c=>/price|usd|eur|gbp|hkd|amount|value|hammer/i.test(c);
 const isLotLike   =c=>/^(lot|item\s*#?)$/i.test(c);
@@ -266,6 +274,11 @@ const isFmtLike   =c=>/^(fmt|format)$/i.test(c);
 const isScoreLike =c=>/^score$/i.test(c);
 const isRegionLike=c=>/region|appellation/i.test(c);
 const isPctOff    =c=>c===PCT_KEY;
+
+function parsePrice(val){
+  if(val===null||val===undefined||val==='') return NaN;
+  return parseFloat(String(val).replace(/[$,\s]/g,''));
+}
 
 function defaultWidth(col){
   if(isPctOff(col))    return 90;
@@ -311,6 +324,11 @@ const ZH={
   'Cote de Nuits':'夜丘','Cote de Beaune':'伯恩丘',
   'Côte Chalonnaise':'夏隆内丘','Cote Chalonnaise':'夏隆内丘',
   'USA Red':'美国红葡萄酒','English Sparkling':'英国气泡酒',
+  // Section headers (new format)
+  'Champagne and sparkling':'香槟与气泡酒',
+  'Red Burgundy':'勃艮第红葡萄酒',
+  'White Burgundy':'勃艮第白葡萄酒',
+  'USA':'美国','Bordeaux':'波尔多',
 };
 
 function zhTranslate(text){
@@ -346,6 +364,56 @@ function trCol(col){
   return zhTranslate(col)||col;
 }
 
+/* ── STRUCTURED EXCEL PARSER ── */
+function parseStructuredData(raw){
+  // Detect if this is the new sectioned format or the old flat format
+  let headers=null, currentSection=null, rows=[], structured=false;
+  const SKIP_PHRASES=['offered subject to final confirmation'];
+
+  for(const row of raw){
+    // Skip entirely empty rows
+    if(!row||row.every(v=>v===null||v===undefined||v==='')) continue;
+
+    const first=row[0];
+    const restEmpty=row.slice(1).every(v=>v===null||v===undefined||v==='');
+
+    // Column header row (QTY / LOT / ITEM # in first cell, other headers follow)
+    if(typeof first==='string' && /^(qty|lot|item\s*#?)$/i.test(first.trim())){
+      if(!headers) headers=row.map(v=>v??'').filter(v=>v!=='');
+      continue;
+    }
+
+    // Section header: text only in col A, all others empty
+    if(typeof first==='string' && restEmpty){
+      if(SKIP_PHRASES.includes(first.trim().toLowerCase())) continue;
+      structured=true;
+      currentSection=first.trim();
+      continue;
+    }
+
+    // Data row — must have headers
+    if(headers && first!==null && first!==undefined && first!==''){
+      const obj={};
+      headers.forEach((h,i)=>{ obj[h]=row[i]??''; });
+      if(structured && currentSection) obj[SEC_KEY]=currentSection;
+      rows.push(obj);
+    }
+  }
+
+  // Fallback: if no header row found, first row is header
+  if(!headers && rows.length===0 && raw.length>0){
+    headers=raw[0].filter(v=>v!==null&&v!==undefined&&v!=='');
+    for(let i=1;i<raw.length;i++){
+      const row=raw[i];
+      if(!row||row.every(v=>v===null||v===undefined||v==='')) continue;
+      const obj={};
+      headers.forEach((h,j)=>{ obj[h]=row[j]??''; });
+      rows.push(obj);
+    }
+  }
+
+  return {headers:headers||[], rows, isStructured:structured};
+}
 /* ── FILE ── */
 document.getElementById('file-input').addEventListener('change',e=>handleFile(e.target.files[0]));
 const dz=document.getElementById('dropzone');
@@ -360,24 +428,24 @@ function handleFile(file){
   reader.onload=e=>{
     const wb=XLSX.read(e.target.result,{type:'binary'});
     const ws=wb.Sheets[wb.SheetNames[0]];
-    allData=XLSX.utils.sheet_to_json(ws,{defval:''});
-    if(!allData.length)return;
-    colOrder=Object.keys(allData[0]);
-    selectedCols=new Set(colOrder);
-    wineCol=colOrder.find(c=>/^wine$|^name$|cuvee|label/i.test(c))||null;
+    const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+    const parsed=parseStructuredData(raw);
 
-    // Auto-detect list price & sale price for % Off calculation
+    allData=parsed.rows;
+    isStructured=parsed.isStructured;
+    colOrder=[...parsed.headers];
+    selectedCols=new Set(colOrder);
+
+    wineCol=colOrder.find(c=>/^wine$|^name$|cuvee|label/i.test(c))||null;
     listPriceCol=colOrder.find(c=>/hkd.?price|retail|list.?price/i.test(c)&&!/sale/i.test(c))
                  ||colOrder.find(c=>isPriceLike(c)&&!/sale|cost/i.test(c))||null;
     salePriceCol=colOrder.find(c=>/sale.?price|hammer|auction.?price/i.test(c))||null;
 
-    // Add virtual % Off column if both price cols found and data has non-empty sale prices
-    const hasSales=salePriceCol&&allData.some(r=>r[salePriceCol]!==''&&r[salePriceCol]!=null);
+    const hasSales=salePriceCol&&allData.some(r=>{
+      const v=r[salePriceCol]; return v!==''&&v!=null&&parsePrice(v)>0;
+    });
     if(listPriceCol&&hasSales){
-      if(!colOrder.includes(PCT_KEY)){
-        colOrder.push(PCT_KEY);
-        selectedCols.add(PCT_KEY);
-      }
+      if(!colOrder.includes(PCT_KEY)){ colOrder.push(PCT_KEY); selectedCols.add(PCT_KEY); }
     } else {
       const i=colOrder.indexOf(PCT_KEY);
       if(i>-1){ colOrder.splice(i,1); selectedCols.delete(PCT_KEY); }
@@ -503,8 +571,8 @@ function setupResizeHandles(){
 /* ── PRICE FORMAT ── */
 function fmtPrice(raw){
   const code=(document.getElementById('currency-code')?.value||'HKD').trim().toUpperCase()||'HKD';
-  const n=parseFloat(String(raw).replace(/[^0-9.]/g,''));
-  if(isNaN(n))return raw;
+  const n=parsePrice(raw);
+  if(isNaN(n))return String(raw);
   return code+'\u00A0'+Math.round(n).toLocaleString('en-US');
 }
 
@@ -532,9 +600,9 @@ function setLang(l){
 /* ── RENDER PREVIEW ── */
 function computePctOff(row){
   if(!listPriceCol||!salePriceCol)return null;
-  const list=parseFloat(String(row[listPriceCol]).replace(/[^0-9.]/g,''));
-  const sale=parseFloat(String(row[salePriceCol]).replace(/[^0-9.]/g,''));
-  if(!list||!sale||list<=0)return null;
+  const list=parsePrice(row[listPriceCol]);
+  const sale=parsePrice(row[salePriceCol]);
+  if(isNaN(list)||isNaN(sale)||list<=0||sale<=0)return null;
   return (list-sale)/list*100;
 }
 
@@ -543,35 +611,43 @@ function updatePreview(){
   const visCols=colOrder.filter(c=>selectedCols.has(c));
   document.getElementById('row-count').textContent=allData.length;
 
-  // colgroup
   document.getElementById('colgroup').innerHTML=visCols.map((col,i)=>`<col id="cw-${i}" style="width:${getW(col)}px">`).join('');
-
-  // thead
   document.getElementById('thead').innerHTML=`<tr>${visCols.map((col,i)=>{
     const label=isPctOff(col)?'% Off':trCol(col);
     return `<th><span style="pointer-events:none">${label}</span><div class="rh" data-vi="${i}" data-col="${col}" title="Drag to resize"></div></th>`;
   }).join('')}</tr>`;
 
-  // tbody
-  document.getElementById('tbody').innerHTML=allData.map(row=>`<tr>${visCols.map(col=>{
-    // Virtual % Off column
-    if(isPctOff(col)){
-      const pct=computePctOff(row);
-      if(pct===null) return `<td class="pct-cell pct-none">—</td>`;
-      const abs=Math.abs(pct).toFixed(1);
-      const cls=pct>0?'pct-off':pct<0?'pct-over':'pct-none';
-      const label=pct>0?`↓ ${abs}%`:pct<0?`↑ ${abs}%`:'—';
-      return `<td class="pct-cell ${cls}">${label}</td>`;
+  // tbody — insert section dividers when section changes
+  let lastSec=null;
+  document.getElementById('tbody').innerHTML=allData.map((row,ri)=>{
+    let secRow='';
+    if(isStructured){
+      const sec=row[SEC_KEY]||'';
+      if(sec && sec!==lastSec){
+        lastSec=sec;
+        const secLabel=lang==='zh'?(ZH[sec]||sec):sec;
+        secRow=`<tr class="section-divider"><td colspan="${visCols.length}"><span class="sec-label">${secLabel}</span></td></tr>`;
+      }
     }
-    const raw=String(row[col]??'');
-    const isWine=(col===wineCol);
-    const val=tr(raw,isWine);
-    if(isLotLike(col))    return `<td><span class="lot-badge">${val}</span></td>`;
-    if(isPriceLike(col))  return `<td class="price-cell">${fmtPrice(raw)}</td>`;
-    if(isWine)            return `<td class="wine-cell">${raw}</td>`;
-    if(isQtyLike(col))    return `<td class="qty-cell">${val}</td>`;
-    return `<td>${val}</td>`;
-  }).join('')}</tr>`).join('')||`<tr><td colspan="${visCols.length}" style="text-align:center;padding:3rem;color:var(--ink3)">No data</td></tr>`;
+    const dataRow=`<tr>${visCols.map(col=>{
+      if(isPctOff(col)){
+        const pct=computePctOff(row);
+        if(pct===null) return `<td class="pct-cell pct-none">—</td>`;
+        const abs=Math.abs(pct).toFixed(1);
+        const cls=pct>0?'pct-off':pct<0?'pct-over':'pct-none';
+        return `<td class="pct-cell ${cls}">${pct>0?`↓ ${abs}%`:pct<0?`↑ ${abs}%`:'—'}</td>`;
+      }
+      const raw=String(row[col]??'');
+      const isWine=(col===wineCol);
+      const val=tr(raw,isWine);
+      if(isLotLike(col))   return `<td><span class="lot-badge">${val}</span></td>`;
+      if(isPriceLike(col)) return `<td class="price-cell">${fmtPrice(raw)}</td>`;
+      if(isWine)           return `<td class="wine-cell">${raw}</td>`;
+      if(isQtyLike(col))   return `<td class="qty-cell">${val}</td>`;
+      return `<td>${val}</td>`;
+    }).join('')}</tr>`;
+    return secRow+dataRow;
+  }).join('')||`<tr><td colspan="${visCols.length}" style="text-align:center;padding:3rem;color:var(--ink3)">No data</td></tr>`;
 
   if(!resizeListenerSet){setupResizeHandles();resizeListenerSet=true;}
 }
@@ -653,193 +729,261 @@ async function loadLogoDataURL(){
   }
 }
 
+/* ── SHARED PDF HELPERS ── */
+function pdfColors(){
+  return {
+    BUR:[128,23,71],GOLD:[190,173,133],INK:[33,33,33],
+    INK2:[90,87,85],INK3:[138,136,132],BLK:[17,17,17],
+    LGRAY:[246,245,244],LINE:[218,215,210],WHITE:[255,255,255]
+  };
+}
+function pdfDrawHeader(doc,logoDataURL,title,date){
+  const {BUR,GOLD,BLK,WHITE}=pdfColors();
+  const PW=210,ML=14,MR=14,HDR_H=30;
+  doc.setFillColor(...BLK); doc.rect(0,0,PW,HDR_H,'F');
+  doc.setFillColor(...BUR); doc.rect(0,HDR_H-1.5,PW,1.5,'F');
+  doc.setDrawColor(...GOLD); doc.setLineWidth(0.3); doc.line(ML,HDR_H+1.2,PW-MR,HDR_H+1.2);
+  if(logoDataURL){
+    try{
+      const ar=window._logoAR||LOGO_AR_FALLBACK;
+      const lh=16; doc.addImage(logoDataURL,'PNG',ML,7,lh*ar,lh,undefined,'FAST');
+    }catch(e){ pdfDrawLogoText(doc); }
+  } else { pdfDrawLogoText(doc); }
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...GOLD);
+  doc.text(date.toUpperCase(),PW-MR,13,{align:'right'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(...WHITE);
+  doc.text(title,PW-MR,24,{align:'right'});
+}
+function pdfDrawLogoText(doc){
+  const {GOLD,WHITE}=pdfColors();
+  doc.setFont('helvetica','bolditalic'); doc.setFontSize(22); doc.setTextColor(...WHITE);
+  doc.text('Acker',14,20);
+  doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...GOLD);
+  doc.text('SINCE 1820  ·  FINE WINE AUCTION HOUSE',14,26);
+}
+function pdfDrawFooter(doc,pn,tp,title,date){
+  const {BUR,GOLD,INK3}=pdfColors();
+  const PW=210,PH=297,ML=14,MR=14,MB=20;
+  const fy=PH-MB+4;
+  doc.setDrawColor(...GOLD); doc.setLineWidth(0.25); doc.line(ML,fy-1,PW-MR,fy-1);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7);
+  doc.setTextColor(...INK3); doc.text(`${title}  ·  ${date}`,ML,fy+3.5);
+  doc.setTextColor(...BUR); doc.text(`— ${pn} / ${tp} —`,PW/2,fy+3.5,{align:'center'});
+  doc.setTextColor(...GOLD); doc.text('Acker Wines  ·  ackerwines.com',PW-MR,fy+3.5,{align:'right'});
+}
+
 async function downloadPDF(){
   const btn=document.getElementById('pdf-btn');
   btn.disabled=true; btn.textContent='⏳  Generating…';
-
   try{
-    const {jsPDF}=window.jspdf;
-    const doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait',compress:true});
-
-    const PW=210,PH=297;
-    const ML=14,MR=14,MB=20;
-    const CW=PW-ML-MR;
-
+    const logoDataURL=await loadLogoDataURL();
     const title=document.getElementById('sale-title').value||'Wine Auction';
     const date=document.getElementById('sale-date').value||'';
-    const visCols=colOrder.filter(c=>selectedCols.has(c));
-    const totalPx=visCols.reduce((s,c)=>s+getW(c),0);
-    const colMMs=visCols.map(c=>(getW(c)/totalPx*CW));
+    const fileName=title.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.pdf';
 
-    // Colors
-    const BUR=[128,23,71],GOLD=[190,173,133],INK=[33,33,33],
-          INK2=[90,87,85],INK3=[138,136,132],BLK=[17,17,17],
-          LGRAY=[246,245,244],LINE=[218,215,210],WHITE=[255,255,255];
-
-    const HDR_H=30, TBL_H=9, ROW_H=8;
-    const TP='{TP}';
-
-    // Try loading logo
-    const logoDataURL=await loadLogoDataURL();
-
-    let page=0,y=0;
-
-    function drawDocHeader(){
-      // Black bg
-      doc.setFillColor(...BLK);
-      doc.rect(0,0,PW,HDR_H,'F');
-      // Burgundy bottom strip
-      doc.setFillColor(...BUR);
-      doc.rect(0,HDR_H-1.5,PW,1.5,'F');
-      // Gold rule
-      doc.setDrawColor(...GOLD);
-      doc.setLineWidth(0.3);
-      doc.line(ML,HDR_H+1.2,PW-MR,HDR_H+1.2);
-
-      // LOGO — maintain exact aspect ratio, no distortion
-      if(logoDataURL){
-        try{
-          const ar=window._logoAR||LOGO_AR_FALLBACK;
-          const logoH=16;          // mm fixed height
-          const logoW=logoH*ar;    // width from AR → no stretch
-          doc.addImage(logoDataURL,'PNG',ML,7,logoW,logoH,undefined,'FAST');
-        }catch(e){ drawLogoText(); }
-      } else { drawLogoText(); }
-
-      // Date top-right
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(7);
-      doc.setTextColor(...GOLD);
-      doc.text(date.toUpperCase(),PW-MR,13,{align:'right'});
-
-      // Title right
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(14);
-      doc.setTextColor(...WHITE);
-      doc.text(title,PW-MR,24,{align:'right'});
+    if(lang==='zh'){
+      await downloadPDF_Canvas(logoDataURL,title,date,fileName);
+    } else {
+      await downloadPDF_Direct(logoDataURL,title,date,fileName);
     }
-
-    function drawLogoText(){
-      doc.setFont('helvetica','bolditalic');
-      doc.setFontSize(22);
-      doc.setTextColor(...WHITE);
-      doc.text('Acker',ML,20);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(6.5);
-      doc.setTextColor(...GOLD);
-      doc.text('SINCE 1820  ·  FINE WINE AUCTION HOUSE',ML,26);
-    }
-
-    function drawTableHeader(startY){
-      doc.setFillColor(...BUR);
-      doc.rect(ML,startY,CW,TBL_H,'F');
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(7.5);
-      doc.setTextColor(...WHITE);
-      let x=ML;
-      visCols.forEach((col,i)=>{
-        const cw=colMMs[i];
-        const label=(isPctOff(col)?'% Off':trCol(col)).toUpperCase();
-        const safe=doc.splitTextToSize(label,cw-3)[0]||label;
-        const isP=isPriceLike(col)||isPctOff(col);
-        doc.text(safe,isP?(x+cw/2):(x+2),startY+TBL_H-2.5,{align:isP?'center':'left'});
-        x+=cw;
-      });
-      return startY+TBL_H;
-    }
-
-    function drawFooter(pn){
-      const fy=PH-MB+4;
-      doc.setDrawColor(...GOLD);
-      doc.setLineWidth(0.25);
-      doc.line(ML,fy-1,PW-MR,fy-1);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(7);
-      doc.setTextColor(...INK3);
-      doc.text(`${title}  ·  ${date}`,ML,fy+3.5);
-      doc.setTextColor(...BUR);
-      doc.text(`— ${pn} / ${TP} —`,PW/2,fy+3.5,{align:'center'});
-      doc.setTextColor(...GOLD);
-      doc.text('Acker Wines  ·  ackerwines.com',PW-MR,fy+3.5,{align:'right'});
-    }
-
-    function newPage(){
-      if(page>0)doc.addPage();
-      page++;
-      drawDocHeader();
-      return drawTableHeader(HDR_H+3);
-    }
-
-    y=newPage();
-
-    allData.forEach((row,ri)=>{
-      if(y+ROW_H>PH-MB){
-        drawFooter(page);
-        y=newPage();
-      }
-      // Alt row bg
-      if(ri%2===1){
-        doc.setFillColor(...LGRAY);
-        doc.rect(ML,y,CW,ROW_H,'F');
-      }
-      // Row bottom border
-      doc.setDrawColor(...LINE);
-      doc.setLineWidth(0.2);
-      doc.line(ML,y+ROW_H,ML+CW,y+ROW_H);
-
-      let x=ML;
-      visCols.forEach((col,ci)=>{
-        const cw=colMMs[ci];
-
-        // Virtual % Off column
-        if(isPctOff(col)){
-          const pct=computePctOff(row);
-          if(pct!==null){
-            const abs=Math.abs(pct).toFixed(1);
-            const label=pct>0?`-${abs}%`:pct<0?`+${abs}%`:'—';
-            const color=pct>0?[39,174,96]:pct<0?[192,57,43]:INK3;
-            doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...color);
-            doc.text(label,x+cw/2,y+ROW_H-2.2,{align:'center'});
-          }
-          x+=cw; return;
-        }
-
-        const raw=String(row[col]??'');
-        const isWine=(col===wineCol);
-        const val=tr(raw,isWine);
-        const disp=isPriceLike(col)?fmtPrice(raw):val;
-
-        if(isLotLike(col)){
-          doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...BUR);
-        }else if(isWine){
-          doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK);
-        }else if(isPriceLike(col)){
-          doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK);
-        }else{
-          doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...INK2);
-        }
-
-        const isP=isPriceLike(col);
-        const truncated=doc.splitTextToSize(disp,cw-3)[0]||disp;
-        doc.text(truncated,isP?(x+cw-2):(x+2),y+ROW_H-2.2,{align:isP?'right':'left'});
-        x+=cw;
-      });
-      y+=ROW_H;
-    });
-
-    drawFooter(page);
-    doc.putTotalPages(TP);
-
-    const fileName=(title.replace(/[^a-z0-9]+/gi,'-').toLowerCase())+'.pdf';
-    doc.save(fileName);
-
   }catch(err){
     console.error('PDF error:',err);
     alert('PDF generation failed: '+err.message);
   }finally{
-    btn.disabled=false;
-    btn.innerHTML='⬇ &nbsp;Download PDF';
+    btn.disabled=false; btn.innerHTML='⬇ &nbsp;Download PDF';
   }
+}
+
+/* ── PDF: ENGLISH — jsPDF vector text ── */
+async function downloadPDF_Direct(logoDataURL,title,date,fileName){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4',compress:true});
+  const PW=210,PH=297,ML=14,MR=14,MB=20,CW=PW-ML-MR;
+  const visCols=colOrder.filter(c=>selectedCols.has(c));
+  const totalPx=visCols.reduce((s,c)=>s+getW(c),0);
+  const colMMs=visCols.map(c=>getW(c)/totalPx*CW);
+  const {BUR,GOLD,INK,INK2,INK3,LGRAY,LINE,WHITE}=pdfColors();
+  const HDR_H=30,TBL_H=9,ROW_H=8;
+  const TP='{TP}';
+  let page=0,y=0;
+
+  function drawTblHdr(sy){
+    doc.setFillColor(...BUR); doc.rect(ML,sy,CW,TBL_H,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...WHITE);
+    let x=ML;
+    visCols.forEach((col,i)=>{
+      const cw=colMMs[i];
+      const label=(isPctOff(col)?'% OFF':col).toUpperCase();
+      const safe=doc.splitTextToSize(label,cw-3)[0]||label;
+      const isP=isPriceLike(col)||isPctOff(col);
+      doc.text(safe,isP?(x+cw/2):(x+2),sy+TBL_H-2.5,{align:isP?'center':'left'});
+      x+=cw;
+    });
+    return sy+TBL_H;
+  }
+
+  function newPage(){
+    if(page>0) doc.addPage();
+    page++;
+    pdfDrawHeader(doc,logoDataURL,title,date);
+    return drawTblHdr(HDR_H+3);
+  }
+
+  y=newPage();
+  let lastPdfSec=null;
+  allData.forEach((row,ri)=>{
+    // Section header band
+    if(isStructured && row[SEC_KEY] && row[SEC_KEY]!==lastPdfSec){
+      lastPdfSec=row[SEC_KEY];
+      const secH=8;
+      if(y+secH+ROW_H>PH-MB){ pdfDrawFooter(doc,page,TP,title,date); y=newPage(); }
+      if(y>HDR_H+TBL_H+5){ y+=2; } // breathing room after first section
+      doc.setFillColor(...BLK);
+      doc.rect(ML,y,CW,secH,'F');
+      doc.setFillColor(...BUR);
+      doc.rect(ML,y,3,secH,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...GOLD);
+      const secLabel=lang==='zh'?(ZH[row[SEC_KEY]]||row[SEC_KEY]):row[SEC_KEY];
+      doc.text(secLabel.toUpperCase(),ML+6,y+secH-2.3);
+      y+=secH+1;
+    }
+
+    if(y+ROW_H>PH-MB){ pdfDrawFooter(doc,page,TP,title,date); y=newPage(); lastPdfSec=null; }
+    if(ri%2===1){ doc.setFillColor(...LGRAY); doc.rect(ML,y,CW,ROW_H,'F'); }
+    doc.setDrawColor(...LINE); doc.setLineWidth(0.2); doc.line(ML,y+ROW_H,ML+CW,y+ROW_H);
+    let x=ML;
+    visCols.forEach((col,ci)=>{
+      const cw=colMMs[ci];
+      if(isPctOff(col)){
+        const pct=computePctOff(row);
+        if(pct!==null){
+          const abs=Math.abs(pct).toFixed(1);
+          const lbl=pct>0?`-${abs}%`:pct<0?`+${abs}%`:'—';
+          const color=pct>0?[39,174,96]:pct<0?[192,57,43]:INK3;
+          doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...color);
+          doc.text(lbl,x+cw/2,y+ROW_H-2.2,{align:'center'});
+        }
+        x+=cw; return;
+      }
+      const raw=String(row[col]??'');
+      const isWine=(col===wineCol);
+      const disp=isPriceLike(col)?fmtPrice(raw):tr(raw,isWine);
+      if(isLotLike(col)){ doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...BUR); }
+      else if(isWine){ doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK); }
+      else if(isPriceLike(col)){ doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK); }
+      else{ doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...INK2); }
+      const isP=isPriceLike(col);
+      doc.text(doc.splitTextToSize(disp,cw-3)[0]||disp,isP?(x+cw-2):(x+2),y+ROW_H-2.2,{align:isP?'right':'left'});
+      x+=cw;
+    });
+    y+=ROW_H;
+  });
+  pdfDrawFooter(doc,page,TP,title,date);
+  doc.putTotalPages(TP);
+  doc.save(fileName);
+}
+
+/* ── PDF: CHINESE — html2canvas (browser renders CJK via system fonts) ── */
+async function downloadPDF_Canvas(logoDataURL,title,date,fileName){
+  // Load html2canvas on demand
+  if(!window.html2canvas){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload=res; s.onerror=rej; document.head.appendChild(s);
+    });
+  }
+
+  const visCols=colOrder.filter(c=>selectedCols.has(c));
+
+  // Build off-screen styled table (Chinese-ready font stack)
+  const wrap=document.createElement('div');
+  const SCALE=760; // px wide → maps to A4 content width
+  wrap.style.cssText=`position:fixed;left:-9999px;top:0;width:${SCALE}px;background:#fff;`+
+    `font-family:'PingFang SC','Noto Sans SC','Microsoft YaHei','Heiti SC',sans-serif;font-size:13px;line-height:1.5`;
+
+  const thCells=visCols.map(col=>{
+    const label=isPctOff(col)?'折扣':trCol(col);
+    const isP=isPriceLike(col)||isPctOff(col);
+    return `<th style="background:#801747;color:#fff;padding:7px 10px;font-size:10px;`+
+      `letter-spacing:1px;text-align:${isP?'center':'left'};font-weight:700;white-space:nowrap">${label}</th>`;
+  }).join('');
+
+  let lastCanvasSec=null;
+  const bodyRows=allData.map((row,ri)=>{
+    let secHTML='';
+    if(isStructured && row[SEC_KEY] && row[SEC_KEY]!==lastCanvasSec){
+      lastCanvasSec=row[SEC_KEY];
+      const secLabel=lang==='zh'?(ZH[row[SEC_KEY]]||row[SEC_KEY]):row[SEC_KEY];
+      secHTML=`<tr><td colspan="${visCols.length}" style="padding:0;border:none">
+        <div style="background:#111;color:#BEAD85;font-size:9px;font-weight:700;letter-spacing:2px;
+          text-transform:uppercase;padding:7px 10px 7px 13px;margin-top:6px;
+          border-left:3px solid #801747">${secLabel}</div></td></tr>`;
+    }
+    const bg=ri%2?'#f6f5f4':'#fff';
+    const cells=visCols.map(col=>{
+      const isP=isPriceLike(col)||isPctOff(col);
+      let html='',extraStyle='';
+      if(isPctOff(col)){
+        const pct=computePctOff(row);
+        if(pct===null){html='—';extraStyle='color:#aaa;text-align:center';}
+        else{
+          const abs=Math.abs(pct).toFixed(1);
+          const color=pct>0?'#27ae60':'#c0392b';
+          html=pct>0?`↓ ${abs}%`:`↑ ${abs}%`;
+          extraStyle=`color:${color};font-weight:700;text-align:center`;
+        }
+      } else {
+        const raw=String(row[col]??'');
+        const isWine=(col===wineCol);
+        if(isLotLike(col)){html=tr(raw,false);extraStyle='font-weight:700;color:#801747';}
+        else if(isPriceLike(col)){html=fmtPrice(raw);extraStyle='font-weight:700;text-align:right';}
+        else if(isWine){html=raw;extraStyle='font-weight:700';}
+        else{html=tr(raw,false);extraStyle='color:#5a5755';}
+      }
+      const align=isP?'center':isPriceLike(col)?'right':'left';
+      return `<td style="padding:6px 10px;border-bottom:1px solid #e0ddd9;text-align:${align};${extraStyle}">${html}</td>`;
+    }).join('');
+    return secHTML+`<tr style="background:${bg}">${cells}</tr>`;
+  }).join('');
+
+  wrap.innerHTML=`<table style="width:100%;border-collapse:collapse;table-layout:auto">
+    <thead><tr>${thCells}</tr></thead>
+    <tbody>${bodyRows}</tbody>
+  </table>`;
+  document.body.appendChild(wrap);
+
+  // Render table to high-res canvas
+  const tableCanvas=await html2canvas(wrap,{scale:2,backgroundColor:'#fff',logging:false,useCORS:true});
+  document.body.removeChild(wrap);
+
+  // Build A4 PDF: Acker header/footer via jsPDF, table slice via canvas image
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4',compress:true});
+  const PW=210,PH=297,ML=14,MR=14,MB=20;
+  const CW=PW-ML-MR;
+  const HDR_H=30;
+  const contentH_mm=PH-HDR_H-5-MB;               // usable height per page in mm
+  const contentH_px=tableCanvas.width*(contentH_mm/CW); // equivalent in canvas px
+  const totalPages=Math.ceil(tableCanvas.height/contentH_px);
+
+  for(let pg=0;pg<totalPages;pg++){
+    if(pg>0) doc.addPage();
+    pdfDrawHeader(doc,logoDataURL,title,date);
+
+    // Slice canvas for this page
+    const srcY=Math.round(pg*contentH_px);
+    const srcH=Math.min(contentH_px,tableCanvas.height-srcY);
+    const tmp=document.createElement('canvas');
+    tmp.width=tableCanvas.width; tmp.height=srcH;
+    tmp.getContext('2d').drawImage(tableCanvas,0,srcY,tableCanvas.width,srcH,0,0,tableCanvas.width,srcH);
+    const imgH_mm=srcH/tableCanvas.width*CW;
+    doc.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',ML,HDR_H+3,CW,imgH_mm);
+
+    pdfDrawFooter(doc,pg+1,totalPages,title,date);
+  }
+
+  doc.save(fileName);
 }
 </script>
 </body>
