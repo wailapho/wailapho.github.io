@@ -1357,7 +1357,8 @@ function closeLeadsPw() {
 }
 
 /* ══ LEADS PIC ASSIGNMENT ══ */
-const LEADS_PIC_WEBHOOK = 'https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on';
+const LEADS_PIC_WEBHOOK  = 'https://hook.eu2.make.com/bi98gduy0wkripc5pwagnnmdfabf28on';
+const APPS_SCRIPT_URL   = 'https://script.google.com/macros/s/AKfycbzYip6E1zRlOT2Q2MD7Kw4qro8oeKyMIqvmxzBjvZz8mTPzzeTIBPUzUCg3z-J6JI5n8g/exec';
 let leadsPicSelections = {}; // { "platform:idx": picValue }
 let leadsChecked = new Set(); // "platform:idx"
 
@@ -1553,7 +1554,6 @@ function selectByPIC(pic) {
 async function bulkAssignAndSend(pic) {
   if (!leadsChecked.size) return;
 
-  // Lock all assign buttons
   const assignBtns = document.querySelectorAll('.lsb-assign-btn');
   assignBtns.forEach(b => { b.disabled = true; b.classList.add('sending'); });
 
@@ -1567,34 +1567,41 @@ async function bulkAssignAndSend(pic) {
     const row = (data[platform] || [])[idx];
     if (!row) { errors++; continue; }
 
-    status.textContent = ` · Sending ${sent + errors + 1} of ${items.length}…`;
+    status.textContent = ` · Updating ${sent + errors + 1} of ${items.length}…`;
 
-    // Update the PIC dropdown in the DOM
+    // Update PIC dropdown in DOM
     const sel = document.querySelector(`.pic-select[data-idx="${idx}"][data-platform="${platform}"]`);
     if (sel) sel.value = pic;
-
-    // Also store in local selection map
     leadsPicSelections[key] = pic;
 
-    // Build FormData with all row fields + PIC
-    const fd = new FormData();
-    fd.append('record_type', 'leads_pic_assign');
-    fd.append('source',      platform);
-    fd.append('PIC',         pic);
-    Object.entries(row).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && v !== '') fd.append(k, String(v));
-    });
+    // ── Build payload ──────────────────────────────
+    const payload = { record_type:'leads_pic_assign', source:platform, PIC:pic };
+    Object.entries(row).forEach(([k,v]) => { if (v!==undefined&&v!==null&&v!=='') payload[k]=String(v); });
 
+    // ── 1. Update Google Sheet via Apps Script (url-encoded, handles CORS) ──
+    if (APPS_SCRIPT_URL) {
+      try {
+        const body = new URLSearchParams(payload).toString();
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body,
+          mode: 'no-cors', // Apps Script requires no-cors from browser
+        });
+      } catch (err) { console.warn('Apps Script error:', err); }
+    }
+
+    // ── 2. Also notify Make.com (keeps existing automation running) ──
     try {
+      const fd = new FormData();
+      Object.entries(payload).forEach(([k,v]) => fd.append(k,v));
       const res = await fetch(LEADS_PIC_WEBHOOK, { method:'POST', body:fd });
-      if (res.ok) sent++;
-      else errors++;
+      if (res.ok) sent++; else errors++;
     } catch { errors++; }
 
     await new Promise(r => setTimeout(r, 400));
   }
 
-  // Unlock buttons
   assignBtns.forEach(b => { b.disabled = false; b.classList.remove('sending'); });
 
   if (errors === 0) {
