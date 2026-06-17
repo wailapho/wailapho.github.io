@@ -1362,15 +1362,63 @@ const APPS_SCRIPT_URL   = 'https://script.google.com/macros/s/AKfycbzYip6E1zRlOT
 let leadsPicSelections = {}; // { "platform:idx": picValue }
 let leadsChecked = new Set(); // "platform:idx"
 
-function onPicChange(sel) {
-  const idx      = sel.dataset.idx;
+async function onPicChange(sel) {
+  const idx      = parseInt(sel.dataset.idx);
   const platform = sel.dataset.platform;
   const key      = platform + ':' + idx;
-  if (sel.value) {
-    leadsPicSelections[key] = sel.value;
+  const pic      = sel.value;
+
+  if (pic) {
+    leadsPicSelections[key] = pic;
   } else {
     delete leadsPicSelections[key];
+    return; // nothing to send if cleared
   }
+
+  const row = (data[platform] || [])[idx];
+  if (!row) return;
+
+  // Visual feedback — show a small spinner in the dropdown
+  sel.style.borderColor = 'rgba(190,173,133,0.6)';
+  sel.style.color       = 'var(--gold)';
+
+  // Build match payload
+  const matchPayload = {
+    source:         platform,
+    PIC:            pic,
+    Email:          String(row['Email'] || row['email'] || ''),
+    email:          String(row['Email'] || row['email'] || ''),
+    'Account name': String(row['Account name'] || ''),
+    'Display Name': String(row['Display Name'] || row['chat_display_name'] || ''),
+    date:           String(row['Date'] || row['date'] || ''),
+    Date:           String(row['Date'] || row['date'] || ''),
+  };
+
+  // Send to Apps Script via GET (avoids redirect/POST body issue)
+  if (APPS_SCRIPT_URL) {
+    try {
+      const qs  = new URLSearchParams(matchPayload).toString();
+      fetch(APPS_SCRIPT_URL + '?' + qs, { method:'GET', mode:'no-cors' }).catch(()=>{});
+    } catch(e) { console.warn('Apps Script error:', e); }
+  }
+
+  // Also notify Make.com
+  try {
+    const fd = new FormData();
+    Object.assign(matchPayload, { record_type:'leads_pic_assign' });
+    Object.entries(matchPayload).forEach(([k,v]) => fd.append(k, v));
+    fetch(LEADS_PIC_WEBHOOK, { method:'POST', body:fd }).catch(()=>{});
+  } catch(e) {}
+
+  // Show tick after short delay
+  setTimeout(() => {
+    sel.style.borderColor = 'rgba(34,197,94,0.5)';
+    sel.style.color       = '#22c55e';
+    setTimeout(() => {
+      sel.style.borderColor = '';
+      sel.style.color       = '';
+    }, 1800);
+  }, 400);
 }
 
 let _lastLeadsCbIdx = null; // tracks last clicked checkbox for shift-select
