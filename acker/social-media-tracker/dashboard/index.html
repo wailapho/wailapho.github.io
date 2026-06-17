@@ -271,6 +271,32 @@
       white-space:nowrap;
     }
     .leads-export-btn:hover { background:rgba(190,173,133,0.2); }
+    /* PIC filter chips */
+    .pic-chip {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      color:var(--muted); border-radius:8px; padding:6px 12px;
+      font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500;
+      cursor:pointer; transition:all 0.15s; white-space:nowrap;
+    }
+    .pic-chip:hover { color:var(--sub); background:rgba(255,255,255,0.09); }
+    .pic-chip.active {
+      background:rgba(190,173,133,0.15); border-color:rgba(190,173,133,0.45);
+      color:var(--gold); font-weight:600;
+    }
+    .pic-chip#chip-none.active {
+      background:rgba(244,63,94,0.1); border-color:rgba(244,63,94,0.3);
+      color:var(--red);
+    }
+
+    /* Email summary button */
+    .leads-email-btn {
+      background:rgba(96,165,250,0.1); border:1px solid rgba(96,165,250,0.3);
+      color:#60a5fa; border-radius:8px; padding:8px 14px;
+      font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600;
+      cursor:pointer; display:flex; align-items:center; gap:7px; white-space:nowrap;
+    }
+    .leads-email-btn:hover { background:rgba(96,165,250,0.18); }
+
     .leads-group-select-btn {
       background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
       color:var(--sub); border-radius:8px; padding:8px 12px;
@@ -406,7 +432,16 @@
             <option value="no">Not qualified only</option>
           </select>
         </div>
-        <select id="filterPIC" class="leads-select" onchange="applyLeadsFilters()">
+        <!-- PIC quick-filter chips -->
+        <div style="display:flex;gap:4px;align-items:center">
+          <button class="pic-chip" id="chip-all"    onclick="setPICChip('')"              >All</button>
+          <button class="pic-chip" id="chip-Joey"   onclick="setPICChip('Joey')"          >Joey</button>
+          <button class="pic-chip" id="chip-Ken"    onclick="setPICChip('Ken')"           >Ken</button>
+          <button class="pic-chip" id="chip-MB"     onclick="setPICChip('MB')"            >MB</button>
+          <button class="pic-chip" id="chip-Yanni"  onclick="setPICChip('Yanni')"         >Yanni</button>
+          <button class="pic-chip" id="chip-none"   onclick="setPICChip('__unassigned__')">Unassigned</button>
+        </div>
+        <select id="filterPIC" class="leads-select" style="display:none" onchange="applyLeadsFilters()">
           <option value="">All PIC</option>
           <option value="Joey">Joey</option>
           <option value="Ken">Ken</option>
@@ -417,8 +452,7 @@
         <button class="leads-clear-btn" onclick="clearLeadsFilters()"><i class="fas fa-xmark" style="font-size:10px"></i> Clear</button>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
-        <button class="leads-group-select-btn" id="leadsSelectAllBtn" onclick="leadsSelectAll()" title="Select all visible rows"><i class="fas fa-check-double" style="font-size:11px"></i> Select all</button>
-        <span style="font-size:11px;color:var(--muted);white-space:nowrap">· Shift+click for range</span>
+
         <button class="leads-export-btn" onclick="exportLeadsCSV()"><i class="fas fa-download" style="font-size:12px"></i> Export CSV</button>
       </div>
     </div>
@@ -848,14 +882,12 @@ function renderLeadsTable(sorted, platform) {
 
   let html = isRednote
     ? `<table><thead><tr>
-        <th class="cb-cell" style="cursor:default"></th>
         <th style="width:50px;cursor:default">Image</th>
         <th>Campaign</th><th>Date</th><th>Account Name</th>
         <th style="text-align:center">Qualified</th>
         <th>PIC</th>
       </tr></thead><tbody>`
     : `<table><thead><tr>
-        <th class="cb-cell" style="cursor:default"></th>
         <th style="width:50px;cursor:default">Image</th>
         <th>Campaign</th><th>Date</th><th>Name</th>
         <th>Email</th><th>Phone</th>
@@ -873,14 +905,11 @@ function renderLeadsTable(sorted, platform) {
       `<option value="${p}" ${existingPIC===p?'selected':''}>${p||'Assign…'}</option>`
     ).join('');
     const picSel = `<select class="pic-select" data-idx="${rowIdx}" data-platform="${platform}" onchange="onPicChange(this)" onclick="event.stopPropagation()">${picOpts}</select>`;
-    const cbHtml = `<input type="checkbox" class="leads-cb" data-idx="${rowIdx}" data-platform="${platform}" onclick="event.stopPropagation();toggleLeadsCb(this,event)">`;
-
     if (isRednote) {
       html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
-        <td class="cb-cell">${cbHtml}</td>
         <td>${thumbHtml}</td>
         <td class="td-title">${esc(row['Campaign']||row['lead_campaign_name']||'—')}</td>
-        <td class="td-date">${esc(row['date']||'—')}</td>
+        <td class="td-date">${esc(row['Date']||row['date']||'')}</td>
         <td style="color:var(--text);font-size:13.5px">${esc(row['Account name']||'—')}</td>
         <td style="text-align:center">${qualBadge(isQualified(row['Is qualified lead']))}</td>
         <td onclick="event.stopPropagation()">${picSel}</td>
@@ -888,10 +917,9 @@ function renderLeadsTable(sorted, platform) {
     } else {
       const name = row['Display Name'] || [row['First Name'],row['Last Name']].filter(Boolean).join(' ') || row['chat_display_name'] || '—';
       html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
-        <td class="cb-cell">${cbHtml}</td>
         <td>${thumbHtml}</td>
         <td class="td-title">${esc(row['Campaign']||row['lead_campaign_name']||'—')}</td>
-        <td class="td-date">${esc(row['date']||'—')}</td>
+        <td class="td-date">${esc(row['Date']||row['date']||'')}</td>
         <td style="color:var(--text);font-size:13.5px">${esc(name)}</td>
         <td style="font-size:12px;color:var(--sub)">${esc(row['Email']||row['email']||'—')}</td>
         <td style="font-size:12px;color:var(--sub)">${esc(row['Phone']||row['phone_number']||'—')}</td>
@@ -1230,7 +1258,8 @@ function clearLeadsFilters() {
   document.getElementById('filterQual').value     = '';
   const fp = document.getElementById('filterPIC');
   if (fp) fp.value = '';
-  applyLeadsFilters();
+  // Reset chips
+  setPICChip('');
 }
 
 // Parse dates like "14/04/2026", "2026-04-14", "14-4-2026" → "YYYY-MM-DD" for comparison
@@ -1378,6 +1407,11 @@ async function onPicChange(sel) {
   const row = (data[platform] || [])[idx];
   if (!row) return;
 
+  // Save old value for undo
+  const oldPIC = row['PIC (Sales Person)'] || row['PIC'] || '';
+  _picHistory.push({ platform, idx, oldPIC, newPIC: pic });
+  if (_picHistory.length > 20) _picHistory.shift(); // cap history
+
   // Visual feedback — show a small spinner in the dropdown
   sel.style.borderColor = 'rgba(190,173,133,0.6)';
   sel.style.color       = 'var(--gold)';
@@ -1414,6 +1448,7 @@ async function onPicChange(sel) {
   setTimeout(() => {
     sel.style.borderColor = 'rgba(34,197,94,0.5)';
     sel.style.color       = '#22c55e';
+    showUndoToast(`Assigned to ${pic} — undo?`);
     setTimeout(() => {
       sel.style.borderColor = '';
       sel.style.color       = '';
@@ -1572,12 +1607,7 @@ function leadsSelectAll() {
 
 // Reset the select-all button state when table re-renders
 function resetLeadsSelectAllBtn() {
-  leadsAllSelected = false;
-  const btn = document.getElementById('leadsSelectAllBtn');
-  if (btn) {
-    btn.classList.remove('active');
-    btn.innerHTML = '<i class="fas fa-check-double" style="font-size:11px"></i> Select all';
-  }
+  // Select-all removed — no-op kept for compatibility
 }
 
 // Also add a "select by PIC" quick action in submit bar on hover
@@ -1675,6 +1705,139 @@ async function bulkAssignAndSend(pic) {
     status.textContent = ` · ${sent} sent, ${errors} failed`;
   }
 }
+
+/* ══ PIC ASSIGNMENT — UNDO STACK ══ */
+let _picHistory  = [];  // [{platform, idx, oldPIC, newPIC}]
+let _undoTimeout = null;
+
+function showUndoToast(msg) {
+  const toast = document.getElementById('undoToast');
+  const label = document.getElementById('undoToastMsg');
+  if (!toast) return;
+  label.textContent = msg;
+  toast.style.pointerEvents = 'all';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(_undoTimeout);
+  _undoTimeout = setTimeout(() => {
+    toast.style.transform = 'translateX(-50%) translateY(80px)';
+    toast.style.pointerEvents = 'none';
+  }, 4000);
+}
+
+function undoLastPIC() {
+  const last = _picHistory.pop();
+  if (!last) return;
+  const { platform, idx, oldPIC } = last;
+  const row = (data[platform] || [])[idx];
+  if (!row) return;
+
+  // Revert the dropdown visually
+  const sel = document.querySelector(`.pic-select[data-idx="${idx}"][data-platform="${platform}"]`);
+  if (sel) sel.value = oldPIC || '';
+
+  // Send revert to Apps Script
+  const matchPayload = {
+    source: platform, PIC: oldPIC || '',
+    Email:  String(row['Email'] || row['email'] || ''),
+    email:  String(row['Email'] || row['email'] || ''),
+    'Account name':  String(row['Account name'] || ''),
+    'Display Name':  String(row['Display Name'] || row['chat_display_name'] || ''),
+    date: String(row['Date'] || row['date'] || ''),
+    Date: String(row['Date'] || row['date'] || ''),
+  };
+  if (APPS_SCRIPT_URL) {
+    const qs = new URLSearchParams(matchPayload).toString();
+    fetch(APPS_SCRIPT_URL + '?' + qs, { method:'GET', mode:'no-cors' }).catch(()=>{});
+  }
+
+  // Hide toast
+  const toast = document.getElementById('undoToast');
+  if (toast) { toast.style.transform = 'translateX(-50%) translateY(80px)'; toast.style.pointerEvents='none'; }
+  clearTimeout(_undoTimeout);
+
+  // Flash sel red briefly to show it was reverted
+  if (sel) {
+    sel.style.borderColor = 'rgba(244,63,94,0.6)';
+    sel.style.color = 'var(--red)';
+    setTimeout(() => { sel.style.borderColor=''; sel.style.color=''; }, 1500);
+  }
+}
+
+/* ══ PIC FILTER CHIPS ══ */
+let _activePICChip = '';
+
+function setPICChip(val) {
+  _activePICChip = val;
+  // Update chip styles
+  ['all','Joey','Ken','MB','Yanni','none'].forEach(k => {
+    const chip = document.getElementById('chip-' + k);
+    if (!chip) return;
+    const chipVal = k === 'all' ? '' : k === 'none' ? '__unassigned__' : k;
+    chip.classList.toggle('active', chipVal === val);
+  });
+  // Sync hidden select
+  const sel = document.getElementById('filterPIC');
+  if (sel) sel.value = val;
+  // Show/hide email button
+  const emailBtn    = document.getElementById('leadsEmailBtn');
+  const emailBtnName = document.getElementById('leadsEmailBtnName');
+  const showEmail   = val && val !== '__unassigned__';
+  if (emailBtn) emailBtn.style.display = showEmail ? 'flex' : 'none';
+  if (emailBtnName) emailBtnName.textContent = val;
+  // Apply filter
+  applyLeadsFilters();
+}
+
+/* ══ EMAIL SUMMARY ══ */
+// PIC email addresses — update these to match your team
+const PIC_EMAILS = {
+  Joey:  'joey@ackerasia.com',
+  Ken:   'ken@ackerasia.com',
+  MB:    'martin@ackerasia.com',
+  Yanni: 'yanni@ackerasia.com',
+};
+
+function sendPICEmailSummary() {
+  const pic = _activePICChip;
+  if (!pic || pic === '__unassigned__') return;
+  const platform = leadsFilterPlatform || current;
+  let rows = [...(data[platform] || [])];
+
+  // Apply current filters
+  const fromVal = document.getElementById('filterDateFrom')?.value || '';
+  const toVal   = document.getElementById('filterDateTo')?.value   || '';
+  if (fromVal || toVal) {
+    rows = rows.filter(r => {
+      const d = parseDate(r['Date'] || r['date']);
+      if (!d) return true;
+      if (fromVal && d < fromVal) return false;
+      if (toVal   && d > toVal)   return false;
+      return true;
+    });
+  }
+  // Only this PIC's rows
+  rows = rows.filter(r => (r['PIC (Sales Person)'] || r['PIC'] || '').trim() === pic);
+
+  if (!rows.length) { alert(`No leads assigned to ${pic}.`); return; }
+
+  // Build email body
+  const total = rows.length;
+  const isRednote = platform === 'leads_rednote';
+  const lines = rows.map((r, i) => {
+    if (isRednote) {
+      return `${i+1}. ${r['Account name']||'—'} | ${r['Campaign']||r['lead_campaign_name']||'—'} | ${r['Date']||r['date']||'—'} | ${isQualified(r['Is qualified lead'])==='yes'?'✓ Qualified':'—'}`;
+    } else {
+      const name = r['Display Name'] || [r['First Name'],r['Last Name']].filter(Boolean).join(' ') || r['chat_display_name'] || '—';
+      return `${i+1}. ${name} | ${r['Email']||r['email']||'—'} | ${r['Phone']||r['phone_number']||'—'} | ${r['Campaign']||r['lead_campaign_name']||'—'} | ${r['Date']||r['date']||'—'}`;
+    }
+  });
+
+  const subject = `Acker Leads Update — ${pic} (${total} lead${total!==1?'s':''})`;
+  const body    = `Hi ${pic},\n\nHere is your current leads list (${total} lead${total!==1?'s':''}):\n\n${lines.join('\n')}\n\nAcker Performance Dashboard`;
+  const to      = PIC_EMAILS[pic] || '';
+  const mailto  = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(mailto, '_blank');
+}
 </script>
 
 <!-- Leads password modal -->
@@ -1693,21 +1856,10 @@ async function bulkAssignAndSend(pic) {
 </div>
 
 
-<!-- Leads PIC submit bar -->
-<div class="leads-submit-bar" id="leadsSubmitBar">
-  <div class="leads-submit-bar-left">
-    <strong id="leadsSubmitCount">0</strong> row<span id="leadsSubmitCountS">s</span> selected
-    <span class="lsb-status" id="leadsSubmitStatus"></span>
-  </div>
-  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-    <span style="font-size:11px;color:var(--muted);white-space:nowrap">Assign &amp; send to:</span>
-    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('Joey')">Joey</button>
-    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('Ken')">Ken</button>
-    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('MB')">MB</button>
-    <button class="lsb-assign-btn" onclick="bulkAssignAndSend('Yanni')">Yanni</button>
-    <div style="width:1px;height:20px;background:rgba(255,255,255,0.1);margin:0 4px"></div>
-    <button class="lsb-clear" onclick="clearLeadsSelection()"><i class="fas fa-xmark"></i> Clear</button>
-  </div>
+<!-- Undo toast -->
+<div id="undoToast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(22,18,18,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:12px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;white-space:nowrap">
+  <span style="font-size:13px;color:var(--sub)" id="undoToastMsg">PIC assigned</span>
+  <button onclick="undoLastPIC()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:var(--text);border-radius:7px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;pointer-events:all">↩ Undo</button>
 </div>
 
 </body>
