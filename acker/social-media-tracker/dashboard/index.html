@@ -1582,25 +1582,28 @@ async function bulkAssignAndSend(pic) {
     payload['Display Name'] = payload['Display Name'] || payload['chat_display_name'] || '';
 
     // ── 1. Update Google Sheet via Apps Script ──
-    // Note: Apps Script doesn't return CORS headers so the browser throws a CORS
-    // error when reading the response — but the POST IS sent and the sheet IS
-    // updated. We catch and ignore the error.
+    // Use GET + URL params — avoids the POST-body-dropped-on-redirect issue.
+    // Apps Script's doGet reads e.parameter identically to doPost.
+    // CORS error on response is expected and harmless — sheet is updated.
     if (APPS_SCRIPT_URL) {
       try {
-        const body = new URLSearchParams(payload).toString();
-        await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body,
-          // No mode:'no-cors' — that drops POST body on redirect.
-          // CORS error will be thrown on response but the request goes through.
-          redirect: 'follow',
-        });
+        // Only send fields Apps Script needs for matching + the PIC value
+        const matchPayload = {
+          source:   platform,
+          PIC:      pic,
+          Email:    String(row['Email'] || row['email'] || ''),
+          email:    String(row['Email'] || row['email'] || ''),
+          'Account name': String(row['Account name'] || ''),
+          'Display Name': String(row['Display Name'] || row['chat_display_name'] || ''),
+          date:     String(row['Date'] || row['date'] || ''),
+          'Date':   String(row['Date'] || row['date'] || ''),
+        };
+        const qs  = new URLSearchParams(matchPayload).toString();
+        const url = APPS_SCRIPT_URL + '?' + qs;
+        // GET request — no redirect body issue, no preflight
+        fetch(url, { method:'GET', mode:'no-cors' }).catch(() => {});
       } catch (err) {
-        // CORS error is expected from Apps Script — request was still processed
-        if (!err.message.includes('CORS') && !err.message.includes('Failed to fetch')) {
-          console.warn('Apps Script unexpected error:', err);
-        }
+        console.warn('Apps Script error:', err);
       }
     }
 
