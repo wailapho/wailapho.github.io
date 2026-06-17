@@ -818,7 +818,7 @@ function renderLeads(platform) {
   } else {
     // Meta/general: channel breakdown
     const channelCount = {};
-    rows.forEach(r => { const ch = r['channel'] || 'Unknown'; channelCount[ch] = (channelCount[ch]||0)+1; });
+    rows.forEach(r => { const ch = r['Channel'] || r['Source'] || 'Unknown'; channelCount[ch] = (channelCount[ch]||0)+1; });
     const channelCards = Object.entries(channelCount).sort((a,b)=>b[1]-a[1]).map(([ch,n])=>
       `<div class="stat-card"><div class="stat-label">${esc(ch)}</div><div class="stat-value gold">${n}</div><div class="stat-sub">leads</div></div>`
     ).join('');
@@ -863,12 +863,12 @@ function renderLeadsTable(sorted, platform) {
       </tr></thead><tbody>`;
 
   sorted.forEach((row, idx) => {
-    const imgThumb = driveThumb(row['image-url']||'');
+    const imgThumb = driveThumb(row['Image URL']||row['image-url']||'');
     const rowIdx = sorted.indexOf(row);
     const thumbHtml = imgThumb
       ? `<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`
       : `<div class="no-thumb"><i class="fas fa-image"></i></div>`;
-    const existingPIC = row['PIC'] || '';
+    const existingPIC = row['PIC (Sales Person)'] || '';
     const picOpts = ['','Joey','Ken','MB','Yanni'].map(p =>
       `<option value="${p}" ${existingPIC===p?'selected':''}>${p||'Assign…'}</option>`
     ).join('');
@@ -879,22 +879,22 @@ function renderLeadsTable(sorted, platform) {
       html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
         <td class="cb-cell">${cbHtml}</td>
         <td>${thumbHtml}</td>
-        <td class="td-title">${esc(row['lead_campaign_name']||'—')}</td>
+        <td class="td-title">${esc(row['Campaign']||row['lead_campaign_name']||'—')}</td>
         <td class="td-date">${esc(row['date']||'—')}</td>
         <td style="color:var(--text);font-size:13.5px">${esc(row['Account name']||'—')}</td>
         <td style="text-align:center">${qualBadge(isQualified(row['Is qualified lead']))}</td>
         <td onclick="event.stopPropagation()">${picSel}</td>
       </tr>`;
     } else {
-      const name = [row['first_name'],row['last_name']].filter(Boolean).join(' ') || row['chat_display_name'] || '—';
+      const name = row['Display Name'] || [row['First Name'],row['Last Name']].filter(Boolean).join(' ') || row['chat_display_name'] || '—';
       html += `<tr onclick="openLeadDrawer(${rowIdx},'${platform}')">
         <td class="cb-cell">${cbHtml}</td>
         <td>${thumbHtml}</td>
-        <td class="td-title">${esc(row['lead_campaign_name']||'—')}</td>
+        <td class="td-title">${esc(row['Campaign']||row['lead_campaign_name']||'—')}</td>
         <td class="td-date">${esc(row['date']||'—')}</td>
         <td style="color:var(--text);font-size:13.5px">${esc(name)}</td>
-        <td style="font-size:12px;color:var(--sub)">${esc(row['email']||'—')}</td>
-        <td style="font-size:12px;color:var(--sub)">${esc(row['phone_number']||'—')}</td>
+        <td style="font-size:12px;color:var(--sub)">${esc(row['Email']||row['email']||'—')}</td>
+        <td style="font-size:12px;color:var(--sub)">${esc(row['Phone']||row['phone_number']||'—')}</td>
         <td onclick="event.stopPropagation()">${picSel}</td>
       </tr>`;
     };
@@ -923,7 +923,7 @@ function openLeadDrawer(idx, platform) {
   const row = data[platform] ? data[platform][idx] : null;
   if (!row) return;
 
-  const imgRaw = row['image-url'] || '';
+  const imgRaw = row['Image URL'] || row['image-url'] || '';
   const imgUrl = driveThumb(imgRaw, 'w800');
 
   // Both leads tabs: show image popup
@@ -1577,8 +1577,14 @@ async function bulkAssignAndSend(pic) {
     // ── Build payload ──────────────────────────────
     const payload = { record_type:'leads_pic_assign', source:platform, PIC:pic };
     Object.entries(row).forEach(([k,v]) => { if (v!==undefined&&v!==null&&v!=='') payload[k]=String(v); });
+    // Ensure Apps Script can match by email regardless of column name casing
+    payload['email'] = payload['Email'] || payload['email'] || '';
+    payload['Display Name'] = payload['Display Name'] || payload['chat_display_name'] || '';
 
-    // ── 1. Update Google Sheet via Apps Script (url-encoded, handles CORS) ──
+    // ── 1. Update Google Sheet via Apps Script ──
+    // Note: Apps Script doesn't return CORS headers so the browser throws a CORS
+    // error when reading the response — but the POST IS sent and the sheet IS
+    // updated. We catch and ignore the error.
     if (APPS_SCRIPT_URL) {
       try {
         const body = new URLSearchParams(payload).toString();
@@ -1586,9 +1592,16 @@ async function bulkAssignAndSend(pic) {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body,
-          mode: 'no-cors', // Apps Script requires no-cors from browser
+          // No mode:'no-cors' — that drops POST body on redirect.
+          // CORS error will be thrown on response but the request goes through.
+          redirect: 'follow',
         });
-      } catch (err) { console.warn('Apps Script error:', err); }
+      } catch (err) {
+        // CORS error is expected from Apps Script — request was still processed
+        if (!err.message.includes('CORS') && !err.message.includes('Failed to fetch')) {
+          console.warn('Apps Script unexpected error:', err);
+        }
+      }
     }
 
     // ── 2. Also notify Make.com (keeps existing automation running) ──
