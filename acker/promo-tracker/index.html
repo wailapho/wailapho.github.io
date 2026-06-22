@@ -26,6 +26,7 @@
   .ap-gear{border:1px solid var(--line); background:var(--card); border-radius:10px; padding:8px 10px; cursor:pointer; color:var(--muted); display:flex; align-items:center; gap:6px; font-size:13px}
   .ap-gear:hover{color:var(--wine); border-color:var(--gold)}
   .ap-gear svg{width:16px; height:16px}
+  .ap-tools{display:flex; gap:8px; flex-wrap:wrap}
 
   .ap-totals{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px}
   .ap-stat{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px}
@@ -91,7 +92,27 @@
     .ap-grid{grid-template-columns:1fr}
     th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){display:none}
   }
+
+  /* Off-screen invoice used only for PDF rendering */
+  .ap-report{position:fixed; left:-10000px; top:0; width:760px; background:#fff; color:#241b1c;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif; padding:44px 48px}
+  .ap-r-top{display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #6b1f2a; padding-bottom:18px; margin-bottom:22px}
+  .ap-r-mark{font-family:Georgia,serif; font-style:italic; font-size:30px; color:#6b1f2a}
+  .ap-r-mark span{display:block; font-family:inherit; font-style:normal; font-size:12px; color:#8a7c7d; letter-spacing:.5px; margin-top:2px}
+  .ap-r-meta{text-align:right; font-size:12px; color:#8a7c7d; line-height:1.7}
+  .ap-r-meta b{color:#241b1c}
+  .ap-r-sum{display:flex; gap:30px; margin-bottom:24px}
+  .ap-r-sum div .v{font-size:20px; font-weight:700; color:#6b1f2a}
+  .ap-r-sum div .l{font-size:11px; color:#8a7c7d; margin-top:2px}
+  table.ap-r-tbl{width:100%; border-collapse:collapse}
+  table.ap-r-tbl th{background:#6b1f2a; color:#fff; font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; padding:9px 10px; text-align:left}
+  table.ap-r-tbl td{font-size:12px; padding:8px 10px; border-bottom:1px solid #ece3df}
+  table.ap-r-tbl td.n,table.ap-r-tbl th.n{text-align:right}
+  table.ap-r-tbl tfoot td{font-weight:700; border-top:2px solid #6b1f2a; border-bottom:none; padding-top:11px}
+  .ap-r-foot{margin-top:24px; font-size:11px; color:#8a7c7d; border-top:1px solid #ece3df; padding-top:12px}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 <div class="ap-wrap">
@@ -103,10 +124,16 @@
         <div class="ap-sub">Promotion Spend Tracker · 推广花费记录</div>
       </div>
     </div>
-    <button class="ap-gear" id="apSettingsBtn" title="Set Web App URL">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Settings
-    </button>
+    <div class="ap-tools">
+      <button class="ap-gear" id="apPdfBtn" title="Download PDF report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        PDF report
+      </button>
+      <button class="ap-gear" id="apSettingsBtn" title="Set Web App URL">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </div>
   </div>
 
   <div class="ap-totals">
@@ -201,8 +228,8 @@
 (function(){
   "use strict";
 
-  // ── Optional: hardcode your deployed URL here so the tool works out of the box.
-  var WEB_APP_URL = "";
+  // ── Deployed Web App URL (baked in so the tool works on open).
+  var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz8qTL_x1zU-H3BheRrUeBKBjhDEnJqnkNu_PNIQLBORh1z_9575UhuVhYfoTnULPth/exec";
 
   var KEY = "acker_promo_webapp_url";
   function getUrl(){
@@ -214,6 +241,7 @@
 
   var $ = function(id){ return document.getElementById(id); };
   var imageData = null; // { base64, name, mime }
+  var currentRows = [];
 
   // Default date = today
   $("apDate").value = new Date().toISOString().slice(0,10);
@@ -315,6 +343,7 @@
   function num(n){ return (Number(n)||0).toLocaleString("en-US"); }
 
   function render(rows){
+    currentRows = rows || [];
     // Totals
     var spend=0, views=0, coins=0;
     rows.forEach(function(r){ spend+=Number(r.spend)||0; views+=Number(r.views)||0; coins+=Number(r.coins)||0; });
@@ -347,6 +376,87 @@
   function esc(s){
     return String(s==null?"":s).replace(/[&<>"]/g, function(c){
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+    });
+  }
+
+  // ── PDF report ──
+  $("apPdfBtn").addEventListener("click", downloadPdf);
+
+  function sum(rows, key){ var t=0; rows.forEach(function(r){ t+=Number(r[key])||0; }); return t; }
+
+  function buildReport(rows){
+    var spend=sum(rows,'spend'), coins=sum(rows,'coins'),
+        views=sum(rows,'views'), likes=sum(rows,'likes'), saves=sum(rows,'saves');
+    var dates=rows.map(function(r){return r.date;}).filter(Boolean).sort();
+    var range = dates.length ? dates[0]+"  –  "+dates[dates.length-1] : "—";
+    var today = new Date().toISOString().slice(0,10);
+
+    var body="";
+    rows.forEach(function(r){
+      body+='<tr><td>'+esc(r.date)+'</td><td>'+esc(r.campaign)+'</td><td>'+esc(r.platform)+'</td>'+
+        '<td class="n">¥'+num(r.spend)+'</td><td class="n">'+num(r.coins)+'</td>'+
+        '<td class="n">'+num(r.views)+'</td><td class="n">'+num(r.likes)+'</td><td class="n">'+num(r.saves)+'</td></tr>';
+    });
+
+    var el=document.createElement('div');
+    el.className='ap-report';
+    el.innerHTML=
+      '<div class="ap-r-top">'+
+        '<div class="ap-r-mark">Acker<span>PROMOTION SPEND REPORT · 推广花费报告</span></div>'+
+        '<div class="ap-r-meta">Generated <b>'+today+'</b><br>Period <b>'+esc(range)+'</b><br>Entries <b>'+rows.length+'</b></div>'+
+      '</div>'+
+      '<div class="ap-r-sum">'+
+        '<div><div class="v">¥'+num(spend)+'</div><div class="l">Total spend · 总花费</div></div>'+
+        '<div><div class="v">'+num(rows.length)+'</div><div class="l">Campaigns · 推广次数</div></div>'+
+        '<div><div class="v">'+num(views)+'</div><div class="l">Total views · 总阅读</div></div>'+
+        '<div><div class="v">'+num(coins)+'</div><div class="l">Total coins · 总薯币</div></div>'+
+      '</div>'+
+      '<table class="ap-r-tbl"><thead><tr>'+
+        '<th>Date</th><th>Campaign</th><th>Platform</th>'+
+        '<th class="n">Spend</th><th class="n">Coins</th><th class="n">Views</th><th class="n">Likes</th><th class="n">Saves</th>'+
+      '</tr></thead><tbody>'+body+'</tbody>'+
+      '<tfoot><tr><td colspan="3">Total</td>'+
+        '<td class="n">¥'+num(spend)+'</td><td class="n">'+num(coins)+'</td>'+
+        '<td class="n">'+num(views)+'</td><td class="n">'+num(likes)+'</td><td class="n">'+num(saves)+'</td></tr></tfoot>'+
+      '</table>'+
+      '<div class="ap-r-foot">Acker Wines · RED promotion spend · figures in RMB (¥) and RED coins (薯币).</div>';
+    return el;
+  }
+
+  function downloadPdf(){
+    if (!currentRows.length){ status("No entries to export yet.", "bad"); return; }
+    if (!window.jspdf || !window.html2canvas){ status("PDF libraries didn't load — check your connection.", "bad"); return; }
+    var btn=$("apPdfBtn"); btn.disabled=true; var label=btn.lastChild; var prev=label.textContent; label.textContent=" Generating…";
+
+    var node=buildReport(currentRows);
+    document.body.appendChild(node);
+
+    html2canvas(node, { scale:2, backgroundColor:'#ffffff', useCORS:true }).then(function(canvas){
+      var jsPDF=window.jspdf.jsPDF;
+      var pdf=new jsPDF('p','mm','a4');
+      var pageW=pdf.internal.pageSize.getWidth();
+      var pageH=pdf.internal.pageSize.getHeight();
+      var ratio=pageW/canvas.width;          // mm per canvas px
+      var pageHpx=pageH/ratio;               // canvas px that fill one page
+      var rendered=0, first=true;
+      while (rendered < canvas.height){
+        var sliceH=Math.min(pageHpx, canvas.height-rendered);
+        var tmp=document.createElement('canvas');
+        tmp.width=canvas.width; tmp.height=Math.floor(sliceH);
+        var ctx=tmp.getContext('2d');
+        ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,tmp.width,tmp.height);
+        ctx.drawImage(canvas,0,rendered,canvas.width,sliceH,0,0,canvas.width,sliceH);
+        if(!first) pdf.addPage();
+        pdf.addImage(tmp.toDataURL('image/jpeg',0.92),'JPEG',0,0,pageW,sliceH*ratio);
+        first=false; rendered+=sliceH;
+      }
+      pdf.save('Acker-Promotion-Report-'+new Date().toISOString().slice(0,10)+'.pdf');
+      status("PDF downloaded.", "good");
+    }).catch(function(err){
+      status("PDF error: "+err, "bad");
+    }).finally(function(){
+      document.body.removeChild(node);
+      btn.disabled=false; label.textContent=prev;
     });
   }
 
