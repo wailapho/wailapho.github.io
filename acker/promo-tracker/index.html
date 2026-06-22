@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acker — Promotion Spend Tracker</title>
+<style>
+  :root{
+    --wine:#6b1f2a; --wine-dark:#4e151e; --gold:#b08d57;
+    --ink:#241b1c; --muted:#8a7c7d; --line:#e7ddd9;
+    --bg:#faf7f4; --card:#ffffff; --good:#2f6f4e; --bad:#9c2b2b;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.5;
+  }
+  .ap-wrap{max-width:920px; margin:0 auto; padding:28px 20px 64px}
+
+  .ap-head{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px}
+  .ap-brand{display:flex; align-items:center; gap:12px}
+  .ap-mark{font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:26px; color:var(--wine); letter-spacing:.3px}
+  .ap-sub{font-size:13px; color:var(--muted); margin-top:1px}
+  .ap-gear{border:1px solid var(--line); background:var(--card); border-radius:10px; padding:8px 10px; cursor:pointer; color:var(--muted); display:flex; align-items:center; gap:6px; font-size:13px}
+  .ap-gear:hover{color:var(--wine); border-color:var(--gold)}
+  .ap-gear svg{width:16px; height:16px}
+
+  .ap-totals{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px}
+  .ap-stat{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px}
+  .ap-stat .v{font-size:22px; font-weight:700; color:var(--wine)}
+  .ap-stat .l{font-size:12px; color:var(--muted); margin-top:2px}
+
+  .ap-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px}
+  .ap-card h2{margin:0 0 4px; font-size:16px; letter-spacing:.2px}
+  .ap-card .hint{margin:0 0 18px; font-size:13px; color:var(--muted)}
+
+  .ap-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .ap-field{display:flex; flex-direction:column; gap:6px}
+  .ap-field.full{grid-column:1 / -1}
+  label{font-size:12.5px; font-weight:600; color:var(--ink)}
+  label .cn{color:var(--muted); font-weight:400}
+  input,select{
+    font:inherit; padding:10px 12px; border:1px solid var(--line); border-radius:10px;
+    background:#fff; color:var(--ink); width:100%;
+  }
+  input:focus,select:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(176,141,87,.18)}
+
+  .ap-drop{
+    grid-column:1 / -1; border:1.5px dashed var(--line); border-radius:12px; padding:18px;
+    display:flex; align-items:center; gap:16px; cursor:pointer; transition:border-color .15s,background .15s;
+  }
+  .ap-drop:hover{border-color:var(--gold); background:#fffdf9}
+  .ap-drop.has{border-style:solid; border-color:var(--gold)}
+  .ap-drop input{display:none}
+  .ap-thumb{width:64px; height:64px; border-radius:10px; object-fit:cover; background:#f1ebe7; flex:0 0 auto; display:none}
+  .ap-thumb.show{display:block}
+  .ap-drop-ph{display:flex; align-items:center; gap:12px; color:var(--muted); font-size:13px}
+  .ap-drop-ph svg{width:26px; height:26px; color:var(--gold)}
+
+  .ap-actions{display:flex; align-items:center; gap:14px; margin-top:18px}
+  .ap-btn{
+    background:var(--wine); color:#fff; border:none; border-radius:10px; padding:11px 22px;
+    font:inherit; font-weight:600; cursor:pointer;
+  }
+  .ap-btn:hover{background:var(--wine-dark)}
+  .ap-btn:disabled{opacity:.55; cursor:default}
+  .ap-status{font-size:13px}
+  .ap-status.good{color:var(--good)} .ap-status.bad{color:var(--bad)}
+
+  .ap-listwrap{margin-top:28px}
+  .ap-listwrap h2{font-size:15px; margin:0 0 12px; display:flex; align-items:center; gap:8px}
+  table{width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden}
+  th,td{text-align:left; padding:10px 12px; font-size:13px; border-bottom:1px solid var(--line)}
+  th{background:#f6efe9; color:var(--muted); font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.4px}
+  tr:last-child td{border-bottom:none}
+  td.num{text-align:right; font-variant-numeric:tabular-nums}
+  td a{color:var(--wine); text-decoration:none}
+  td a:hover{text-decoration:underline}
+  .ap-empty{padding:26px; text-align:center; color:var(--muted); font-size:13px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius)}
+
+  .ap-modal{position:fixed; inset:0; background:rgba(36,27,28,.45); display:none; align-items:center; justify-content:center; padding:20px; z-index:50}
+  .ap-modal.show{display:flex}
+  .ap-modal-card{background:#fff; border-radius:var(--radius); padding:22px; max-width:460px; width:100%}
+  .ap-modal-card h3{margin:0 0 4px; font-size:16px}
+  .ap-modal-card p{margin:0 0 14px; font-size:13px; color:var(--muted)}
+
+  @media(max-width:620px){
+    .ap-totals{grid-template-columns:1fr 1fr}
+    .ap-grid{grid-template-columns:1fr}
+    th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){display:none}
+  }
+</style>
+</head>
+<body>
+<div class="ap-wrap">
+
+  <div class="ap-head">
+    <div class="ap-brand">
+      <div>
+        <div class="ap-mark">Acker</div>
+        <div class="ap-sub">Promotion Spend Tracker · 推广花费记录</div>
+      </div>
+    </div>
+    <button class="ap-gear" id="apSettingsBtn" title="Set Web App URL">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+  </div>
+
+  <div class="ap-totals">
+    <div class="ap-stat"><div class="v" id="apTotSpend">¥0</div><div class="l">Total spend · 总花费</div></div>
+    <div class="ap-stat"><div class="v" id="apTotCount">0</div><div class="l">Campaigns · 推广次数</div></div>
+    <div class="ap-stat"><div class="v" id="apTotViews">0</div><div class="l">Total views · 总阅读</div></div>
+    <div class="ap-stat"><div class="v" id="apTotCoins">0</div><div class="l">Total coins · 总薯币</div></div>
+  </div>
+
+  <div class="ap-card">
+    <h2>Add a promotion</h2>
+    <p class="hint">Upload the RED screenshot and fill in the details. Spend is in RMB; coins fill in automatically (¥1 = 10薯币) but you can override.</p>
+
+    <div class="ap-grid">
+      <label class="ap-drop full" id="apDrop">
+        <input type="file" id="apFile" accept="image/*">
+        <img class="ap-thumb" id="apThumb" alt="preview">
+        <span class="ap-drop-ph" id="apDropPh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Upload screenshot · 上传截图（可选）</span>
+        </span>
+      </label>
+
+      <div class="ap-field">
+        <label>Date <span class="cn">日期</span></label>
+        <input type="date" id="apDate">
+      </div>
+      <div class="ap-field">
+        <label>Platform <span class="cn">平台</span></label>
+        <select id="apPlatform">
+          <option value="RED">RED · 小红书</option>
+          <option value="WeChat">WeChat · 微信</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Other">Other · 其他</option>
+        </select>
+      </div>
+
+      <div class="ap-field full">
+        <label>Campaign name <span class="cn">推广标题</span></label>
+        <input type="text" id="apCampaign" placeholder="e.g. 曼谷｜勃艮第双王盛宴">
+      </div>
+
+      <div class="ap-field">
+        <label>Spend ¥ <span class="cn">花费（人民币）</span></label>
+        <input type="number" id="apSpend" min="0" step="1" placeholder="85">
+      </div>
+      <div class="ap-field">
+        <label>Coins <span class="cn">薯币</span></label>
+        <input type="number" id="apCoins" min="0" step="1" placeholder="850">
+      </div>
+
+      <div class="ap-field">
+        <label>Views <span class="cn">阅读量</span></label>
+        <input type="number" id="apViews" min="0" step="1" placeholder="0">
+      </div>
+      <div class="ap-field">
+        <label>Likes <span class="cn">点赞量</span></label>
+        <input type="number" id="apLikes" min="0" step="1" placeholder="0">
+      </div>
+      <div class="ap-field">
+        <label>Saves <span class="cn">收藏量</span></label>
+        <input type="number" id="apSaves" min="0" step="1" placeholder="0">
+      </div>
+    </div>
+
+    <div class="ap-actions">
+      <button class="ap-btn" id="apSave">Save entry</button>
+      <span class="ap-status" id="apStatus"></span>
+    </div>
+  </div>
+
+  <div class="ap-listwrap">
+    <h2>Logged promotions <span class="cn" style="color:var(--muted);font-weight:400">· 记录</span></h2>
+    <div id="apList"><div class="ap-empty">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="ap-modal" id="apModal">
+  <div class="ap-modal-card">
+    <h3>Web App URL</h3>
+    <p>Paste the /exec URL from your Apps Script deployment. It's stored in this browser only.</p>
+    <input type="text" id="apUrlInput" placeholder="https://script.google.com/macros/s/AKfyc.../exec">
+    <div class="ap-actions">
+      <button class="ap-btn" id="apUrlSave">Save URL</button>
+      <button class="ap-gear" id="apUrlClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ── Optional: hardcode your deployed URL here so the tool works out of the box.
+  var WEB_APP_URL = "";
+
+  var KEY = "acker_promo_webapp_url";
+  function getUrl(){
+    try { return localStorage.getItem(KEY) || WEB_APP_URL; } catch(e){ return WEB_APP_URL; }
+  }
+  function setUrl(v){
+    try { localStorage.setItem(KEY, v); } catch(e){}
+  }
+
+  var $ = function(id){ return document.getElementById(id); };
+  var imageData = null; // { base64, name, mime }
+
+  // Default date = today
+  $("apDate").value = new Date().toISOString().slice(0,10);
+
+  // Auto coins = spend * 10 (until user types coins manually)
+  var coinsEdited = false;
+  $("apCoins").addEventListener("input", function(){ coinsEdited = true; });
+  $("apSpend").addEventListener("input", function(){
+    if (!coinsEdited && this.value !== "") $("apCoins").value = Math.round(Number(this.value) * 10);
+  });
+
+  // Image upload + preview
+  $("apFile").addEventListener("change", function(e){
+    var f = e.target.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var dataUrl = reader.result;
+      imageData = { base64: dataUrl.split(",")[1], name: f.name, mime: f.type || "image/jpeg" };
+      var t = $("apThumb"); t.src = dataUrl; t.classList.add("show");
+      $("apDrop").classList.add("has");
+      $("apDropPh").querySelector("span:last-child").textContent = f.name;
+    };
+    reader.readAsDataURL(f);
+  });
+
+  // Settings modal
+  $("apSettingsBtn").addEventListener("click", function(){
+    $("apUrlInput").value = getUrl();
+    $("apModal").classList.add("show");
+  });
+  $("apUrlClose").addEventListener("click", function(){ $("apModal").classList.remove("show"); });
+  $("apUrlSave").addEventListener("click", function(){
+    setUrl($("apUrlInput").value.trim());
+    $("apModal").classList.remove("show");
+    loadList();
+  });
+
+  // Save entry
+  $("apSave").addEventListener("click", function(){
+    var url = getUrl();
+    if (!url){ status("Set your Web App URL first (Settings).", "bad"); return; }
+    if (!$("apCampaign").value.trim()){ status("Enter a campaign name.", "bad"); return; }
+
+    var payload = {
+      date: $("apDate").value,
+      campaign: $("apCampaign").value.trim(),
+      spend: $("apSpend").value,
+      coins: $("apCoins").value,
+      views: $("apViews").value,
+      likes: $("apLikes").value,
+      saves: $("apSaves").value,
+      platform: $("apPlatform").value
+    };
+    if (imageData){
+      payload.imageBase64 = imageData.base64;
+      payload.imageName   = imageData.name;
+      payload.imageMime   = imageData.mime;
+    }
+
+    $("apSave").disabled = true;
+    status("Saving…", "");
+    // text/plain default body = simple request, avoids CORS preflight on Apps Script
+    fetch(url, { method:"POST", body: JSON.stringify(payload) })
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (res && res.ok){ status("Saved.", "good"); resetForm(); loadList(); }
+        else { status("Error: " + ((res && res.error) || "unknown"), "bad"); }
+      })
+      .catch(function(err){ status("Network error: " + err, "bad"); })
+      .finally(function(){ $("apSave").disabled = false; });
+  });
+
+  function resetForm(){
+    ["apCampaign","apSpend","apCoins","apViews","apLikes","apSaves"].forEach(function(id){ $(id).value=""; });
+    coinsEdited = false; imageData = null;
+    $("apThumb").classList.remove("show");
+    $("apDrop").classList.remove("has");
+    $("apFile").value = "";
+    $("apDropPh").querySelector("span:last-child").textContent = "Upload screenshot · 上传截图（可选）";
+  }
+
+  function status(msg, cls){
+    var el = $("apStatus");
+    el.textContent = msg;
+    el.className = "ap-status" + (cls ? " " + cls : "");
+  }
+
+  // Load + render list
+  function loadList(){
+    var url = getUrl();
+    if (!url){ $("apList").innerHTML = '<div class="ap-empty">Set your Web App URL in Settings to load entries.</div>'; return; }
+    fetch(url + "?action=list")
+      .then(function(r){ return r.json(); })
+      .then(function(res){ render(res && res.rows ? res.rows : []); })
+      .catch(function(){ $("apList").innerHTML = '<div class="ap-empty">Could not reach the Web App. Check the URL in Settings.</div>'; });
+  }
+
+  function num(n){ return (Number(n)||0).toLocaleString("en-US"); }
+
+  function render(rows){
+    // Totals
+    var spend=0, views=0, coins=0;
+    rows.forEach(function(r){ spend+=Number(r.spend)||0; views+=Number(r.views)||0; coins+=Number(r.coins)||0; });
+    $("apTotSpend").textContent = "¥" + num(spend);
+    $("apTotCount").textContent = num(rows.length);
+    $("apTotViews").textContent = num(views);
+    $("apTotCoins").textContent = num(coins);
+
+    if (!rows.length){ $("apList").innerHTML = '<div class="ap-empty">No entries yet. Add your first promotion above.</div>'; return; }
+
+    var html = '<table><thead><tr>' +
+      '<th>Date</th><th>Campaign</th><th class="num">¥</th>' +
+      '<th class="num">Views</th><th class="num">Likes</th><th>Shot</th>' +
+      '</tr></thead><tbody>';
+    rows.forEach(function(r){
+      var shot = r.screenshot ? '<a href="'+r.screenshot+'" target="_blank" rel="noopener">View</a>' : '—';
+      html += '<tr>' +
+        '<td>'+esc(r.date)+'</td>' +
+        '<td>'+esc(r.campaign)+'</td>' +
+        '<td class="num">'+num(r.spend)+'</td>' +
+        '<td class="num">'+num(r.views)+'</td>' +
+        '<td class="num">'+num(r.likes)+'</td>' +
+        '<td>'+shot+'</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    $("apList").innerHTML = html;
+  }
+
+  function esc(s){
+    return String(s==null?"":s).replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+    });
+  }
+
+  loadList();
+})();
+</script>
+</body>
+</html>
