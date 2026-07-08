@@ -675,20 +675,69 @@ function renderCurrent() {
 /* ══════════════════════════════════════════════════
    STATS
 ══════════════════════════════════════════════════ */
+
+// The Leads tabs overwrite #statsRow's innerHTML with their own cards, which
+// deletes #s-posts / #s-impr / etc. Returning to a post tab would then throw
+// on the missing elements (and stop the table from rendering), so restore the
+// standard 4-card skeleton whenever it's gone.
+function resetStatCardsSkeleton() {
+  if (document.getElementById('s-posts')) return;
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Posts</div><div class="stat-value" id="s-posts">—</div><div class="stat-sub">tracked</div></div>
+    <div class="stat-card"><div class="stat-label">Total Impressions</div><div class="stat-value gold" id="s-impr">—</div><div class="stat-sub">all posts</div></div>
+    <div class="stat-card"><div class="stat-label">Total Likes</div><div class="stat-value burg" id="s-likes">—</div><div class="stat-sub">engagements</div></div>
+    <div class="stat-card"><div class="stat-label" id="s-label4">Avg Watch</div><div class="stat-value" id="s-metric4">—</div><div class="stat-sub" id="s-sub4">seconds</div></div>`;
+}
+
+// Collapse XHS snapshot groups → one row per unique post (latest snapshot).
+// Uses the same group map the table uses, so this count and the table's
+// "N posts" count always agree. "Latest" = newest upload-date; if dates are
+// missing/tied, the higher-impression row wins (cumulative metrics only grow).
+function xhsUniquePosts(rows) {
+  const gmap = applyGrpOverrides(computeGroupMap(rows));
+  const num  = v => parseFloat(String(v||'').replace(/,/g,'')) || 0;
+  const dateOf = r => { const t = Date.parse(r['upload-date'] || r['post_date'] || ''); return isNaN(t) ? null : t; };
+  const isLater = (a, b) => {
+    const da = dateOf(a), db = dateOf(b);
+    if (da !== null && db !== null && da !== db) return da > db;
+    return num(a['impressions']) >= num(b['impressions']);
+  };
+  const byGroup = {}, solo = [];
+  rows.forEach(r => {
+    const g = gmap[r['post_title'] || ''];
+    if (g && !g.separated) {
+      const cur = byGroup[g.gid];
+      if (!cur || isLater(r, cur)) byGroup[g.gid] = r;
+    } else {
+      solo.push(r);
+    }
+  });
+  return [...Object.values(byGroup), ...solo];
+}
+
 function renderStats(p, rows) {
+  resetStatCardsSkeleton();
   const strip = v => parseFloat(String(v||'').replace(/,/g,'')) || 0;
-  // XHS: use dedicated account tab
-  if (p === 'xhs' && data.xhs_account.length > 0) {
-    const acc = data.xhs_account[0];
-    document.getElementById('s-posts').textContent   = acc['Total Posts'] || '—';
-    document.getElementById('s-impr').textContent    = fmt(strip(acc['Total Impressions']));
-    document.getElementById('s-likes').textContent   = fmt(strip(acc['Total Likes']));
+
+  // ── XHS: calculate live from the post rows (snapshot-aware) ──
+  if (p === 'xhs') {
+    const unique = xhsUniquePosts(rows || []);
+    const impr  = unique.reduce((a,r)=>a+strip(r['impressions']),0);
+    const likes = unique.reduce((a,r)=>a+strip(r['likes']),0);
+    const watch = unique
+      .map(r=>parseFloat(String(r['avg_watch_time_seconds']||'').replace(/,/g,'')))
+      .filter(v=>!isNaN(v));
+    const avgWatch = watch.length ? watch.reduce((a,b)=>a+b,0)/watch.length : 0;
+
+    document.getElementById('s-posts').textContent   = unique.length;
+    document.getElementById('s-impr').textContent    = fmt(impr);
+    document.getElementById('s-likes').textContent   = fmt(likes);
     document.getElementById('s-label4').textContent  = 'Avg Watch Time';
     document.getElementById('s-sub4').textContent    = 'seconds';
-    const w = parseFloat(acc['Avg Watch Time']);
-    document.getElementById('s-metric4').textContent = !isNaN(w) && w>0 ? w.toFixed(1)+'s' : '—';
+    document.getElementById('s-metric4').textContent = avgWatch > 0 ? avgWatch.toFixed(1)+'s' : '—';
     return;
   }
+
   const cfg = STAT_CONFIG[p];
   if (!cfg) return;
   document.getElementById('s-posts').textContent   = rows.length;
@@ -862,6 +911,7 @@ function renderLeads(platform) {
   }
 
   if (!rows.length) {
+    const wrap = document.getElementById('tableWrap');
     const gid = SHEET_GIDS[platform];
     wrap.innerHTML = `<div class="state-box"><i class="fas fa-user-plus"></i>${gid===null?'Paste the leads_rednote GID in the script.':'No leads yet.'}</div>`;
     document.getElementById('tableCount').textContent = '0 leads';
@@ -869,7 +919,7 @@ function renderLeads(platform) {
   }
 
   leadsFilterPlatform = platform;
-  const sorted = [...rows].sort((a,b)=>(b['date']||'').localeCompare(a['date']||''));
+  const sorted = [...rows].sort((a,b)=>(b['Date']||b['date']||'').localeCompare(a['Date']||a['date']||''));
   document.getElementById('tableCount').textContent = sorted.length + ' lead' + (sorted.length!==1?'s':'');
   renderLeadsTable(sorted, platform);
 }
@@ -896,7 +946,7 @@ function renderLeadsTable(sorted, platform) {
 
   sorted.forEach((row, idx) => {
     const imgThumb = driveThumb(row['Image URL']||row['image-url']||'');
-    const rowIdx = sorted.indexOf(row);
+    const rowIdx = (data[platform] || []).indexOf(row);
     const thumbHtml = imgThumb
       ? `<img class="thumb-cell" src="${imgThumb}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="no-thumb" style="display:none"><i class="fas fa-image"></i></div>`
       : `<div class="no-thumb"><i class="fas fa-image"></i></div>`;
@@ -1035,7 +1085,7 @@ function openCompare() {
     if(!isNaN(vA)&&!isNaN(vB)){
       if(vA===vB) deltaHtml='<span class="cm-delta flat">No change</span>';
       else{const diff=vB-vA,pct=vA!==0?((diff/Math.abs(vA))*100):null,isUp=diff>0,cls=isUp?'up':'down',arrow=isUp?'↑':'↓',sign=isUp?'+':'';
-      deltaHtml=`<span class="cm-delta ${cls}">${arrow} ${sign}${fmtV(Math.abs(diff),col.type)}${pct!==null?` (${sign}${pct.toFixed(0)}%)`:''}`;+'</span>';}
+      deltaHtml=`<span class="cm-delta ${cls}">${arrow} ${sign}${fmtV(Math.abs(diff),col.type)}${pct!==null?` (${sign}${pct.toFixed(0)}%)`:''}</span>`;}
     }
     tableRows+=`<tr><td>${esc(col.label)}</td><td><span class="cm-val">${fmtV(vA,col.type)}</span></td><td><span class="cm-val ${col.type==='num-hi'?'hi':''}">${fmtV(vB,col.type)}</span></td><td>${deltaHtml}</td></tr>`;
   });
@@ -1101,7 +1151,7 @@ function grpBadgeHtml(title,gmap){
   const g=gmap[title];
   if(!g||g.separated)return`<span class="grp-dot solo"></span>`;
   const color=GRP_COLORS[g.gid%GRP_COLORS.length],cls=g.confirmed?'confirmed':'auto';
-  return`<span class="grp-dot ${cls}" style="--gc:${color}" title="${cls==='confirmed'?'Confirmed same post':'Auto-detected — click to review'}" onclick="showGrpPopover(event,${JSON.stringify(title)})"></span>`;
+  return`<span class="grp-dot ${cls}" style="--gc:${color}" title="${cls==='confirmed'?'Confirmed same post':'Auto-detected — click to review'}" onclick="showGrpPopover(event,${esc(JSON.stringify(title))})"></span>`;
 }
 
 function renderGroupLegend(gmap){
@@ -1226,7 +1276,7 @@ function applyLeadsFilters() {
   // Date filter — parse dates flexibly
   if (fromVal || toVal) {
     rows = rows.filter(r => {
-      const d = parseDate(r['date']);
+      const d = parseDate(r['Date'] || r['date']);
       if (!d) return true; // can't parse → include
       if (fromVal && d < fromVal) return false;
       if (toVal   && d > toVal)   return false;
@@ -1241,13 +1291,14 @@ function applyLeadsFilters() {
 
   // PIC filter (both tabs)
   const picFilter = document.getElementById('filterPIC')?.value || '';
+  const picOf = r => (r['PIC (Sales Person)'] || r['PIC'] || '').trim();
   if (picFilter === '__unassigned__') {
-    rows = rows.filter(r => !r['PIC'] || r['PIC'].trim() === '');
+    rows = rows.filter(r => picOf(r) === '');
   } else if (picFilter) {
-    rows = rows.filter(r => (r['PIC']||'').trim() === picFilter);
+    rows = rows.filter(r => picOf(r) === picFilter);
   }
 
-  const sorted = [...rows].sort((a,b)=>(b['date']||'').localeCompare(a['date']||''));
+  const sorted = [...rows].sort((a,b)=>(b['Date']||b['date']||'').localeCompare(a['Date']||a['date']||''));
   renderLeadsTable(sorted, leadsFilterPlatform);
   document.getElementById('tableCount').textContent = rows.length + ' lead' + (rows.length!==1?'s':'') + (rows.length !== (data[leadsFilterPlatform]||[]).length ? ' (filtered)' : '');
 }
@@ -1284,7 +1335,7 @@ function exportLeadsCSV() {
 
   if (fromVal || toVal) {
     rows = rows.filter(r => {
-      const d = parseDate(r['date']);
+      const d = parseDate(r['Date'] || r['date']);
       if (!d) return true;
       if (fromVal && d < fromVal) return false;
       if (toVal   && d > toVal)   return false;
@@ -1296,8 +1347,9 @@ function exportLeadsCSV() {
   }
 
   const picF = document.getElementById('filterPIC')?.value || '';
-  if (picF === '__unassigned__') { rows = rows.filter(r => !r['PIC'] || r['PIC'].trim() === ''); }
-  else if (picF) { rows = rows.filter(r => (r['PIC']||'').trim() === picF); }
+  const picOfE = r => (r['PIC (Sales Person)'] || r['PIC'] || '').trim();
+  if (picF === '__unassigned__') { rows = rows.filter(r => picOfE(r) === ''); }
+  else if (picF) { rows = rows.filter(r => picOfE(r) === picF); }
 
   if (!rows.length) { alert('No data to export.'); return; }
 
@@ -1502,6 +1554,7 @@ function toggleLeadsCb(cb, event) {
 function updateLeadsSubmitBar() {
   const n   = leadsChecked.size;
   const bar = document.getElementById('leadsSubmitBar');
+  if (!bar) return; // bulk submit bar not present in this build
   document.getElementById('leadsSubmitCount').textContent = n;
   document.getElementById('leadsSubmitCountS').textContent = n === 1 ? '' : 's';
   bar.classList.toggle('visible', n > 0);
