@@ -159,15 +159,20 @@
 
   /* editable affordance */
   [contenteditable]{outline:none;}
-  body:not(.printing) [contenteditable]:hover{background:#F2EEE2;}
-  body:not(.printing) [contenteditable]:focus{background:#EFEAD9;box-shadow:0 0 0 1px var(--line-strong);}
+  body:not(.printing) .sheet[contenteditable]:hover{box-shadow:0 26px 60px -30px rgba(20,18,12,.5),0 0 0 1px var(--line-strong);}
+  body:not(.printing) .sheet[contenteditable]:focus-within{box-shadow:0 26px 60px -30px rgba(20,18,12,.5),0 0 0 2px var(--mark);}
 
   /* ---- print ---- */
-  @page{size:A4;margin:9mm;}
+  @page{size:A4;margin:6mm;}
   @media print{
     body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .controls{display:none !important;}
-    .sheet{box-shadow:none;max-width:none;margin:0;padding:2mm 3mm;zoom:0.88;}
+    .sheet{box-shadow:none;max-width:none;margin:0;padding:9mm 10mm;zoom:0.88;}
+    .sheet::before,.sheet::after,.mark-tr,.mark-bl{width:13px;height:13px;}
+    .sheet::before{top:12px;left:12px;}
+    .sheet::after{bottom:12px;right:12px;}
+    .mark-tr{top:12px;right:12px;}
+    .mark-bl{bottom:12px;left:12px;}
     [contenteditable]{background:none !important;box-shadow:none !important;}
   }
 </style>
@@ -180,10 +185,10 @@
       <button id="tab-invoice" onclick="setMode('invoice')">Invoice</button>
     </div>
     <button class="btn" onclick="window.print()">Print / Save PDF</button>
-    <span class="hint">Tip: click any grey-highlighting field to edit before printing</span>
+    <span class="hint">Tip: click anywhere on the document to edit any text before printing</span>
   </div>
 
-  <main class="sheet" id="sheet">
+  <main class="sheet" id="sheet" contenteditable="true" spellcheck="false">
     <span class="mark-tr"></span><span class="mark-bl"></span>
 
     <!-- HEADER -->
@@ -224,7 +229,7 @@
     <!-- BILL TO + PROJECT -->
     <section class="cols">
       <div>
-        <p class="lbl-cap">Prepared for</p>
+        <p class="lbl-cap"><span class="only-quote">Prepared for</span><span class="only-invoice">Billed to</span></p>
         <p class="party">Compass Offices</p>
         <p class="party-sub" contenteditable="true" spellcheck="false">Marketing department<br>Attn: William<br>Hong Kong</p>
       </div>
@@ -258,17 +263,17 @@
           </ul>
           <p class="talents">雨录&nbsp; ·&nbsp; soyan_charlize&nbsp; ·&nbsp; nghonmo&nbsp; ·&nbsp; carlospoon&nbsp; ·&nbsp; John Daniel Borbolla</p>
         </div>
-        <div class="amt">HKD 7,000.00</div>
+        <div class="amt">HKD 6,500.00</div>
       </div>
     </section>
 
     <!-- TOTAL -->
     <div class="totalwrap">
       <div class="totalbox">
-        <div class="totalrow"><span>Subtotal</span><span>HKD 7,000.00</span></div>
+        <div class="totalrow"><span>Subtotal</span><span>HKD 6,500.00</span></div>
         <div class="totalrow grand">
-          <span>Total <span class="only-quote">quoted</span><span class="only-invoice">due</span></span>
-          <span class="g">HKD 7,000.00</span>
+          <span><span class="only-quote">Total quoted</span><span class="only-invoice">Amount due</span></span>
+          <span class="g">HKD 6,500.00</span>
         </div>
         <p class="discount-note">Special discounted package rate —<br>not the standard commercial rate.</p>
       </div>
@@ -302,8 +307,9 @@
       <div>
         <p class="lbl-cap">Terms</p>
         <div class="terms" contenteditable="true" spellcheck="false">
-          <div class="t-item">Quoted price covers all five talents for the full shoot day.</div>
-          <div class="t-item only-quote">This quotation is valid until the date shown above.</div>
+          <div class="t-item">Price covers all five talents for the full shoot day.</div>
+          <div class="t-item only-quote">Quotation valid until the date shown above — reply to accept and confirm the booking.</div>
+          <div class="t-item only-invoice">Payment due by the date shown above. Please remit to the account below, quoting the invoice number.</div>
           <div class="t-item">RAW images delivered within 10 working days of the shoot.</div>
         </div>
       </div>
